@@ -1,0 +1,16 @@
+### Vercel / local
+.vercel/
+
+### Local env files
+.env
+.env.*
+.env*.local
+
+### Local tooling
+.tools/
+
+### Misc
+~/
+
+### Dependencies
+node_modules/
