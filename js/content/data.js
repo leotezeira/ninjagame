@@ -421,7 +421,88 @@ export const BASE_GAME = {
             boss: [
                 { name: 'Pain (Tendō)', hp: 600, chakra: 300, attack: 50, defense: 35, accuracy: 23, exp: 300, ryo: 2000 },
                 { name: 'Madara Uchiha', hp: 800, chakra: 400, attack: 60, defense: 40, accuracy: 25, exp: 500, ryo: 5000 },
-                { name: 'Kaguya Ōtsutsuki', hp: 1000, chakra: 500, attack: 70, defense: 45, accuracy: 28, exp: 800, ryo: 10000 }
+                { name: 'Kaguya Ōtsutsuki', hp: 1000, chakra: 500, attack: 70, defense: 45, accuracy: 28, exp: 800, ryo: 10000 },
+                { name: 'Zabuza Momochi', hp: 520, chakra: 260, attack: 48, defense: 30, accuracy: 22, exp: 420, ryo: 15000 },
+                { name: 'Kisame Hoshigaki', hp: 700, chakra: 420, attack: 58, defense: 38, accuracy: 24, exp: 650, ryo: 25000 }
+            ]
+        },
+
+        // Enemigos especiales (persecución)
+        anbuHunters: [
+            { name: 'ANBU Hunter', hp: 260, chakra: 120, attack: 30, defense: 22, accuracy: 16, exp: 120, ryo: 250 },
+            { name: 'ANBU Rastreador', hp: 240, chakra: 140, attack: 28, defense: 20, accuracy: 20, exp: 130, ryo: 260 },
+            { name: 'ANBU Capitán', hp: 320, chakra: 160, attack: 36, defense: 26, accuracy: 18, exp: 180, ryo: 350 }
+        ],
+
+        // Kinjutsu (solo renegados)
+        kinjutsu: [
+            { id: 'edo_tensei', name: 'EDO TENSEI (Resurrección Impura)', rank: 'S', price: 15000, chakra: 200, damage: 0, element: null, effect: 'revive', description: 'Revive un enemigo derrotado como aliado (1 combate).' },
+            { id: 'shiki_fujin', name: 'SHIKI FUJIN (Sello de Muerte)', rank: 'S', price: 10000, chakra: 150, damage: 9999, element: null, effect: 'suicide_kill', description: 'Mata instantáneamente al enemigo, pero pierdes 50% de HP.' },
+            { id: 'jashin_ritual', name: 'JASHIN RITUAL (Inmortalidad)', rank: 'S', price: 12000, chakra: 100, damage: 0, element: null, effect: 'immortal_reflect', description: 'No puedes morir por 3 turnos y reflejas parte del daño.' },
+            { id: 'kotoamatsukami', name: 'KOTOAMATSUKAMI (Control mental)', rank: 'S', price: 18000, chakra: 180, damage: 0, element: null, effect: 'control', description: 'Controla al enemigo por 2 turnos (pierde acciones).' },
+            { id: 'izanagi', name: 'IZANAGI (Reescribir realidad)', rank: 'S', price: 20000, chakra: 250, damage: 0, element: null, effect: 'izanagi', description: 'Si mueres, revives con 100% HP (1 uso por batalla).' },
+            { id: 'tanuki_neiri', name: 'TANUKI NEIRI (Robo de Kekkei Genkai)', rank: 'S', price: 50000, chakra: 300, damage: 0, element: null, effect: 'steal_kg', description: 'Copia un Kekkei Genkai tras derrotar un objetivo.' }
+        ],
+
+        // Mercado Negro (renegados)
+        blackMarketItems: [
+            { id: 'pill_prohibida', name: '💊 Píldora Prohibida', price: 2000, description: '+50 todos los stats por 5 turnos. Después: -30 HP', effect: { buffAll: 50, buffTurns: 5, backlashHp: 30 } },
+            { id: 'hoja_maldita', name: '🗡️ Hoja Maldita de Orochimaru', price: 5000, description: '+20 Taijutsu, drena chakra al enemigo (pasivo).', effect: { taijutsu: 20 } },
+            { id: 'pergamino_kinjutsu', name: '📜 Pergamino de Jutsu Prohibido', price: 8000, description: 'Desbloquea 1 Kinjutsu aleatorio.', effect: { unlockKinjutsu: true } },
+            { id: 'suero_hashirama', name: '🧪 Suero de Hashirama', price: 15000, description: 'Desbloquea Mokuton temporal (3 misiones).', effect: { mokutonMissions: 3 } },
+            { id: 'sharingan_artificial', name: '👁️ Sharingan Artificial (Danzō)', price: 50000, description: '+15 Genjutsu y 1 Izanagi por día.', effect: { genjutsu: 15, dailyIzanagi: true } }
+        ],
+        blackMarketServices: [
+            { id: 'identity', name: 'Cambiar identidad', price: 1000, description: 'Te quitan del Bingo Book por 7 días.', effect: { hideDays: 7 } },
+            { id: 'chakra_surgery', name: 'Cirugía de chakra', price: 5000, description: 'Cambia tu naturaleza elemental.', effect: { changeElement: true } },
+            { id: 'cell_implant', name: 'Implante de células', price: 10000, description: '+30 HP/Chakra permanente.', effect: { maxHp: 30, maxChakra: 30 } },
+            { id: 'wipe_village', name: 'Borrar memoria de aldea', price: 20000, description: 'Resetea reputación con tu aldea natal.', effect: { resetReputation: true } }
+        ],
+
+        // Contratos/Misiones exclusivas renegados
+        renegadeContracts: {
+            low: [
+                { name: '🧨 Robar Suministros', rank: 'C', description: 'Asalta un depósito aislado y desaparece sin dejar rastro.', enemies: [{ type: 'genin', index: 0, count: 2 }], ryo: 300, exp: 50, turns: 2, criminal: true },
+                { name: '🛞 Sabotear Caravana', rank: 'C', description: 'Rompe la ruta de comercio. La aldea pagará el precio.', enemies: [{ type: 'genin', index: 1, count: 2 }], ryo: 500, exp: 60, turns: 2, criminal: true },
+                { name: '🎭 Secuestro Express', rank: 'C', description: 'Rápido, limpio, aterrador. Cobro inmediato.', enemies: [{ type: 'genin', index: 1, count: 3 }], ryo: 800, exp: 75, turns: 2, criminal: true },
+                { name: '🔫 Contrabando de Armas', rank: 'C', description: 'Escolta un cargamento ilícito por rutas secundarias.', enemies: [{ type: 'genin', index: 2, count: 2 }], ryo: 600, exp: 70, turns: 2, criminal: true }
+            ],
+            mid: [
+                { name: '🗡️ Asesinar Comerciante', rank: 'B', description: 'Un mensaje: “deja de vender a Konoha”.', enemies: [{ type: 'chunin', index: 2, count: 2 }], ryo: 2000, exp: 180, turns: 3, criminal: true },
+                { name: '📜 Robar Pergamino de Aldea', rank: 'B', description: 'Infiltra y roba un pergamino sellado sin activar alarmas.', enemies: [{ type: 'chunin', index: 1, count: 3 }], ryo: 3000, exp: 220, turns: 4, criminal: true },
+                { name: '🔥 Quemar Campos de Cultivo', rank: 'B', description: 'Golpe económico. Que recuerden tu nombre.', enemies: [{ type: 'chunin', index: 0, count: 3 }], ryo: 2500, exp: 200, turns: 3, criminal: true },
+                { name: '🔓 Liberar Prisioneros', rank: 'B', description: 'Rompe una caravana de prisioneros y gana aliados.', enemies: [{ type: 'chunin', index: 3, count: 3 }], ryo: 3500, exp: 250, turns: 4, criminal: true },
+                { name: '🌉 Destruir Puente Estratégico', rank: 'A', description: 'Un puente cae, la guerra comienza.', enemies: [{ type: 'jonin', index: 0, count: 2 }], ryo: 4000, exp: 300, turns: 4, criminal: true }
+            ],
+            high: [
+                { name: '☠️ Asesinar Jōnin', rank: 'S', description: 'Un objetivo de alto valor. Un golpe y fin.', enemies: [{ type: 'jonin', index: 2, count: 2 }], ryo: 8000, exp: 400, turns: 5, criminal: true },
+                { name: '🏺 Robar Arma Legendaria', rank: 'S', description: 'Entra, roba y sal vivo. Eso es todo.', enemies: [{ type: 'akatsuki', index: 2, count: 1 }], ryo: 12000, exp: 600, turns: 6, criminal: true },
+                { name: '👑 Secuestrar Hijo de Daimyō', rank: 'S', description: 'La política se compra con miedo.', enemies: [{ type: 'jonin', index: 0, count: 3 }], ryo: 15000, exp: 800, turns: 6, criminal: true },
+                { name: '🕊️ Sabotear Cumbre de Paz', rank: 'S', description: 'Que la paz se vuelva ceniza.', enemies: [{ type: 'akatsuki', index: 0, count: 2 }], ryo: 18000, exp: 1000, turns: 7, criminal: true },
+                { name: '🏯 Asesinar Kage', rank: 'S', description: 'Un acto que cambia la historia.', enemies: [{ type: 'boss', index: 1, count: 1 }], ryo: 50000, exp: 2000, turns: 8, criminal: true }
+            ]
+        },
+
+        organizationMissions: {
+            akatsuki: [
+                { name: '🌑 Capturar Jinchūriki', rank: 'S', description: 'Caza a un portador antes de que escape.', enemies: [{ type: 'boss', index: 0, count: 1 }], ryo: 10000, exp: 500, turns: 6, criminal: true },
+                { name: '🩸 Asesinar Kage', rank: 'S', description: 'Un golpe imposible. Eso es lo que buscan.', enemies: [{ type: 'boss', index: 1, count: 1 }], ryo: 15000, exp: 800, turns: 7, criminal: true },
+                { name: '🕵️ Infiltrar Aldea', rank: 'S', description: 'Entra como sombra, sal como leyenda.', enemies: [{ type: 'jonin', index: 2, count: 4 }], ryo: 8000, exp: 400, turns: 6, criminal: true },
+                { name: '📜 Robar Pergamino Prohibido', rank: 'S', description: 'La información mata más que un kunai.', enemies: [{ type: 'akatsuki', index: 1, count: 1 }], ryo: 12000, exp: 600, turns: 6, criminal: true },
+                { name: '🗡️ Eliminar Escuadrón ANBU', rank: 'S', description: 'Cazadores cazados. No dejes testigos.', enemies: [{ type: 'jonin', index: 0, count: 5 }], ryo: 9000, exp: 450, turns: 6, criminal: true }
+            ],
+            sound: [
+                { name: '🐍 Secuestrar para Experimentos', rank: 'S', description: 'Material vivo para Orochimaru.', enemies: [{ type: 'jonin', index: 1, count: 3 }], ryo: 12000, exp: 700, turns: 6, criminal: true },
+                { name: '🧪 Probar Jutsu Experimental', rank: 'S', description: 'Riesgo extremo. Sobrevive al sello.', enemies: [{ type: 'akatsuki', index: 4, count: 1 }], ryo: 18000, exp: 1200, turns: 7, criminal: true },
+                { name: '🩸 Robar Cuerpos', rank: 'S', description: 'Nada personal. Solo ciencia oscura.', enemies: [{ type: 'jonin', index: 2, count: 4 }], ryo: 7000, exp: 500, turns: 6, criminal: true }
+            ],
+            root: [
+                { name: '👁️ Eliminar objetivo sin testigos', rank: 'S', description: 'Si alguien lo vio, fallaste.', enemies: [{ type: 'jonin', index: 0, count: 4 }], ryo: 12000, exp: 900, turns: 6, criminal: true },
+                { name: '🕶️ Operación Encubierta', rank: 'S', description: 'Golpea donde nadie mira.', enemies: [{ type: 'akatsuki', index: 3, count: 1 }], ryo: 16000, exp: 1000, turns: 7, criminal: true }
+            ],
+            bounty: [
+                { name: '💰 BINGO BOOK: Zabuza Momochi', rank: 'S', description: 'Recompensa viva o muerta. Un monstruo en la niebla.', enemies: [{ type: 'boss', index: 3, count: 1 }], ryo: 15000, exp: 800, turns: 6, bounty: true },
+                { name: '💰 BINGO BOOK: Kisame Hoshigaki', rank: 'S', description: 'Recompensa altísima. El tiburón humano.', enemies: [{ type: 'boss', index: 4, count: 1 }], ryo: 25000, exp: 1200, turns: 7, bounty: true }
             ]
         },
 

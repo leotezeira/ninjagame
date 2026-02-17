@@ -267,6 +267,36 @@ rollDice(sides = 20) {
                     nieve: 0
                 },
                 urgentMission: null
+                ,
+
+                // Renegado / deserción
+                isRenegade: false,
+                status: 'loyal', // 'loyal' | 'renegade'
+                renegadeLevel: 0, // estrellas (0..5)
+                bounty: 0,
+                organization: null, // 'akatsuki' | 'sound' | 'root' | 'bounty'
+                organizationRank: 0,
+                karma: 0, // -100..100
+                anbuTimerDays: 0,
+                hideoutLocation: null,
+                kinjutsuLearned: [],
+                daysAsRenegade: 0,
+                identityHiddenDays: 0,
+                anbuEliminated: 0,
+                criminalMissions: 0,
+                renegadesCaptured: 0,
+                dailyIzanagiReady: false,
+
+                // Mercado negro / kinjutsu
+                blackMarketInventory: [],
+                hasDailyIzanagi: false,
+                izanagiAvailable: false,
+                izanagiUsed: false,
+                pendingStealKg: false,
+                combatBuff: null,
+                jashinTurns: 0,
+                jashinReflect: 0,
+                edoAllyTurns: 0
             };
 
             for (const [key, value] of Object.entries(defaults)) {
@@ -284,6 +314,31 @@ rollDice(sides = 20) {
             this.player.day = this.clamp(this.player.day, 1, this.daysPerMonth);
             this.player.month = this.clamp(this.player.month, 1, this.monthsPerYear);
             this.player.year = Math.max(1, this.player.year);
+
+            this.player.karma = this.clamp(this.player.karma, -100, 100);
+            this.player.renegadeLevel = this.clamp(this.player.renegadeLevel, 0, 5);
+            this.player.bounty = Math.max(0, this.player.bounty || 0);
+            this.player.anbuTimerDays = Math.max(0, this.player.anbuTimerDays || 0);
+            this.player.identityHiddenDays = Math.max(0, this.player.identityHiddenDays || 0);
+            this.player.daysAsRenegade = Math.max(0, this.player.daysAsRenegade || 0);
+            this.player.anbuEliminated = Math.max(0, this.player.anbuEliminated || 0);
+            this.player.criminalMissions = Math.max(0, this.player.criminalMissions || 0);
+            this.player.renegadesCaptured = Math.max(0, this.player.renegadesCaptured || 0);
+
+            if (!Array.isArray(this.player.blackMarketInventory)) this.player.blackMarketInventory = [];
+            if (!Array.isArray(this.player.kinjutsuLearned)) this.player.kinjutsuLearned = [];
+            this.player.hasDailyIzanagi = !!this.player.hasDailyIzanagi;
+            this.player.dailyIzanagiReady = !!this.player.dailyIzanagiReady;
+            this.player.izanagiAvailable = !!this.player.izanagiAvailable;
+            this.player.izanagiUsed = !!this.player.izanagiUsed;
+            this.player.pendingStealKg = !!this.player.pendingStealKg;
+            this.player.jashinTurns = Math.max(0, this.player.jashinTurns || 0);
+            this.player.jashinReflect = Math.max(0, this.player.jashinReflect || 0);
+            this.player.edoAllyTurns = Math.max(0, this.player.edoAllyTurns || 0);
+
+            if (this.player.isRenegade && this.player.location === 'konoha') {
+                this.player.location = this.player.hideoutLocation || 'bosque';
+            }
 
             this.updateSeasonAndWeather(false);
         },
@@ -364,11 +419,13 @@ rollDice(sides = 20) {
                 genjutsu: this.player.genjutsu
             };
 
+            const buffAll = (this.player.combatBuff && this.player.combatBuff.all) ? this.player.combatBuff.all : 0;
+
             const team = this.getTeamBonuses();
             return {
-                taijutsu: Math.max(1, base.taijutsu - penalty),
-                ninjutsu: Math.max(1, base.ninjutsu - penalty),
-                genjutsu: Math.max(1, base.genjutsu - penalty),
+                taijutsu: Math.max(1, base.taijutsu - penalty + buffAll),
+                ninjutsu: Math.max(1, base.ninjutsu - penalty + buffAll),
+                genjutsu: Math.max(1, base.genjutsu - penalty + buffAll),
                 combatDamageBonus: team.combatDamageBonus,
                 teamEvasionBonus: team.teamEvasionBonus,
                 missionRyoMult: team.missionRyoMult,
@@ -439,6 +496,7 @@ rollDice(sides = 20) {
                     this.updateSeasonAndWeather(true);
                     this.applyDailyUpkeep();
                     this.checkRandomDailyEvents();
+                    this.renegadeDailyTick();
                 }
             }
 
@@ -490,6 +548,18 @@ rollDice(sides = 20) {
         },
 
         checkRandomDailyEvents() {
+            // Renegados: acceso constante al Mercado Negro (según ubicación de escondites)
+            if (this.player.isRenegade) {
+                const hideouts = new Set(['bosque', 'olas', 'ame', 'valle']);
+                this.player.blackMarketToday = hideouts.has(this.player.location);
+                if (!this.player.blackMarketToday) {
+                    this.player.blackMarketOffer = null;
+                }
+                // No maestro visitante ni eventos “positivos” de aldea
+                this.player.visitingMasterToday = false;
+                return;
+            }
+
             // Mercado negro (aleatorio)
             const chance = 0.07; // 7% al día
             const isActive = Math.random() < chance;
@@ -511,6 +581,549 @@ rollDice(sides = 20) {
             } else {
                 this.player.visitingMasterToday = false;
             }
+        },
+
+        renegadeDailyTick() {
+            if (!this.player.isRenegade) {
+                return;
+            }
+
+            this.player.daysAsRenegade += 1;
+
+            // Identidad escondida
+            if (this.player.identityHiddenDays > 0) {
+                this.player.identityHiddenDays -= 1;
+            }
+
+            // Recompensa base
+            const base = (this.player.level || 1) * 1000;
+            const starMult = 1 + (this.player.renegadeLevel * 0.35);
+            this.player.bounty = Math.floor(base * starMult);
+
+            // Timer ANBU
+            if (this.player.identityHiddenDays > 0) {
+                // “fuera del bingo”: baja presión
+                this.player.anbuTimerDays = Math.max(this.player.anbuTimerDays, 7);
+                this.player.anbuTimerDays -= 1;
+            } else {
+                this.player.anbuTimerDays = Math.max(0, (this.player.anbuTimerDays || 0) - 1);
+            }
+
+            if (this.player.anbuTimerDays === 0 && this.player.identityHiddenDays === 0) {
+                this.anbuHunterAttack();
+                this.player.anbuTimerDays = this.rollNextAnbuIntervalDays();
+            }
+
+            // Izanagi diario (Sharingan artificial)
+            if (this.player.dailyIzanagiReady === false && this.player.hasDailyIzanagi) {
+                this.player.dailyIzanagiReady = true;
+            }
+        },
+
+        rollNextAnbuIntervalDays() {
+            const s = this.player.renegadeLevel || 1;
+            if (s >= 5) return 1;
+            if (s === 4) return 2;
+            if (s === 3) return 3;
+            if (s === 2) return 4;
+            // 1 o 0
+            return 5;
+        },
+
+        // -----------------------------
+        // Renegado / deserción
+        // -----------------------------
+        promptDesertion() {
+            if (!this.player || this.player.isRenegade) return;
+            if (this.player.level < 5) {
+                alert('Necesitas ser nivel 5+ para desertar.');
+                return;
+            }
+            if (this.player.location !== 'konoha') {
+                alert('Solo puedes desertar desde Konoha.');
+                return;
+            }
+
+            const ok = confirm(
+                '⚠️ DESERCIÓN\n\n' +
+                '- Serás marcado como Renegado (0–5★)\n' +
+                '- ANBU te perseguirá periódicamente\n' +
+                '- No podrás entrar a Konoha ni usar Tienda/Academia\n' +
+                '- Accedes al Mercado Negro, contratos y Kinjutsu\n\n' +
+                '¿Confirmas que desertarás?'
+            );
+            if (!ok) return;
+            this.becomeRenegade();
+        },
+
+        becomeRenegade() {
+            this.player.isRenegade = true;
+            this.player.status = 'renegade';
+            this.player.renegadeLevel = Math.max(1, this.player.renegadeLevel || 0);
+            this.player.karma = this.clamp((this.player.karma || 0) - 10, -100, 100);
+            this.player.anbuTimerDays = this.rollNextAnbuIntervalDays();
+
+            if (this.player.reputation?.konoha !== undefined) {
+                this.player.reputation.konoha = -100;
+            }
+
+            // Escapás a un escondite
+            this.player.location = 'bosque';
+            this.player.hideoutLocation = 'bosque';
+
+            // Recompensa base
+            const base = (this.player.level || 1) * 1000;
+            const starMult = 1 + (this.player.renegadeLevel * 0.35);
+            this.player.bounty = Math.floor(base * starMult);
+
+            this.hideRenegadePanels();
+            this.updateVillageUI();
+            this.saveGame();
+            alert('Has desertado. Ahora eres un Ninja Renegado.');
+        },
+
+        hideRenegadePanels() {
+            const bm = document.getElementById('blackmarket-panel');
+            const org = document.getElementById('organization-panel');
+            const red = document.getElementById('redemption-panel');
+            if (bm) bm.style.display = 'none';
+            if (org) org.style.display = 'none';
+            if (red) red.style.display = 'none';
+        },
+
+        increaseWantedLevel(amount) {
+            if (!this.player?.isRenegade) return;
+            this.player.renegadeLevel = this.clamp((this.player.renegadeLevel || 0) + amount, 0, 5);
+            this.updateWorldHUD();
+        },
+
+        reduceWantedLevel() {
+            if (!this.player?.isRenegade) return;
+            const current = this.player.renegadeLevel || 0;
+            if (current <= 0) {
+                alert('No tienes búsqueda activa.');
+                return;
+            }
+            const cost = 8000 + current * 5000;
+            const ok = confirm(`Reducir búsqueda cuesta ${cost.toLocaleString('es-ES')} Ryo y consume 1 día (4 turnos). ¿Proceder?`);
+            if (!ok) return;
+            if (this.player.ryo < cost) {
+                alert('No tienes suficiente Ryo.');
+                return;
+            }
+            this.player.ryo -= cost;
+            this.increaseWantedLevel(-1);
+            this.player.karma = this.clamp((this.player.karma || 0) + 5, -100, 100);
+            this.advanceTurns(4, 'reduce_wanted');
+            this.updateVillageUI();
+            this.saveGame();
+        },
+
+        toggleBlackMarketPanel() {
+            if (!this.player?.isRenegade) return;
+            if (!this.player.blackMarketToday) {
+                alert('🕶️ El Mercado Negro no está disponible aquí/hoy. Busca un escondite.');
+                return;
+            }
+            this.hideRenegadePanels();
+            const panel = document.getElementById('blackmarket-panel');
+            if (!panel) return;
+            panel.style.display = (panel.style.display === 'none' || !panel.style.display) ? 'block' : 'none';
+            if (panel.style.display === 'block') this.renderBlackMarketPanel(panel);
+        },
+
+        getBlackMarketPriceMultiplier() {
+            let mult = 1.0;
+            if (this.player.organization === 'akatsuki') mult *= 0.85;
+            if (this.player.organization === 'sound') mult *= 0.9;
+            if (this.player.organization === 'root') mult *= 0.9;
+            return mult;
+        },
+
+        renderBlackMarketPanel(panelEl) {
+            const items = this.blackMarketItems || [];
+            const services = this.blackMarketServices || [];
+            const kinjutsu = this.kinjutsu || [];
+            const mult = this.getBlackMarketPriceMultiplier();
+
+            panelEl.innerHTML = `
+                <div class="panel">
+                    <h3>🕳️ Mercado Negro</h3>
+                    <p style="margin-top:-6px; color: rgba(240,240,240,0.75)">Técnicas prohibidas, ítems ilegales y servicios ocultos.</p>
+                    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+                        <div class="card">
+                            <h4>🧪 Ítems</h4>
+                            ${items.map(it => {
+                                const price = Math.ceil((it.price || 0) * mult);
+                                return `
+                                    <div class="info-item" style="margin-bottom:8px;">
+                                        <div><b>${it.name}</b><br><span style="color: rgba(240,240,240,0.75)">${it.description || ''}</span></div>
+                                        <button class="btn btn-small" onclick="game.buyBlackMarketItem('${it.id}')">Comprar (${price.toLocaleString('es-ES')} Ryo)</button>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <div class="card">
+                            <h4>🧾 Servicios</h4>
+                            ${services.map(sv => {
+                                const price = Math.ceil((sv.price || 0) * mult);
+                                return `
+                                    <div class="info-item" style="margin-bottom:8px;">
+                                        <div><b>${sv.name}</b><br><span style="color: rgba(240,240,240,0.75)">${sv.description || ''}</span></div>
+                                        <button class="btn btn-small" onclick="game.buyBlackMarketService('${sv.id}')">Pagar (${price.toLocaleString('es-ES')} Ryo)</button>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <div class="card">
+                            <h4>📜 Kinjutsu</h4>
+                            ${kinjutsu.map(kj => {
+                                const learned = (this.player.kinjutsuLearned || []).includes(kj.id);
+                                const price = Math.ceil((kj.price || 0) * mult);
+                                const disabled = learned ? 'disabled' : '';
+                                return `
+                                    <div class="info-item" style="margin-bottom:8px;">
+                                        <div><b>${kj.name}</b><br><span style="color: rgba(240,240,240,0.75)">${kj.description || ''}</span></div>
+                                        <button class="btn btn-small" ${disabled} onclick="game.buyKinjutsu('${kj.id}')">${learned ? 'Aprendido' : `Aprender (${price.toLocaleString('es-ES')} Ryo)`}</button>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        },
+
+        buyBlackMarketItem(itemId) {
+            if (!this.player?.isRenegade) return;
+            const item = (this.blackMarketItems || []).find(i => i.id === itemId);
+            if (!item) return;
+            const price = Math.ceil((item.price || 0) * this.getBlackMarketPriceMultiplier());
+            if (this.player.ryo < price) {
+                alert('No tienes suficiente Ryo.');
+                return;
+            }
+
+            this.player.ryo -= price;
+            this.player.blackMarketInventory.push({ id: item.id, name: item.name, effect: item.effect || null });
+
+            // Consumible de combate
+            if (item.effect && (item.effect.buffAll || item.effect.backlashHp || item.effect.buffTurns)) {
+                this.player.inventory.push({ name: item.name, effect: { buffAll: item.effect.buffAll, buffTurns: item.effect.buffTurns, backlashHp: item.effect.backlashHp } });
+            }
+
+            if (item.id === 'sharingan_artificial' && item.effect?.dailyIzanagi) {
+                this.player.hasDailyIzanagi = true;
+                this.player.dailyIzanagiReady = true;
+                this.player.genjutsu += (item.effect.genjutsu || 0);
+            }
+
+            if (item.id === 'pergamino_kinjutsu' && item.effect?.unlockKinjutsu) {
+                this.unlockRandomKinjutsu();
+            }
+
+            this.increaseWantedLevel(1);
+            this.updateVillageUI();
+            this.saveGame();
+            const panel = document.getElementById('blackmarket-panel');
+            if (panel && panel.style.display === 'block') this.renderBlackMarketPanel(panel);
+            alert(`Compra realizada: ${item.name}`);
+        },
+
+        buyBlackMarketService(serviceId) {
+            if (!this.player?.isRenegade) return;
+            const svc = (this.blackMarketServices || []).find(s => s.id === serviceId);
+            if (!svc) return;
+            const price = Math.ceil((svc.price || 0) * this.getBlackMarketPriceMultiplier());
+            if (this.player.ryo < price) {
+                alert('No tienes suficiente Ryo.');
+                return;
+            }
+            if (!confirm(`${svc.name} por ${price.toLocaleString('es-ES')} Ryo. ¿Confirmar?`)) return;
+
+            this.player.ryo -= price;
+            const effect = svc.effect || {};
+            if (effect.hideDays) {
+                this.player.identityHiddenDays = Math.max(this.player.identityHiddenDays || 0, effect.hideDays);
+            }
+            if (effect.changeElement) {
+                const options = Object.entries(this.elements || {}).map(([k, v]) => ({ k, name: v.name }));
+                const pick = prompt(`Elige tu nuevo elemento (${options.map(o => o.name).join(', ')})`);
+                if (pick) {
+                    const found = options.find(o => o.name.toLowerCase() === pick.toLowerCase());
+                    if (found) this.player.element = found.k;
+                }
+            }
+            if (effect.maxHp) {
+                this.player.maxHp += effect.maxHp;
+                this.player.hp = Math.min(this.player.maxHp, this.player.hp + effect.maxHp);
+            }
+            if (effect.maxChakra) {
+                this.player.maxChakra += effect.maxChakra;
+                this.player.chakra = Math.min(this.player.maxChakra, this.player.chakra + effect.maxChakra);
+            }
+            if (effect.resetReputation && this.player.reputation?.konoha !== undefined) {
+                this.player.reputation.konoha = Math.min(0, this.player.reputation.konoha || 0);
+                this.player.karma = this.clamp((this.player.karma || 0) + 10, -100, 100);
+            }
+
+            this.increaseWantedLevel(1);
+            this.updateVillageUI();
+            this.saveGame();
+            const panel = document.getElementById('blackmarket-panel');
+            if (panel && panel.style.display === 'block') this.renderBlackMarketPanel(panel);
+            alert('Servicio completado.');
+        },
+
+        unlockRandomKinjutsu() {
+            const list = (this.kinjutsu || []).filter(k => !(this.player.kinjutsuLearned || []).includes(k.id));
+            if (list.length === 0) return;
+            const pick = list[Math.floor(Math.random() * list.length)];
+            this.player.kinjutsuLearned.push(pick.id);
+            this.player.learnedJutsus.push({
+                name: pick.name,
+                rank: pick.rank,
+                chakra: pick.chakra,
+                damage: pick.damage,
+                description: pick.description,
+                isKinjutsu: true,
+                effect: pick.effect
+            });
+        },
+
+        buyKinjutsu(kinjutsuId) {
+            if (!this.player?.isRenegade) return;
+            const kin = (this.kinjutsu || []).find(k => k.id === kinjutsuId);
+            if (!kin) return;
+            if ((this.player.kinjutsuLearned || []).includes(kin.id)) return;
+            const price = Math.ceil((kin.price || 0) * this.getBlackMarketPriceMultiplier());
+            if (this.player.ryo < price) {
+                alert('No tienes suficiente Ryo.');
+                return;
+            }
+            if (!confirm(`Aprender ${kin.name} por ${price.toLocaleString('es-ES')} Ryo. ¿Confirmar?`)) return;
+
+            this.player.ryo -= price;
+            this.player.kinjutsuLearned.push(kin.id);
+            this.player.learnedJutsus.push({
+                name: kin.name,
+                rank: kin.rank,
+                chakra: kin.chakra,
+                damage: kin.damage,
+                description: kin.description,
+                isKinjutsu: true,
+                effect: kin.effect
+            });
+            this.increaseWantedLevel(1);
+            this.updateVillageUI();
+            this.saveGame();
+            const panel = document.getElementById('blackmarket-panel');
+            if (panel && panel.style.display === 'block') this.renderBlackMarketPanel(panel);
+            alert(`Has aprendido: ${kin.name}`);
+        },
+
+        toggleOrganizationPanel() {
+            if (!this.player?.isRenegade) return;
+            this.hideRenegadePanels();
+            const panel = document.getElementById('organization-panel');
+            if (!panel) return;
+            panel.style.display = (panel.style.display === 'none' || !panel.style.display) ? 'block' : 'none';
+            if (panel.style.display === 'block') this.renderOrganizationPanel(panel);
+        },
+
+        renderOrganizationPanel(panelEl) {
+            const org = this.player.organization;
+            const canJoin = !org;
+            panelEl.innerHTML = `
+                <div class="panel">
+                    <h3>🏴 Organización</h3>
+                    <p style="margin-top:-6px; color: rgba(240,240,240,0.75)">${org ? `Actualmente: <b>${org}</b> (rango ${this.player.organizationRank || 1})` : 'No perteneces a ninguna.'}</p>
+                    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+                        <div class="card">
+                            <h4>Akatsuki</h4>
+                            <p style="color: rgba(240,240,240,0.75)">Tributo alto, acceso premium y descuentos.</p>
+                            <button class="btn btn-small" ${canJoin ? '' : 'disabled'} onclick="game.joinOrganization('akatsuki')">Unirse</button>
+                        </div>
+                        <div class="card">
+                            <h4>Sonido</h4>
+                            <p style="color: rgba(240,240,240,0.75)">Mejoras físicas y chakra a costo moderado.</p>
+                            <button class="btn btn-small" ${canJoin ? '' : 'disabled'} onclick="game.joinOrganization('sound')">Unirse</button>
+                        </div>
+                        <div class="card">
+                            <h4>ROOT</h4>
+                            <p style="color: rgba(240,240,240,0.75)">Operaciones encubiertas y ocultamiento.</p>
+                            <button class="btn btn-small" ${canJoin ? '' : 'disabled'} onclick="game.joinOrganization('root')">Unirse</button>
+                        </div>
+                        <div class="card">
+                            <h4>Cazarrecompensas</h4>
+                            <p style="color: rgba(240,240,240,0.75)">Bingo Book y contratos de captura.</p>
+                            <button class="btn btn-small" ${canJoin ? '' : 'disabled'} onclick="game.joinOrganization('bounty')">Unirse</button>
+                        </div>
+                    </div>
+                    <div style="margin-top:10px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                        <button class="btn btn-small btn-secondary" ${org ? '' : 'disabled'} onclick="game.leaveOrganization()">Salir</button>
+                        <button class="btn btn-small" onclick="game.activateVillageTab('missions')">Ver misiones/contratos</button>
+                    </div>
+                </div>
+            `;
+        },
+
+        joinOrganization(orgId) {
+            if (!this.player?.isRenegade) {
+                alert('Solo renegados pueden unirse desde aquí.');
+                return;
+            }
+            if (this.player.organization) return;
+            const requirements = {
+                akatsuki: { level: 10, fee: 20000 },
+                sound: { level: 8, fee: 12000 },
+                root: { level: 12, fee: 18000 },
+                bounty: { level: 6, fee: 6000 }
+            };
+            const req = requirements[orgId];
+            if (!req) return;
+            if (this.player.level < req.level) {
+                alert(`Requiere nivel ${req.level}+.`);
+                return;
+            }
+            if (this.player.ryo < req.fee) {
+                alert('No tienes suficiente Ryo para el tributo.');
+                return;
+            }
+            if (!confirm(`Unirte a ${orgId} cuesta ${req.fee.toLocaleString('es-ES')} Ryo. ¿Confirmar?`)) return;
+            this.player.ryo -= req.fee;
+            this.player.organization = orgId;
+            this.player.organizationRank = 1;
+
+            if (orgId === 'akatsuki') {
+                this.player.maxChakra += 50;
+                this.player.ninjutsu += 10;
+            } else if (orgId === 'sound') {
+                this.player.maxHp += 60;
+                this.player.taijutsu += 10;
+            } else if (orgId === 'root') {
+                this.player.identityHiddenDays = Math.max(this.player.identityHiddenDays || 0, 7);
+                this.player.genjutsu += 8;
+            } else if (orgId === 'bounty') {
+                this.player.critChance = (this.player.critChance || 0) + 2;
+            }
+
+            this.updateVillageUI();
+            this.saveGame();
+            const panel = document.getElementById('organization-panel');
+            if (panel && panel.style.display === 'block') this.renderOrganizationPanel(panel);
+            alert(`Te has unido a ${orgId}.`);
+        },
+
+        leaveOrganization() {
+            if (!this.player?.organization) return;
+            if (!confirm('¿Salir de la organización?')) return;
+            this.player.organization = null;
+            this.player.organizationRank = 0;
+            this.updateVillageUI();
+            this.saveGame();
+            const panel = document.getElementById('organization-panel');
+            if (panel && panel.style.display === 'block') this.renderOrganizationPanel(panel);
+        },
+
+        toggleRedemptionPanel() {
+            if (!this.player?.isRenegade) return;
+            this.hideRenegadePanels();
+            const panel = document.getElementById('redemption-panel');
+            if (!panel) return;
+            panel.style.display = (panel.style.display === 'none' || !panel.style.display) ? 'block' : 'none';
+            if (panel.style.display === 'block') this.renderRedemptionPanel(panel);
+        },
+
+        renderRedemptionPanel(panelEl) {
+            const karma = this.player.karma || 0;
+            const need = Math.max(0, 30 - karma);
+            panelEl.innerHTML = `
+                <div class="panel">
+                    <h3>🕊️ Camino de Redención</h3>
+                    <p style="color: rgba(240,240,240,0.75)">Necesitas karma alto y búsqueda baja para limpiar tu nombre.</p>
+                    <div class="info-item">Karma: <b>${karma}</b> • Faltan: <b>${need}</b> • Búsqueda: <b>${this.player.renegadeLevel || 0}★</b></div>
+                    <div style="margin-top:10px; text-align:center;">
+                        <button class="btn btn-small" onclick="game.attemptRedemption()">Intentar Redención</button>
+                    </div>
+                </div>
+            `;
+        },
+
+        attemptRedemption() {
+            if (!this.player?.isRenegade) return;
+            if ((this.player.karma || 0) < 30) {
+                alert('Aún no has hecho suficientes acciones de redención.');
+                return;
+            }
+            if ((this.player.renegadeLevel || 0) > 1) {
+                alert('Primero reduce tu nivel de búsqueda a 1★ o menos.');
+                return;
+            }
+            if (!confirm('¿Dejar la vida renegada y volver a Konoha?')) return;
+
+            this.player.isRenegade = false;
+            this.player.status = 'loyal';
+            this.player.renegadeLevel = 0;
+            this.player.bounty = 0;
+            this.player.organization = null;
+            this.player.organizationRank = 0;
+            if (this.player.reputation?.konoha !== undefined) {
+                this.player.reputation.konoha = Math.max(0, this.player.reputation.konoha || 0);
+            }
+            this.player.location = 'konoha';
+            this.player.hideoutLocation = null;
+            this.hideRenegadePanels();
+            this.updateVillageUI();
+            this.saveGame();
+            alert('Has sido readmitido.');
+        },
+
+        anbuHunterAttack() {
+            if (!this.player?.isRenegade) return;
+            if (document.getElementById('combat-screen')?.classList.contains('active')) return;
+            if (this.player.travelState) return;
+
+            const templates = this.anbuHunters || [];
+            if (templates.length === 0) return;
+
+            const stars = this.clamp(this.player.renegadeLevel || 1, 1, 5);
+            const squadSize = this.clamp(1 + stars, 2, 6);
+
+            this.currentMission = {
+                name: '⚔️ Persecución ANBU',
+                rank: 'X',
+                description: 'Los cazadores te encontraron. No hay escapatoria.',
+                enemies: [],
+                ryo: 1000 + stars * 500,
+                exp: 200 + stars * 120,
+                turns: 0,
+                isAnbuHunt: true
+            };
+
+            this.enemyQueue = [];
+            for (let i = 0; i < squadSize; i++) {
+                const base = templates[Math.floor(Math.random() * templates.length)];
+                const isCaptain = i === 0 && stars >= 3;
+                const scaled = {
+                    ...base,
+                    name: isCaptain ? 'ANBU Capitán' : base.name,
+                    hp: Math.floor(base.hp * (1 + stars * 0.15) + (this.player.level * 8)),
+                    chakra: Math.floor(base.chakra * (1 + stars * 0.10)),
+                    attack: Math.floor(base.attack * (1 + stars * 0.12) + (this.player.level * 0.8)),
+                    defense: Math.floor(base.defense * (1 + stars * 0.10)),
+                    accuracy: Math.floor(base.accuracy * (1 + stars * 0.05)),
+                    controlledTurns: 0
+                };
+                this.enemyQueue.push({ ...scaled, maxHp: scaled.hp, maxChakra: scaled.chakra });
+            }
+
+            this.totalWaves = this.enemyQueue.length;
+            this.currentWave = 1;
+            this.currentEnemy = this.enemyQueue.shift();
+
+            alert(`⚠️ ANBU te ha encontrado (${stars}★). ¡Prepárate!`);
+            this.startCombat();
         },
 
         getBlackMarketOffer() {
@@ -637,11 +1250,13 @@ rollDice(sides = 20) {
         applyReputationDelta(locationId, delta) {
             if (!this.player.reputation) this.player.reputation = {};
             const current = this.player.reputation[locationId] || 0;
-            this.player.reputation[locationId] = this.clamp(current + delta, 0, 100);
+            // Reputación ampliada: permite hostilidad (hasta -100)
+            this.player.reputation[locationId] = this.clamp(current + delta, -100, 100);
         },
 
         getReputationTier(locationId) {
             const rep = (this.player.reputation && this.player.reputation[locationId]) || 0;
+            if (rep < 0) return 'Enemigo';
             if (rep <= 20) return 'Desconocido';
             if (rep <= 50) return 'Conocido';
             if (rep <= 80) return 'Respetado';
@@ -650,6 +1265,7 @@ rollDice(sides = 20) {
 
         getReputationDiscount(locationId) {
             const rep = (this.player.reputation && this.player.reputation[locationId]) || 0;
+            if (rep < 0) return 0;
             if (rep <= 20) return 0;
             if (rep <= 50) return 0.05;
             if (rep <= 80) return 0.10;
@@ -726,7 +1342,31 @@ rollDice(sides = 20) {
                     <button class="btn btn-small" onclick="game.activateVillageTab('missions')">Misión</button>
                     <button class="btn btn-small" onclick="game.activateVillageTab('training')">Entrenar</button>
                     <button class="btn btn-small" onclick="game.activateVillageTab('shop')">Tienda</button>
+                    <button class="btn btn-small" id="desert-btn" style="display:none; background: linear-gradient(135deg, #8b0000 0%, #c0392b 100%);" onclick="game.promptDesertion()">⚠️ Desertar de la Aldea</button>
                 </div>
+
+                <div id="renegade-box" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid rgba(74,85,131,0.45);">
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+                        <div style="color:#c0392b; font-weight:bold;">🔴 MODO RENEGADO ACTIVO</div>
+                        <div style="font-size:0.9em; color: rgba(240,240,240,0.78);">⚠️ ANBU próximo: <b id="hud-anbu-next"></b> día(s)</div>
+                    </div>
+                    <div style="margin-top:10px; display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:10px;">
+                        <div class="info-item">💀 Búsqueda: <b id="hud-wanted"></b></div>
+                        <div class="info-item">💰 Recompensa: <b id="hud-bounty"></b></div>
+                        <div class="info-item">🏴 Organización: <b id="hud-org"></b></div>
+                    </div>
+                    <div style="margin-top:10px; text-align:center;">
+                        <button class="btn btn-small" onclick="game.activateVillageTab('missions')">Contratos</button>
+                        <button class="btn btn-small" onclick="game.toggleBlackMarketPanel()">Mercado Negro</button>
+                        <button class="btn btn-small" onclick="game.toggleOrganizationPanel()">Organización</button>
+                        <button class="btn btn-small btn-secondary" onclick="game.reduceWantedLevel()">Reducir búsqueda</button>
+                        <button class="btn btn-small" onclick="game.toggleRedemptionPanel()">Camino de Redención</button>
+                    </div>
+                    <div id="blackmarket-panel" style="display:none; margin-top:12px;"></div>
+                    <div id="organization-panel" style="display:none; margin-top:12px;"></div>
+                    <div id="redemption-panel" style="display:none; margin-top:12px;"></div>
+                </div>
+
                 <div id="travel-panel" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid rgba(74,85,131,0.45);">
                     <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
                         <div style="color:#ff8c00; font-weight:bold;">🧭 Viaje</div>
@@ -783,6 +1423,25 @@ rollDice(sides = 20) {
             } else {
                 eventsDiv.innerHTML = events.map(e => `• ${e}`).join('<br>');
             }
+
+            const desertBtn = document.getElementById('desert-btn');
+            if (desertBtn) {
+                const canDesert = !this.player.isRenegade && this.player.level >= 5 && this.player.location === 'konoha';
+                desertBtn.style.display = canDesert ? 'inline-flex' : 'none';
+            }
+
+            const renegadeBox = document.getElementById('renegade-box');
+            if (renegadeBox) {
+                renegadeBox.style.display = this.player.isRenegade ? 'block' : 'none';
+            }
+            const wantedEl = document.getElementById('hud-wanted');
+            if (wantedEl) wantedEl.textContent = `${this.player.renegadeLevel || 0}★`;
+            const bountyEl = document.getElementById('hud-bounty');
+            if (bountyEl) bountyEl.textContent = `${(this.player.bounty || 0).toLocaleString('es-ES')} Ryo`;
+            const orgEl = document.getElementById('hud-org');
+            if (orgEl) orgEl.textContent = this.player.organization ? this.player.organization : '—';
+            const anbuNextEl = document.getElementById('hud-anbu-next');
+            if (anbuNextEl) anbuNextEl.textContent = `${Math.max(0, this.player.anbuTimerDays || 0)}`;
 
             this.populateTravelDestinations();
             this.renderRecruitPanel();
@@ -892,6 +1551,7 @@ rollDice(sides = 20) {
             const current = this.player?.location;
             const opts = Object.entries(this.locations)
                 .filter(([id, info]) => id !== current)
+                .filter(([id]) => !(this.player?.isRenegade && id === 'konoha'))
                 .map(([id, info]) => ({ id, label: `${info.icon} ${info.name}` }));
 
             const previous = sel.value;
@@ -986,6 +1646,10 @@ rollDice(sides = 20) {
             if (!this.player) return;
             if (!destination || !this.locations[destination]) {
                 alert('Destino inválido.');
+                return;
+            }
+            if (this.player.isRenegade && destination === 'konoha') {
+                alert('🚫 Un renegado no puede entrar a Konoha.');
                 return;
             }
             if (destination === this.player.location) {
@@ -1184,8 +1848,39 @@ rollDice(sides = 20) {
                 missionList.appendChild(urgentCard);
             }
             
+            // Renegado: contratos + misiones de organización
+            if (this.player.isRenegade) {
+                const tier = (this.player.level >= 12 || (this.player.renegadeLevel || 0) >= 4)
+                    ? 'high'
+                    : (this.player.level >= 8 ? 'mid' : 'low');
+
+                const contracts = (this.renegadeContracts && this.renegadeContracts[tier]) ? this.renegadeContracts[tier] : [];
+                const org = this.player.organization;
+                const orgMissions = (org && this.organizationMissions && this.organizationMissions[org]) ? this.organizationMissions[org] : [];
+
+                const addHeading = (text) => {
+                    const h = document.createElement('div');
+                    h.style.gridColumn = '1/-1';
+                    h.innerHTML = `<h4 style="color:#c0392b;">${text}</h4>`;
+                    missionList.appendChild(h);
+                };
+
+                addHeading(`🩸 Contratos (${tier.toUpperCase()})`);
+                contracts.forEach(m => this.renderMissionCard(missionList, m, { renegade: true }));
+
+                if (org) {
+                    addHeading(`🏴 Misiones de organización: ${org}`);
+                    orgMissions.forEach(m => this.renderMissionCard(missionList, m, { renegade: true }));
+                }
+
+                if (contracts.length === 0 && orgMissions.length === 0 && !this.player.urgentMission) {
+                    missionList.innerHTML = '<div class="story-text">No hay contratos disponibles por ahora.</div>';
+                }
+                return;
+            }
+
             let availableMissions = [];
-            
+
             if (this.player.rank === 'Genin') {
                 availableMissions = this.missions.genin;
             } else if (this.player.rank === 'Chunin') {
@@ -1195,7 +1890,7 @@ rollDice(sides = 20) {
             } else if (this.player.rank === 'ANBU' || this.player.rank === 'Kage') {
                 availableMissions = this.missions.kage;
             }
-            
+
             availableMissions.forEach(mission => {
                 const card = document.createElement('div');
                 card.className = 'mission-card';
@@ -1221,9 +1916,43 @@ rollDice(sides = 20) {
             });
         },
 
+        renderMissionCard(container, mission, opts = {}) {
+            const card = document.createElement('div');
+            card.className = 'mission-card';
+            card.onclick = () => this.startMission(mission);
+
+            const rank = (mission.rank || '').toUpperCase();
+            const turnCostByRank = { D: 1, C: 2, B: 3, A: 4, S: 4 };
+            const turns = mission.turns ?? (turnCostByRank[rank] ?? 2);
+
+            const team = this.getTeamBonuses();
+            const nightRyoMult = this.player.timeOfDay === 2 ? 1.2 : 1;
+            const estRyo = Math.floor(mission.ryo * (team.missionRyoMult || 1) * nightRyoMult);
+            const estExp = Math.floor(mission.exp * (team.missionExpMult || 1));
+
+            if (opts.renegade) {
+                card.style.borderLeftColor = '#c0392b';
+                card.style.background = 'rgba(192, 57, 43, 0.10)';
+            }
+
+            card.innerHTML = `
+                <h4>📜 ${mission.name} [Rango ${mission.rank}]</h4>
+                <p>${mission.description}</p>
+                <p style="color: #ffd700; margin-top: 8px;">Recompensa: ${estRyo} Ryo | ${estExp} EXP</p>
+                <p style="opacity: 0.85; margin-top: 6px;">⏱️ Tiempo: ${turns} turno(s)</p>
+            `;
+
+            container.appendChild(card);
+        },
+
         showAcademy(rank) {
             const jutsuList = document.getElementById('academy-jutsu-list');
             jutsuList.innerHTML = '';
+
+            if (this.player.isRenegade) {
+                jutsuList.innerHTML = '<div class="story-text">🚫 Como Renegado, la Academia de Konoha está cerrada para ti.</div>';
+                return;
+            }
 
             if (this.player.location !== 'konoha') {
                 jutsuList.innerHTML = '<div class="story-text">📍 La Academia Ninja solo está disponible en Konoha.</div>';
@@ -1292,6 +2021,10 @@ rollDice(sides = 20) {
         },
 
         learnJutsu(jutsu) {
+            if (this.player.isRenegade) {
+                alert('🚫 Como Renegado, no puedes aprender en la Academia de Konoha.');
+                return;
+            }
             if (this.player.location !== 'konoha') {
                 alert('La Academia solo está disponible en Konoha.');
                 return;
@@ -1335,6 +2068,10 @@ rollDice(sides = 20) {
 
         showShop() {
             const shopList = document.getElementById('shop-list');
+            if (this.player.isRenegade) {
+                shopList.innerHTML = '<div class="story-text">🚫 Como Renegado, la Tienda de la Aldea no te atenderá.</div>';
+                return;
+            }
             if (this.player.location !== 'konoha') {
                 shopList.innerHTML = '<div class="story-text">📍 La Tienda de la Aldea solo está disponible en Konoha.</div>';
                 return;
@@ -1385,6 +2122,10 @@ rollDice(sides = 20) {
         },
 
         buyItem(item) {
+            if (this.player.isRenegade) {
+                alert('🚫 Como Renegado, no puedes comprar en la Tienda de la Aldea.');
+                return;
+            }
             if (this.player.location !== 'konoha') {
                 alert('La tienda solo está disponible en Konoha.');
                 return;
@@ -1420,6 +2161,10 @@ rollDice(sides = 20) {
 
         showTraining() {
             const trainingList = document.getElementById('training-list');
+            if (this.player.isRenegade) {
+                trainingList.innerHTML = '<div class="story-text">🚫 Como Renegado, no puedes entrenar en el centro de Konoha.</div>';
+                return;
+            }
             if (this.player.location !== 'konoha') {
                 trainingList.innerHTML = '<div class="story-text">📍 El Centro de Entrenamiento solo está disponible en Konoha.</div>';
                 return;
@@ -1452,6 +2197,10 @@ rollDice(sides = 20) {
         },
 
         doTraining(item) {
+            if (this.player.isRenegade) {
+                alert('🚫 Como Renegado, no puedes entrenar en Konoha.');
+                return;
+            }
             if (this.player.location !== 'konoha') {
                 alert('El entrenamiento solo está disponible en Konoha.');
                 return;
@@ -1772,6 +2521,55 @@ rollDice(sides = 20) {
             document.getElementById('jutsu-selection').style.display = 'none';
             
             this.addCombatLog(`Usas ${jutsu.name}!`, 'log-special');
+
+            if (jutsu.isKinjutsu && jutsu.effect) {
+                this.increaseWantedLevel(1);
+
+                if (jutsu.effect === 'suicide_kill') {
+                    this.currentEnemy.hp = 0;
+                    this.player.hp = Math.max(1, Math.floor(this.player.hp * 0.5));
+                    this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
+                    this.updateBar('enemy-health-bar', this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                    this.addCombatLog('☠️ Sacrificio activado. El enemigo cae.', 'log-special');
+                    this.winCombat();
+                    return;
+                }
+
+                if (jutsu.effect === 'immortal_reflect') {
+                    this.player.jashinTurns = 3;
+                    this.player.jashinReflect = 0.35;
+                    this.addCombatLog('🩸 Ritual de Jashin: inmortalidad temporal y reflejo de daño.', 'log-special');
+                }
+
+                if (jutsu.effect === 'control') {
+                    this.currentEnemy.controlledTurns = 2;
+                    this.addCombatLog('👁️ El enemigo queda controlado (pierde acciones).', 'log-special');
+                }
+
+                if (jutsu.effect === 'izanagi') {
+                    // Si es Izanagi diario, requiere estar listo.
+                    if (this.player.hasDailyIzanagi && !this.player.dailyIzanagiReady) {
+                        this.addCombatLog('👁️ No tienes Izanagi diario disponible hoy.', 'log-miss');
+                    } else {
+                        this.player.izanagiAvailable = true;
+                        this.player.izanagiUsed = false;
+                        if (this.player.hasDailyIzanagi) {
+                            this.player.dailyIzanagiReady = false;
+                            this.addCombatLog('👁️ Izanagi diario activado (se consume por hoy).', 'log-special');
+                        }
+                    }
+                }
+
+                if (jutsu.effect === 'steal_kg') {
+                    this.player.pendingStealKg = true;
+                    this.addCombatLog('📌 Marca colocada: intentarás robar un Kekkei Genkai al finalizar.', 'log-special');
+                }
+
+                if (jutsu.effect === 'revive') {
+                    this.player.edoAllyTurns = 1;
+                    this.addCombatLog('🧟 Edo Tensei: un aliado temporal te asistirá.', 'log-special');
+                }
+            }
             
             if (jutsu.damage > 0) {
                 const damage = jutsu.damage + Math.floor(stats.ninjutsu / 2);
@@ -1907,6 +2705,12 @@ rollDice(sides = 20) {
                 this.reduceFatigue(10);
                 this.addCombatLog('🍜 Te sientes mejor: -10% fatiga.', 'log-heal');
             }
+
+            if (item.effect.buffAll) {
+                const turns = Math.max(1, item.effect.buffTurns || 3);
+                this.player.combatBuff = { all: item.effect.buffAll, turns, backlashHp: item.effect.backlashHp || 0 };
+                this.addCombatLog(`💊 Potenciación ilegal: +${item.effect.buffAll} a todos los stats por ${turns} turnos.`, 'log-special');
+            }
             
             this.player.inventory.splice(index, 1);
             document.getElementById('combat-inventory').style.display = 'none';
@@ -1917,6 +2721,27 @@ rollDice(sides = 20) {
 
         enemyTurn() {
             this.combatTurn = 'enemy';
+
+            if (this.currentEnemy && this.currentEnemy.controlledTurns > 0) {
+                this.currentEnemy.controlledTurns -= 1;
+                this.addCombatLog('🧠 El enemigo está controlado y pierde su turno.', 'log-special');
+                this.combatTurn = 'player';
+                this.enableCombatButtons();
+                return;
+            }
+
+            if (this.player.edoAllyTurns > 0) {
+                const allyDmg = 80 + Math.floor((this.player.ninjutsu || 0) / 2);
+                this.currentEnemy.hp -= allyDmg;
+                this.addCombatLog(`🧟 Tu aliado invocado ataca y causa ${allyDmg} daño.`, 'log-damage');
+                this.updateBar('enemy-health-bar', this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                this.player.edoAllyTurns -= 1;
+                if (this.currentEnemy.hp <= 0) {
+                    this.winCombat();
+                    return;
+                }
+            }
+
             this.addCombatLog(`${this.currentEnemy.name} ataca...`, 'log-attack');
 
             const attackRoll = this.rollDice(20);
@@ -1948,8 +2773,36 @@ rollDice(sides = 20) {
                     const baseDamage = this.rollDice(8) + this.rollDice(6);
                     const damage = Math.max(1, baseDamage + Math.floor(this.currentEnemy.attack / 1.5));
                     this.player.hp -= damage;
+
+                    if (this.player.jashinTurns > 0) {
+                        const reflect = Math.max(1, Math.floor(damage * (this.player.jashinReflect || 0.3)));
+                        this.currentEnemy.hp -= reflect;
+                        this.addCombatLog(`🩸 Reflejas ${reflect} de daño al enemigo.`, 'log-special');
+                        this.updateBar('enemy-health-bar', this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                        if (this.currentEnemy.hp <= 0) {
+                            this.winCombat();
+                            return;
+                        }
+                    }
+
                     this.addCombatLog(`¡Te golpean duramente! Recibes ${damage} de daño.`, 'log-damage');
                     this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
+
+                    if (this.player.hp <= 0 && this.player.izanagiAvailable && !this.player.izanagiUsed) {
+                        this.player.izanagiUsed = true;
+                        this.player.izanagiAvailable = false;
+                        this.player.hp = this.player.maxHp;
+                        this.player.chakra = Math.min(this.player.maxChakra, this.player.chakra + 50);
+                        this.addCombatLog('👁️ IZANAGI: reescribes la realidad y vuelves con vida.', 'log-special');
+                        this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
+                        this.updateBar('combat-player-chakra-bar', this.player.chakra, this.player.maxChakra, 'Chakra');
+                    }
+
+                    if (this.player.hp <= 0 && this.player.jashinTurns > 0) {
+                        this.player.hp = 1;
+                        this.addCombatLog('🩸 Ritual activo: no puedes morir todavía.', 'log-special');
+                        this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
+                    }
 
                     if (this.player.hp <= 0) {
                         this.defeat();
@@ -1958,6 +2811,19 @@ rollDice(sides = 20) {
                 } else {
                     this.addCombatLog('¡Esquivas el ataque!', 'log-miss');
                 }
+
+                if (this.player.combatBuff && this.player.combatBuff.turns) {
+                    this.player.combatBuff.turns -= 1;
+                    if (this.player.combatBuff.turns <= 0) {
+                        if (this.player.combatBuff.backlashHp) {
+                            this.player.hp = Math.max(1, this.player.hp - this.player.combatBuff.backlashHp);
+                            this.addCombatLog(`⚠️ Efecto secundario: -${this.player.combatBuff.backlashHp} HP.`, 'log-damage');
+                            this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
+                        }
+                        this.player.combatBuff = null;
+                    }
+                }
+                if (this.player.jashinTurns > 0) this.player.jashinTurns -= 1;
 
                 this.combatTurn = 'player';
                 this.enableCombatButtons();
@@ -2036,8 +2902,32 @@ rollDice(sides = 20) {
                 this.levelUp();
             }
 
+            // Robo de Kekkei Genkai (kinjutsu)
+            if (this.player.pendingStealKg && !this.player.kekkeiGenkai) {
+                const pool = Array.isArray(this.kekkeiGenkaiList) ? this.kekkeiGenkaiList : [];
+                if (pool.length > 0) {
+                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    this.player.kekkeiGenkai = pick;
+                    this.player.kekkeiLevel = 1;
+                    this.player.kekkeiExp = 0;
+                    this.applyKekkeiGenkaiBonuses();
+                    alert(`🌑 Kinjutsu: robaste un Kekkei Genkai: ${pick.name}`);
+                }
+                this.player.pendingStealKg = false;
+            }
+
             // Reputación
-            if (this.currentMission && this.currentMission.isUrgent) {
+            if (this.currentMission && this.currentMission.isAnbuHunt) {
+                this.player.anbuEliminated += this.totalWaves;
+                this.increaseWantedLevel(1);
+                this.player.karma = this.clamp((this.player.karma || 0) - 5, -100, 100);
+            } else if (this.currentMission && this.currentMission.criminal) {
+                this.applyReputationDelta('konoha', -12);
+                this.applyReputationDelta(this.player.location, -6);
+                this.increaseWantedLevel(1);
+                this.player.criminalMissions += 1;
+                this.player.karma = this.clamp((this.player.karma || 0) - 8, -100, 100);
+            } else if (this.currentMission && this.currentMission.isUrgent) {
                 this.applyReputationDelta(this.player.location, 12);
                 this.player.urgentMission = null;
             } else {
@@ -2137,6 +3027,10 @@ rollDice(sides = 20) {
         },
 
         defeat() {
+            if (this.currentMission && this.currentMission.isAnbuHunt && this.player?.isRenegade) {
+                alert('⛓️ Has sido capturado por ANBU. Fin de tu camino renegado.');
+                try { localStorage.removeItem('ninjaRPGSave'); } catch (e) { /* ignore */ }
+            }
             this.showScreen('defeat-screen');
         }
     };
