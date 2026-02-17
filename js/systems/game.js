@@ -1234,7 +1234,9 @@ rollDice(sides = 20) {
                 return;
             }
             
-            const jutsus = this.academyJutsus[rank] || [];
+            const jutsusAll = this.academyJutsus[rank] || [];
+            const playerElement = this.player.element;
+            const jutsus = jutsusAll.filter(j => (j.element == null) || (playerElement && j.element === playerElement));
             
             jutsus.forEach(jutsu => {
                 const isLearned = this.player.learnedJutsus.some(j => j.name === jutsu.name);

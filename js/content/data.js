@@ -208,35 +208,158 @@ export const BASE_GAME = {
         },
 
         academyJutsus: {
+            // Genin (D-C)
             genin: [
-                { name: 'Katon: Pequeña Llama', rank: 'D', price: 100, chakra: 15, damage: 20, element: 'fire', description: 'Jutsu básico de fuego' },
-                { name: 'Suiton: Bala de Agua', rank: 'D', price: 100, chakra: 15, damage: 18, element: 'water', description: 'Dispara agua' },
-                { name: 'Futon: Ventisca', rank: 'D', price: 100, chakra: 15, damage: 22, element: 'wind', description: 'Ráfaga de viento' },
-                { name: 'Doton: Pared de Tierra', rank: 'D', price: 100, chakra: 20, damage: 0, effect: 'defense', element: 'earth', description: '+Defensa temporal' },
-                { name: 'Raiton: Chispa', rank: 'D', price: 100, chakra: 15, damage: 19, element: 'lightning', description: 'Descarga eléctrica' },
-                { name: 'Kage Bunshin', rank: 'C', price: 300, chakra: 40, damage: 0, effect: 'clone', description: 'Crea un clon' },
-                { name: 'Shunshin', rank: 'C', price: 250, chakra: 30, damage: 0, effect: 'speed', description: 'Aumenta velocidad' }
+                // 🔥 Fuego
+                { name: 'Katon: Gōkakyū no Jutsu', rank: 'C', price: 300, chakra: 35, damage: 35, element: 'fire', description: 'Gran Bola de Fuego: una llamarada icónica que arrasa el frente.' },
+                { name: 'Katon: Hōsenka no Jutsu', rank: 'C', price: 280, chakra: 30, damage: 30, element: 'fire', description: 'Flores Fénix: múltiples proyectiles de fuego que persiguen al objetivo.' },
+                { name: 'Katon: Hinotama', rank: 'D', price: 120, chakra: 18, damage: 18, element: 'fire', description: 'Esferas de fuego rápidas, perfectas para hostigar.' },
+                { name: 'Katon: Kasumi Enbu', rank: 'D', price: 150, chakra: 20, damage: 16, element: 'fire', description: 'Danza de Niebla: humo inflamable que detona al impacto.', effect: 'burn' },
+                { name: 'Katon: Enjin no Kama', rank: 'C', price: 260, chakra: 32, damage: 28, element: 'fire', description: 'Guadaña Ígnea: un arco de llamas que corta y quema.', effect: 'burn' },
+
+                // 💧 Agua
+                { name: 'Suiton: Mizurappa', rank: 'C', price: 280, chakra: 30, damage: 30, element: 'water', description: 'Ola Violenta: empuje de agua que golpea y desestabiliza.' },
+                { name: 'Suiton: Teppōdama', rank: 'C', price: 260, chakra: 28, damage: 28, element: 'water', description: 'Bala de Agua: disparo comprimido que perfora.' },
+                { name: 'Suiton: Mizu no Yaiba', rank: 'D', price: 150, chakra: 20, damage: 18, element: 'water', description: 'Hoja de Agua: filo líquido para cortes rápidos.' },
+                { name: 'Suiton: Kirigakure no Jutsu', rank: 'C', price: 300, chakra: 35, damage: 15, element: 'water', description: 'Niebla Oculta: reduce visibilidad y confunde.', effect: 'stun' },
+                { name: 'Suiton: Suiryūdan (Mini)', rank: 'C', price: 290, chakra: 34, damage: 33, element: 'water', description: 'Mini Dragón de Agua: impacto contundente con control.' },
+
+                // 💨 Viento
+                { name: 'Fūton: Kaze no Yaiba', rank: 'D', price: 120, chakra: 18, damage: 18, element: 'wind', description: 'Hoja de Viento: corte invisible a corta distancia.' },
+                { name: 'Fūton: Reppūshō', rank: 'C', price: 250, chakra: 30, damage: 28, element: 'wind', description: 'Palma Huracanada: empuje que rompe postura.' },
+                { name: 'Fūton: Shinkūgyoku', rank: 'C', price: 280, chakra: 34, damage: 33, element: 'wind', description: 'Esfera de Vacío: proyectiles compactos de aire.' },
+                { name: 'Fūton: Kamaitachi (Básico)', rank: 'C', price: 300, chakra: 38, damage: 35, element: 'wind', description: 'Hoz de Viento: ráfaga cortante que hiere en línea.' },
+                { name: 'Fūton: Kaze Shibari', rank: 'D', price: 160, chakra: 22, damage: 15, element: 'wind', description: 'Atadura de Viento: traba el movimiento con presión.', effect: 'stun' },
+
+                // 🪨 Tierra
+                { name: 'Doton: Doryūheki (Básico)', rank: 'C', price: 300, chakra: 35, damage: 20, element: 'earth', description: 'Muro de Tierra: defensa rápida que bloquea el avance.', effect: 'defense' },
+                { name: 'Doton: Moguragakure', rank: 'C', price: 260, chakra: 30, damage: 28, element: 'earth', description: 'Escondite Subterráneo: golpe sorpresa desde abajo.' },
+                { name: 'Doton: Iwa Tsubute', rank: 'D', price: 120, chakra: 18, damage: 18, element: 'earth', description: 'Piedras Lanzadas: proyectiles de roca a corta distancia.' },
+                { name: 'Doton: Tsuchi Shibari', rank: 'D', price: 150, chakra: 22, damage: 15, element: 'earth', description: 'Atadura de Tierra: el suelo atrapa los pies.', effect: 'stun' },
+                { name: 'Doton: Kōgan no Kama', rank: 'C', price: 280, chakra: 34, damage: 33, element: 'earth', description: 'Guadaña Rocosa: filo pesado que rompe guardias.' },
+
+                // ⚡ Rayo
+                { name: 'Raiton: Chispa', rank: 'D', price: 120, chakra: 18, damage: 18, element: 'lightning', description: 'Descarga rápida para aturdir y abrir guardias.', effect: 'stun' },
+                { name: 'Raiton: Denki Tama', rank: 'C', price: 260, chakra: 30, damage: 30, element: 'lightning', description: 'Esfera Eléctrica: golpe directo con zumbido paralizante.', effect: 'stun' },
+                { name: 'Raiton: Raikyū', rank: 'C', price: 280, chakra: 34, damage: 33, element: 'lightning', description: 'Orbe de Rayo: daño sostenido y presión constante.' },
+                { name: 'Raiton: Ikazuchi no Yaiba', rank: 'C', price: 300, chakra: 38, damage: 35, element: 'lightning', description: 'Hoja de Trueno: filo eléctrico para cortes letales.' },
+                { name: 'Raiton: Kōden', rank: 'D', price: 150, chakra: 22, damage: 15, element: 'lightning', description: 'Conducto: chispa que “engancha” el objetivo.', effect: 'stun' },
+
+                // Neutrales (para todos)
+                { name: 'Kawarimi no Jutsu', rank: 'D', price: 100, chakra: 15, damage: 0, element: null, description: 'Sustitución para evitar un golpe crítico.', effect: 'defense' },
+                { name: 'Oiroke no Jutsu (Distracción)', rank: 'D', price: 120, chakra: 15, damage: 15, element: null, description: 'Distracción absurda pero efectiva para romper el ritmo.', effect: 'stun' },
+                { name: 'Iryō Ninjutsu: Shōsen', rank: 'C', price: 280, chakra: 35, damage: 0, element: null, description: 'Técnica médica para cerrar heridas rápidamente.', effect: 'heal' },
+                { name: 'Shunshin no Jutsu', rank: 'C', price: 250, chakra: 30, damage: 0, element: null, description: 'Desplazamiento instantáneo que aumenta velocidad.', effect: 'speed' },
+                { name: 'Kage Bunshin no Jutsu', rank: 'C', price: 300, chakra: 40, damage: 0, element: null, description: 'Clones sólidos que confunden y multiplican presión.', effect: 'clone' }
             ],
+
+            // Chunin (B)
             chunin: [
-                { name: 'Katon: Gran Bola de Fuego', rank: 'C', price: 500, chakra: 35, damage: 45, element: 'fire', description: 'Bola de fuego poderosa' },
-                { name: 'Suiton: Dragón de Agua', rank: 'B', price: 800, chakra: 50, damage: 60, element: 'water', description: 'Dragón de agua' },
-                { name: 'Futon: Rasengan', rank: 'B', price: 1000, chakra: 60, damage: 70, element: 'wind', description: 'Esfera de chakra' },
-                { name: 'Doton: Prisión de Tierra', rank: 'B', price: 700, chakra: 45, damage: 40, effect: 'stun', element: 'earth', description: 'Atrapa al enemigo' },
-                { name: 'Raiton: Chidori', rank: 'B', price: 1200, chakra: 55, damage: 75, element: 'lightning', description: 'Mil pájaros' },
-                { name: 'Invocación: Animal', rank: 'B', price: 900, chakra: 50, damage: 50, effect: 'summon', description: 'Invoca un aliado' }
+                // 🔥
+                { name: 'Katon: Ryūka no Jutsu', rank: 'B', price: 800, chakra: 55, damage: 65, element: 'fire', description: 'Dragón de Fuego: un chorro concentrado que atraviesa defensas.', effect: 'burn' },
+                { name: 'Katon: Gōryūka no Jutsu', rank: 'B', price: 900, chakra: 60, damage: 75, element: 'fire', description: 'Gran Dragón de Fuego: calor abrumador y daño sostenido.', effect: 'burn' },
+                { name: 'Katon: Haisekishō', rank: 'B', price: 700, chakra: 50, damage: 55, element: 'fire', description: 'Ceniza Ardiente: nube que explota al inhalarla.', effect: 'stun' },
+                { name: 'Katon: Enkōdan', rank: 'B', price: 650, chakra: 48, damage: 50, element: 'fire', description: 'Bala de Llama: disparo compacto, veloz y preciso.' },
+                { name: 'Katon: Karyū Endan', rank: 'B', price: 1100, chakra: 70, damage: 80, element: 'fire', description: 'Llamarada Continua: un río de fuego que no da respiro.', effect: 'burn' },
+                { name: 'Katon: Shakunetsu Kekkai', rank: 'B', price: 1000, chakra: 65, damage: 60, element: 'fire', description: 'Barrera Abrasadora: el calor frena al enemigo y lo desgasta.', effect: 'defense' },
+
+                // 💧
+                { name: 'Suiton: Suiryūdan no Jutsu', rank: 'B', price: 900, chakra: 65, damage: 80, element: 'water', description: 'Dragón de Agua: un coloso acuático que arrasa.' },
+                { name: 'Suiton: Suijinheki', rank: 'B', price: 700, chakra: 50, damage: 40, element: 'water', description: 'Muro de Agua: bloquea ataques y contraataca con presión.', effect: 'defense' },
+                { name: 'Suiton: Daibakufu', rank: 'B', price: 1000, chakra: 70, damage: 75, element: 'water', description: 'Gran Cascada: ola masiva que barre el terreno.' },
+                { name: 'Suiton: Hōmatsu Rappa', rank: 'B', price: 650, chakra: 48, damage: 55, element: 'water', description: 'Espuma Violenta: espuma densa que ralentiza y golpea.', effect: 'stun' },
+                { name: 'Suiton: Mizukiri no Yaiba', rank: 'B', price: 800, chakra: 55, damage: 65, element: 'water', description: 'Cuchillas de Agua: múltiples filos cortantes.' },
+                { name: 'Suiton: Suiro no Jutsu', rank: 'B', price: 600, chakra: 45, damage: 42, element: 'water', description: 'Prisión de Agua (impacto): inmoviliza y castiga.', effect: 'stun' },
+
+                // 💨
+                { name: 'Fūton: Shinkūha', rank: 'B', price: 700, chakra: 50, damage: 55, element: 'wind', description: 'Onda de Vacío: cuchilla larga de aire que atraviesa.' },
+                { name: 'Fūton: Shinkū Renpa', rank: 'B', price: 850, chakra: 60, damage: 70, element: 'wind', description: 'Ráfaga en Cadena: varias ondas que saturan la defensa.' },
+                { name: 'Fūton: Kazekiri', rank: 'B', price: 650, chakra: 45, damage: 45, element: 'wind', description: 'Corte de Viento: filo rápido y mortal.' },
+                { name: 'Fūton: Daitoppa', rank: 'B', price: 900, chakra: 65, damage: 80, element: 'wind', description: 'Gran Avance: tormenta frontal que arrasa formación.' },
+                { name: 'Fūton: Kaze no Tate', rank: 'B', price: 600, chakra: 50, damage: 40, element: 'wind', description: 'Escudo de Viento: desvía ataques y reduce impacto.', effect: 'defense' },
+                { name: 'Fūton: Shinkūsen', rank: 'B', price: 1100, chakra: 70, damage: 75, element: 'wind', description: 'Cuchilla Circular: anillo de aire que golpea alrededor.' },
+
+                // 🪨
+                { name: 'Doton: Doryūsō', rank: 'B', price: 650, chakra: 45, damage: 50, element: 'earth', description: 'Lanza de Tierra: estaca que emerge y perfora.' },
+                { name: 'Doton: Yomi Numa', rank: 'B', price: 900, chakra: 65, damage: 60, element: 'earth', description: 'Pantano del Inframundo: hunde al enemigo y lo inmoviliza.', effect: 'stun' },
+                { name: 'Doton: Iwagakure no Jutsu', rank: 'B', price: 700, chakra: 50, damage: 45, element: 'earth', description: 'Camuflaje de Roca: embiste desde cobertura sólida.' },
+                { name: 'Doton: Ganban Kyū', rank: 'B', price: 800, chakra: 55, damage: 65, element: 'earth', description: 'Ataúd de Roca: aprisiona y aplasta con fuerza.' },
+                { name: 'Doton: Iwa Gōlem (Impacto)', rank: 'B', price: 1200, chakra: 70, damage: 80, element: 'earth', description: 'Gólem de Roca: golpe masivo que sacude el suelo.' },
+                { name: 'Doton: Doryūtaiga', rank: 'B', price: 1000, chakra: 65, damage: 75, element: 'earth', description: 'Río de Tierra: ola de lodo que derriba formaciones.', effect: 'stun' },
+
+                // ⚡
+                { name: 'Raiton: Raikiri (Práctica)', rank: 'B', price: 1200, chakra: 70, damage: 80, element: 'lightning', description: 'Corte de Rayo entrenado: velocidad y precisión.' },
+                { name: 'Raiton: Chidori', rank: 'B', price: 1100, chakra: 65, damage: 75, element: 'lightning', description: 'Chidori: estocada relámpago que atraviesa armaduras.' },
+                { name: 'Raiton: Gian', rank: 'B', price: 900, chakra: 60, damage: 70, element: 'lightning', description: 'Falsa Oscuridad: rayo lineal de alta potencia.' },
+                { name: 'Raiton: Jibashi', rank: 'B', price: 650, chakra: 45, damage: 45, element: 'lightning', description: 'Torre de Choque: electricidad que inmoviliza al tocar.', effect: 'stun' },
+                { name: 'Raiton: Raijū Tsuiga', rank: 'B', price: 800, chakra: 55, damage: 65, element: 'lightning', description: 'Bestia de Rayo: forma animal que muerde y paraliza.', effect: 'stun' },
+                { name: 'Raiton: Hiraishin Pulse', rank: 'B', price: 1000, chakra: 68, damage: 60, element: 'lightning', description: 'Pulso Relámpago: descarga de área que corta el ritmo enemigo.', effect: 'stun' },
+
+                // Neutrales B
+                { name: 'Tajū Kage Bunshin', rank: 'B', price: 1200, chakra: 70, damage: 40, element: null, description: 'Muchos clones para abrumar al enemigo.', effect: 'clone' },
+                { name: 'Fūinjutsu: Sello de Contención', rank: 'B', price: 900, chakra: 60, damage: 50, element: null, description: 'Sello que inmoviliza y debilita al objetivo.', effect: 'stun' },
+                { name: 'Kuchiyose: Invocación (Aliado)', rank: 'B', price: 900, chakra: 55, damage: 60, element: null, description: 'Invoca un aliado temporal que golpea fuerte.', effect: 'summon' }
             ],
+
+            // Jonin (A)
             jonin: [
-                { name: 'Katon: Majestuosa Destrucción', rank: 'A', price: 2000, chakra: 80, damage: 100, element: 'fire', description: 'Mar de llamas' },
-                { name: 'Suiton: Gran Cascada', rank: 'A', price: 2200, chakra: 85, damage: 110, element: 'water', description: 'Tsunami devastador' },
-                { name: 'Futon: Rasen-Shuriken', rank: 'A', price: 2500, chakra: 90, damage: 120, element: 'wind', description: 'Rasengan definitivo' },
-                { name: 'Raiton: Kirin', rank: 'A', price: 2800, chakra: 95, damage: 130, element: 'lightning', description: 'Bestia de rayos' },
-                { name: 'Shinra Tensei', rank: 'S', price: 5000, chakra: 120, damage: 150, description: 'Rechaza todo' }
+                // 🔥
+                { name: 'Katon: Gōka Mekkyaku', rank: 'A', price: 2500, chakra: 90, damage: 130, element: 'fire', description: 'Extinción Majestuosa: un mar de fuego que consume el campo.', effect: 'burn' },
+                { name: 'Katon: Gōka Messhitsu', rank: 'A', price: 2800, chakra: 100, damage: 150, element: 'fire', description: 'Extinción Suprema: presión térmica que rompe líneas defensivas.', effect: 'burn' },
+                { name: 'Katon: Bakuenjin', rank: 'A', price: 2200, chakra: 85, damage: 110, element: 'fire', description: 'Anillo Explosivo: círculo ígneo que atrapa y castiga.', effect: 'stun' },
+
+                // 💧
+                { name: 'Suiton: Suikōdan', rank: 'A', price: 2200, chakra: 85, damage: 110, element: 'water', description: 'Tiburón de Agua: mordida giratoria que destroza.' },
+                { name: 'Suiton: Dai Suiryūdan', rank: 'A', price: 2600, chakra: 95, damage: 140, element: 'water', description: 'Dragón de Agua Supremo: presión brutal, difícil de esquivar.' },
+                { name: 'Suiton: Suijinheki Kai', rank: 'A', price: 2000, chakra: 80, damage: 90, element: 'water', description: 'Muro de Agua Mejorado: defensa y contraataque en un solo flujo.', effect: 'defense' },
+
+                // 💨
+                { name: 'Fūton: Kazekiri Ranbu', rank: 'A', price: 2400, chakra: 90, damage: 120, element: 'wind', description: 'Danza de Cortes: combo de ráfagas que despedaza.' },
+                { name: 'Fūton: Shinkū Taigyoku', rank: 'A', price: 2800, chakra: 100, damage: 150, element: 'wind', description: 'Gran Esfera de Vacío: explosión de presión al impacto.' },
+                { name: 'Fūton: Kamaitachi Guren', rank: 'A', price: 2200, chakra: 80, damage: 100, element: 'wind', description: 'Hoz Carmesí: tajos amplios que persiguen al objetivo.' },
+
+                // 🪨
+                { name: 'Doton: Ganchūrō', rank: 'A', price: 2400, chakra: 90, damage: 120, element: 'earth', description: 'Prisión de Roca: encierra y presiona hasta quebrar.', effect: 'stun' },
+                { name: 'Doton: Chidōkaku', rank: 'A', price: 2600, chakra: 95, damage: 140, element: 'earth', description: 'Terremoto Angular: el suelo se parte bajo el enemigo.' },
+                { name: 'Doton: Kōka no Tate', rank: 'A', price: 2000, chakra: 80, damage: 90, element: 'earth', description: 'Escudo Endurecido: defensa extrema que devuelve impacto.', effect: 'defense' },
+
+                // ⚡
+                { name: 'Raiton: Raikiri', rank: 'A', price: 2800, chakra: 95, damage: 140, element: 'lightning', description: 'Raikiri: corte letal, más rápido que el sonido.' },
+                { name: 'Raiton: Chidori Nagashi', rank: 'A', price: 2500, chakra: 90, damage: 120, element: 'lightning', description: 'Corriente Chidori: descarga alrededor del usuario.', effect: 'stun' },
+                { name: 'Raiton: Rairyū no Yoroi', rank: 'A', price: 2200, chakra: 85, damage: 90, element: 'lightning', description: 'Armadura de Rayo: mejora defensa y castiga al contacto.', effect: 'defense' },
+
+                // Neutrales A
+                { name: 'Rasengan', rank: 'A', price: 3000, chakra: 90, damage: 130, element: null, description: 'Esfera de chakra puro: impacto devastador a corta distancia.' },
+                { name: 'Sensō no Kōdō (Disciplina)', rank: 'A', price: 2500, chakra: 80, damage: 90, element: null, description: 'Entra en “modo combate”: mente fría, golpes más certeros.', effect: 'speed' }
             ],
+
+            // Master (S)
             master: [
-                { name: 'Edo Tensei', rank: 'S', price: 10000, chakra: 150, damage: 0, effect: 'revive', description: 'Maestro: Resurrección prohibida' },
-                { name: 'Kamui', rank: 'S', price: 8000, chakra: 100, damage: 80, effect: 'teleport', description: 'Maestro: Espacio-tiempo' },
-                { name: 'Tsukuyomi', rank: 'S', price: 7000, chakra: 90, damage: 0, effect: 'mega_genjutsu', description: 'Maestro: Genjutsu supremo' },
-                { name: 'Amaterasu', rank: 'S', price: 6000, chakra: 85, damage: 90, effect: 'burn_permanent', description: 'Maestro: Llamas eternas' }
+                // 🔥
+                { name: 'Katon: Amaterasu (Llama Negra)', rank: 'S', price: 6000, chakra: 140, damage: 170, element: 'fire', description: 'Llamas negras que no se apagan. Dolor que persiste.', effect: 'burn_permanent' },
+                { name: 'Katon: Tenro no Kiba', rank: 'S', price: 5200, chakra: 150, damage: 180, element: 'fire', description: 'Colmillos del Horno: columnas de fuego que persiguen al objetivo.', effect: 'burn' },
+
+                // 💧
+                { name: 'Suiton: Bakusui Shōha', rank: 'S', price: 5200, chakra: 130, damage: 160, element: 'water', description: 'Ola Explosiva: inunda y aplasta el campo de batalla.' },
+                { name: 'Suiton: Guren no Nagare', rank: 'S', price: 6000, chakra: 150, damage: 180, element: 'water', description: 'Corriente Carmesí: remolino que tritura y arrastra.', effect: 'stun' },
+
+                // 💨
+                { name: 'Fūton: Rasenshuriken', rank: 'S', price: 6000, chakra: 150, damage: 180, element: 'wind', description: 'Rasen-Shuriken: millones de cortes microscópicos.', effect: 'stun' },
+                { name: 'Fūton: Kaze Gokui', rank: 'S', price: 5200, chakra: 140, damage: 170, element: 'wind', description: 'Esencia del Viento: huracán concentrado que no deja respirar.' },
+
+                // 🪨
+                { name: 'Doton: Dai Ganban Kyū', rank: 'S', price: 5200, chakra: 130, damage: 160, element: 'earth', description: 'Gran Ataúd de Roca: aplastamiento total sin escape.' },
+                { name: 'Doton: Jigoku no Saji', rank: 'S', price: 6000, chakra: 150, damage: 180, element: 'earth', description: 'Cuchara del Infierno: columna de roca que pulveriza el área.' },
+
+                // ⚡
+                { name: 'Raiton: Kirin', rank: 'S', price: 6000, chakra: 150, damage: 180, element: 'lightning', description: 'Kirin: rayo natural guiado. Una sentencia desde el cielo.' },
+                { name: 'Raiton: Shiden', rank: 'S', price: 5200, chakra: 130, damage: 160, element: 'lightning', description: 'Relámpago Púrpura: rayo controlado de alto voltaje.' },
+
+                // Neutrales S (ya existentes)
+                { name: 'Edo Tensei', rank: 'S', price: 10000, chakra: 150, damage: 0, element: null, effect: 'revive', description: 'Maestro: Resurrección prohibida' },
+                { name: 'Kamui', rank: 'S', price: 8000, chakra: 100, damage: 80, element: null, effect: 'teleport', description: 'Maestro: Espacio-tiempo' },
+                { name: 'Tsukuyomi', rank: 'S', price: 7000, chakra: 90, damage: 0, element: null, effect: 'mega_genjutsu', description: 'Maestro: Genjutsu supremo' },
+                { name: 'Shinra Tensei', rank: 'S', price: 5000, chakra: 120, damage: 150, element: null, description: 'Rechaza todo' }
             ]
         },
 
@@ -304,28 +427,72 @@ export const BASE_GAME = {
 
         missions: {
             genin: [
-                { name: 'Capturar al Gato Perdido', rank: 'D', description: 'El gato del Daimyo escapó...', enemies: [{ type: 'genin', index: 0, count: 1 }], ryo: 50, exp: 25 },
-                { name: 'Limpiar el Río', rank: 'D', description: 'Bandidos ensucian el río.', enemies: [{ type: 'genin', index: 0, count: 2 }], ryo: 100, exp: 40 },
-                { name: 'Escoltar Comerciante', rank: 'C', description: 'Protege al comerciante. Grupo de bandidos.', enemies: [{ type: 'genin', index: 0, count: 2 }, { type: 'genin', index: 1, count: 1 }], ryo: 250, exp: 60 },
-                { name: 'Recuperar Pergamino', rank: 'C', description: 'Ninja renegado y sus guardias.', enemies: [{ type: 'genin', index: 1, count: 1 }, { type: 'genin', index: 2, count: 1 }], ryo: 350, exp: 70 }
+                { name: '🐾 Huellas en el Barro', rank: 'D', description: 'Un mensajero desapareció cerca del río. Sigue el rastro antes de que anochezca.', enemies: [{ type: 'genin', index: 2, count: 1 }], ryo: 60, exp: 25, turns: 1 },
+                { name: '🐈 El Gato del Daimyō (Otra Vez)', rank: 'D', description: 'El famoso gato volvió a escapar. Encuéntralo sin causar un escándalo.', enemies: [{ type: 'genin', index: 0, count: 1 }], ryo: 50, exp: 25, turns: 1 },
+                { name: '🧹 Limpieza del Canal Este', rank: 'D', description: 'Bandidos ensucian los canales de Konoha. Dale orden al barrio.', enemies: [{ type: 'genin', index: 0, count: 2 }], ryo: 90, exp: 35, turns: 1 },
+                { name: '📦 Paquete Sellado', rank: 'D', description: 'Entrega un paquete con sellos a la puerta norte. No preguntes qué es.', enemies: [{ type: 'genin', index: 0, count: 1 }], ryo: 70, exp: 30, turns: 1 },
+                { name: '🍃 Patrulla de los Campos', rank: 'D', description: 'Reportan sombras en los campos. Mantén la calma y protege a los granjeros.', enemies: [{ type: 'genin', index: 2, count: 2 }], ryo: 120, exp: 40, turns: 2 },
+                { name: '🧭 Señal Perdida', rank: 'D', description: 'Un kunai marcador se perdió en el bosque. Recupéralo antes de que lo usen.', enemies: [{ type: 'genin', index: 1, count: 1 }], ryo: 140, exp: 45, turns: 2 },
+                { name: '🐗 Jabalí Desbocado', rank: 'D', description: 'Un animal salvaje arrasa cultivos. Deténlo sin matar si puedes.', enemies: [{ type: 'genin', index: 2, count: 1 }], ryo: 110, exp: 40, turns: 1 },
+                { name: '🧪 Ingredientes del Hospital', rank: 'D', description: 'Recolecta hierbas raras antes de que se marchiten. El tiempo corre.', enemies: [{ type: 'genin', index: 2, count: 2 }], ryo: 150, exp: 50, turns: 2 },
+                { name: '🗺️ Mapa Mojado', rank: 'C', description: 'Un mapa de rutas secretas cayó en manos equivocadas. Recupéralo.', enemies: [{ type: 'genin', index: 1, count: 2 }], ryo: 250, exp: 60, turns: 2 },
+                { name: '🚶 Escolta de Comerciante', rank: 'C', description: 'Protege la caravana hasta el puesto fronterizo. Habrá emboscada.', enemies: [{ type: 'genin', index: 0, count: 2 }, { type: 'genin', index: 1, count: 1 }], ryo: 300, exp: 70, turns: 2 },
+                { name: '🔥 Fuego en el Almacén', rank: 'C', description: 'Incendio provocado en depósitos. Caza a los culpables antes de que huyan.', enemies: [{ type: 'genin', index: 0, count: 3 }], ryo: 280, exp: 65, turns: 2 },
+                { name: '🕳️ Trampas en el Camino', rank: 'C', description: 'Alguien está minando rutas de suministro. Desactiva trampas y enfrenta al saboteador.', enemies: [{ type: 'genin', index: 1, count: 2 }], ryo: 320, exp: 75, turns: 2 },
+                { name: '📜 Pergamino de Práctica Robado', rank: 'C', description: 'Un pergamino de la Academia fue robado. No debe caer en renegados.', enemies: [{ type: 'genin', index: 1, count: 3 }], ryo: 350, exp: 80, turns: 2 },
+                { name: '🌙 Ronda Nocturna (Genin)', rank: 'C', description: 'Rumores de asaltos durante la noche. Resiste el miedo y protege a la aldea.', enemies: [{ type: 'genin', index: 0, count: 3 }], ryo: 380, exp: 80, turns: 2 },
+                { name: '🦊 Zorro del Bosque', rank: 'C', description: 'Una bestia astuta roba provisiones. Síguela hasta su guarida.', enemies: [{ type: 'genin', index: 2, count: 3 }], ryo: 400, exp: 80, turns: 2 }
             ],
             chunin: [
-                { name: 'Patrulla Fronteriza', rank: 'B', description: 'Escuadrón enemigo detectado.', enemies: [{ type: 'chunin', index: 0, count: 2 }], ryo: 500, exp: 80 },
-                { name: 'Defender Aldea Aliada', rank: 'B', description: 'Múltiples ninjas atacan.', enemies: [{ type: 'chunin', index: 0, count: 1 }, { type: 'chunin', index: 1, count: 2 }], ryo: 700, exp: 120 },
-                { name: 'Infiltración', rank: 'B', description: 'Base enemiga fuertemente custodiada.', enemies: [{ type: 'chunin', index: 1, count: 1 }, { type: 'chunin', index: 3, count: 1 }], ryo: 800, exp: 130 },
-                { name: 'Rescate de Rehén', rank: 'A', description: 'Equipo élite guarda al prisionero.', enemies: [{ type: 'chunin', index: 2, count: 1 }, { type: 'jonin', index: 0, count: 1 }], ryo: 1000, exp: 150 }
+                { name: '🛡️ Defensa del Puente de Piedra', rank: 'B', description: 'Un escuadrón enemigo intenta cortar suministros. Mantén la línea.', enemies: [{ type: 'chunin', index: 0, count: 2 }], ryo: 520, exp: 85, turns: 2 },
+                { name: '🕵️ Infiltración en Depósito de Armas', rank: 'B', description: 'Entra sin ser visto y marca el depósito para un asalto posterior.', enemies: [{ type: 'chunin', index: 1, count: 2 }], ryo: 650, exp: 100, turns: 3 },
+                { name: '🚑 Rescate en Zona Hostil', rank: 'B', description: 'Un equipo aliado quedó atrapado. Extrae a los heridos con vida.', enemies: [{ type: 'chunin', index: 3, count: 2 }], ryo: 700, exp: 110, turns: 3 },
+                { name: '🐺 Bestia de Colmillos Negros', rank: 'B', description: 'Un depredador anormal acecha caravanas. Cázalo antes de que migre.', enemies: [{ type: 'chunin', index: 3, count: 1 }], ryo: 560, exp: 90, turns: 2 },
+                { name: '📡 Interceptar Mensaje Cifrado', rank: 'B', description: 'Un mensaje enemigo viaja por corredores secretos. Rómpelos y captura al mensajero.', enemies: [{ type: 'chunin', index: 2, count: 2 }], ryo: 780, exp: 120, turns: 3 },
+                { name: '🏘️ Aldea Aliada Bajo Asedio', rank: 'B', description: 'Refuerza una aldea vecina. Si caen, la frontera queda abierta.', enemies: [{ type: 'chunin', index: 0, count: 1 }, { type: 'chunin', index: 1, count: 2 }], ryo: 900, exp: 135, turns: 4 },
+                { name: '🧨 Desactivar Trampas de Papel Explosivo', rank: 'B', description: 'Un corredor está minado con sellos explosivos. Avanza con precisión.', enemies: [{ type: 'chunin', index: 1, count: 2 }], ryo: 620, exp: 95, turns: 3 },
+                { name: '⚔️ Cazar al Desertor', rank: 'B', description: 'Un chunin desertor conoce rutas internas. Tráelo de vuelta… o deténlo.', enemies: [{ type: 'chunin', index: 2, count: 2 }], ryo: 880, exp: 140, turns: 4 },
+                { name: '🌫️ Niebla en el Paso del Norte', rank: 'B', description: 'La niebla oculta movimientos enemigos. Descubre la verdad tras el velo.', enemies: [{ type: 'chunin', index: 0, count: 3 }], ryo: 740, exp: 115, turns: 3 },
+                { name: '🔒 Recuperar Sellos de Seguridad', rank: 'B', description: 'Robaron sellos de barrera. Si los usan, Konoha queda expuesta.', enemies: [{ type: 'chunin', index: 1, count: 3 }], ryo: 820, exp: 125, turns: 3 },
+                { name: '🧭 Escolta de Diplomático', rank: 'A', description: 'Un diplomático viaja con información crítica. La emboscada es segura.', enemies: [{ type: 'jonin', index: 0, count: 1 }], ryo: 1100, exp: 150, turns: 4 },
+                { name: '🏚️ Limpieza de Refugio Renegado', rank: 'A', description: 'Un refugio clandestino oculta un pequeño ejército. Borra la amenaza.', enemies: [{ type: 'chunin', index: 0, count: 4 }], ryo: 1000, exp: 145, turns: 4 },
+                { name: '🩸 Secuestro en la Ruta del Té', rank: 'A', description: 'Bandidos con apoyo ninja secuestraron a un heredero. Rescátalo sin ruido.', enemies: [{ type: 'chunin', index: 1, count: 2 }, { type: 'chunin', index: 3, count: 1 }], ryo: 1150, exp: 150, turns: 4 },
+                { name: '🔥 Incursión Relámpago', rank: 'A', description: 'Golpea un puesto enemigo y retírate antes de que lleguen refuerzos.', enemies: [{ type: 'chunin', index: 2, count: 3 }], ryo: 980, exp: 140, turns: 3 },
+                { name: '🕯️ El Testigo Silencioso', rank: 'A', description: 'Un testigo clave está marcado. Protégele hasta el amanecer.', enemies: [{ type: 'jonin', index: 2, count: 1 }], ryo: 1200, exp: 150, turns: 4 }
             ],
             jonin: [
-                { name: 'Escuadrón de Élite', rank: 'A', description: 'Grupo de Jonin renegados.', enemies: [{ type: 'jonin', index: 0, count: 2 }], ryo: 1500, exp: 180 },
-                { name: 'Proteger al Daimyo', rank: 'A', description: 'Oleada de asesinos de élite.', enemies: [{ type: 'jonin', index: 1, count: 1 }, { type: 'jonin', index: 2, count: 1 }], ryo: 1800, exp: 210 },
-                { name: 'Enfrentar Akatsuki', rank: 'A', description: 'Miembro de Akatsuki con refuerzos.', enemies: [{ type: 'akatsuki', index: 0, count: 1 }, { type: 'jonin', index: 0, count: 1 }], ryo: 2000, exp: 250 },
-                { name: 'Destruir Base de Orochimaru', rank: 'S', description: 'Orochimaru y sus guardianes.', enemies: [{ type: 'akatsuki', index: 4, count: 1 }, { type: 'jonin', index: 2, count: 2 }], ryo: 2500, exp: 300 }
+                { name: '🎯 Objetivo de Alto Valor', rank: 'A', description: 'Un estratega enemigo coordina ataques. Elimina la pieza clave.', enemies: [{ type: 'jonin', index: 0, count: 2 }], ryo: 1700, exp: 170, turns: 3 },
+                { name: '🗡️ Caza ANBU Renegado', rank: 'A', description: 'Un ANBU desertor dejó la aldea con secretos. No puede escapar.', enemies: [{ type: 'jonin', index: 2, count: 2 }], ryo: 2000, exp: 210, turns: 4 },
+                { name: '🏯 Protección de Archivo Vivo', rank: 'A', description: 'Un anciano archivista conoce nombres prohibidos. Protege su memoria.', enemies: [{ type: 'jonin', index: 0, count: 1 }, { type: 'chunin', index: 2, count: 2 }], ryo: 1850, exp: 190, turns: 4 },
+                { name: '🌪️ Guerra de Frontera (Escaramuza)', rank: 'A', description: 'Una escaramuza estalla en la frontera. Contén el conflicto antes de que crezca.', enemies: [{ type: 'jonin', index: 1, count: 2 }], ryo: 2300, exp: 240, turns: 5 },
+                { name: '🧿 Romper el Genjutsu Masivo', rank: 'A', description: 'Un pueblo entero cayó en ilusión. Encuentra al conductor y corta el hilo.', enemies: [{ type: 'jonin', index: 2, count: 2 }], ryo: 2100, exp: 230, turns: 4 },
+                { name: '🚨 Asalto al Laboratorio Secreto', rank: 'S', description: 'Experimentos prohibidos. Destruye el laboratorio y recupera evidencia.', enemies: [{ type: 'akatsuki', index: 4, count: 1 }, { type: 'jonin', index: 2, count: 2 }], ryo: 2800, exp: 300, turns: 5 },
+                { name: '🌑 Eliminación Nocturna', rank: 'A', description: 'Un asesino jonin opera solo de noche. Cázalo en su terreno.', enemies: [{ type: 'jonin', index: 0, count: 3 }], ryo: 2400, exp: 260, turns: 5 },
+                { name: '📜 Pergamino de Sangre', rank: 'A', description: 'Un pergamino maldito circula. Recupera el sello y quémalo en altar.', enemies: [{ type: 'jonin', index: 1, count: 2 }], ryo: 1950, exp: 200, turns: 4 },
+                { name: '🧭 Escolta del Jinchūriki Menor', rank: 'S', description: 'Movimiento delicado. Protege a un portador inestable durante el traslado.', enemies: [{ type: 'jonin', index: 1, count: 3 }], ryo: 3000, exp: 300, turns: 5 },
+                { name: '🧨 Desmantelar Red de Explosivos', rank: 'A', description: 'Un corredor está listo para volar. Cortar la red salvará cientos.', enemies: [{ type: 'jonin', index: 0, count: 2 }], ryo: 1750, exp: 180, turns: 3 },
+                { name: '☁️ Asalto al Escuadrón de Nube', rank: 'S', description: 'Un escuadrón élite cruza territorio. Rompe su avance antes del amanecer.', enemies: [{ type: 'jonin', index: 0, count: 4 }], ryo: 2900, exp: 290, turns: 5 },
+                { name: '🕳️ Caverna del Eco', rank: 'A', description: 'Desaparecen patrullas en una caverna. La oscuridad es una trampa viva.', enemies: [{ type: 'jonin', index: 2, count: 3 }], ryo: 2200, exp: 240, turns: 4 },
+                { name: '📦 Intercepción de Contrabando de Jutsu', rank: 'A', description: 'Contrabando de pergaminos avanzados. Captura el lote y al líder.', enemies: [{ type: 'jonin', index: 0, count: 1 }, { type: 'chunin', index: 1, count: 3 }], ryo: 2500, exp: 260, turns: 4 },
+                { name: '🩸 Venganza de los Renegados', rank: 'S', description: 'Un clan renegado juró venganza. Detén la masacre antes de que empiece.', enemies: [{ type: 'akatsuki', index: 2, count: 1 }], ryo: 2700, exp: 280, turns: 4 },
+                { name: '🏹 Protege al Daimyō (Alto Riesgo)', rank: 'A', description: 'Asesinos de élite atacan el convoy. No hay segundas oportunidades.', enemies: [{ type: 'jonin', index: 2, count: 2 }, { type: 'jonin', index: 0, count: 1 }], ryo: 2600, exp: 270, turns: 5 }
             ],
             kage: [
-                { name: 'Detener a Akatsuki', rank: 'S', description: 'Dos miembros de Akatsuki juntos!', enemies: [{ type: 'akatsuki', index: 1, count: 1 }, { type: 'akatsuki', index: 3, count: 1 }], ryo: 4000, exp: 400 },
-                { name: 'Invasión de Pain', rank: 'S', description: 'Pain y varios cuerpos!', enemies: [{ type: 'boss', index: 0, count: 1 }, { type: 'akatsuki', index: 0, count: 2 }], ryo: 6000, exp: 500 },
-                { name: 'Enfrentar a Madara', rank: 'S', description: 'Madara Uchiha. Batalla suprema.', enemies: [{ type: 'boss', index: 1, count: 1 }], ryo: 8000, exp: 600 },
-                { name: 'Guerra Ninja Final', rank: 'S', description: 'Kaguya Ōtsutsuki. El fin de todo.', enemies: [{ type: 'boss', index: 2, count: 1 }], ryo: 15000, exp: 1000 }
+                { name: '☠️ Célula Akatsuki: “El Ritual”', rank: 'S', description: 'Un miembro de Akatsuki prepara un ritual. Interrúmpelo o la aldea sangrará.', enemies: [{ type: 'akatsuki', index: 0, count: 1 }], ryo: 5000, exp: 500, turns: 5 },
+                { name: '🕸️ Cosechador de Corazones', rank: 'S', description: 'Un enemigo inmortal acumula corazones. Corta su red y sobrevívelo.', enemies: [{ type: 'akatsuki', index: 1, count: 1 }], ryo: 6500, exp: 650, turns: 6 },
+                { name: '🦂 Marionetas Carmesí', rank: 'S', description: 'Una ciudad cae ante veneno y marionetas. Encuentra al titiritero.', enemies: [{ type: 'akatsuki', index: 2, count: 1 }], ryo: 7000, exp: 700, turns: 6 },
+                { name: '💥 Arte Explosivo en la Frontera', rank: 'S', description: 'Explosiones selladas destruyen puestos aliados. Caza al artista.', enemies: [{ type: 'akatsuki', index: 3, count: 1 }], ryo: 8000, exp: 800, turns: 6 },
+                { name: '🐍 Sombras del Laboratorio', rank: 'S', description: 'Experimentos prohibidos despiertan. Cierra el laboratorio y destruye registros.', enemies: [{ type: 'akatsuki', index: 4, count: 1 }], ryo: 9000, exp: 900, turns: 7 },
+                { name: '🏯 Invasión de Pain (Primer Asalto)', rank: 'S', description: 'El cielo se parte. Detén el primer cuerpo antes de que la aldea colapse.', enemies: [{ type: 'boss', index: 0, count: 1 }], ryo: 12000, exp: 1100, turns: 8 },
+                { name: '🌑 Operación “Silencio ANBU”', rank: 'S', description: 'Un traidor filtra secretos. Infiltra su red y bórrala sin testigos.', enemies: [{ type: 'jonin', index: 2, count: 4 }], ryo: 6000, exp: 600, turns: 6 },
+                { name: '🌩️ Tormenta sobre la Cumbre', rank: 'S', description: 'Reunión de kages bajo ataque. Evita una guerra total.', enemies: [{ type: 'akatsuki', index: 3, count: 1 }, { type: 'jonin', index: 0, count: 2 }], ryo: 10000, exp: 950, turns: 7 },
+                { name: '🔥 Sellos del Kyūbi (Barrera Fracturada)', rank: 'S', description: 'La barrera se debilita. Repara los sellos mientras te cazan.', enemies: [{ type: 'akatsuki', index: 0, count: 2 }], ryo: 11000, exp: 1000, turns: 7 },
+                { name: '🩸 Guerra Relámpago en Dos Frentes', rank: 'S', description: 'Dos aldeas atacan al mismo tiempo. Decide rápido o perderás todo.', enemies: [{ type: 'jonin', index: 0, count: 5 }], ryo: 9000, exp: 900, turns: 6 },
+                { name: '🪐 El Ojo del Uchiha Legendario', rank: 'S', description: 'Una presencia aplasta la voluntad. Sobrevive y detén al titán.', enemies: [{ type: 'boss', index: 1, count: 1 }], ryo: 15000, exp: 1300, turns: 8 },
+                { name: '🌕 Noche de Luna Roja', rank: 'S', description: 'Una técnica prohibida se activa con la luna. Rompe el ritual antes del amanecer.', enemies: [{ type: 'akatsuki', index: 1, count: 1 }, { type: 'akatsuki', index: 0, count: 1 }], ryo: 14000, exp: 1200, turns: 7 },
+                { name: '🧊 País de la Nieve: Eclipse Blanco', rank: 'S', description: 'El frío es una prisión. Recupera un artefacto sellado en tormenta.', enemies: [{ type: 'jonin', index: 1, count: 4 }], ryo: 8000, exp: 850, turns: 6 },
+                { name: '🗿 Valle del Fin: Ruptura de Paz', rank: 'S', description: 'Un choque histórico amenaza repetirse. Evita que el valle sea tumba otra vez.', enemies: [{ type: 'akatsuki', index: 2, count: 1 }], ryo: 9500, exp: 900, turns: 6 },
+                { name: '🌌 Guerra Ninja Final (Umbral)', rank: 'S', description: 'La realidad se abre. Lucha contra lo imposible y protege el mundo.', enemies: [{ type: 'boss', index: 2, count: 1 }], ryo: 20000, exp: 1500, turns: 8 }
             ]
         },
 };
