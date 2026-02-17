@@ -13,6 +13,47 @@ rollDice(sides = 20) {
             document.getElementById(screenId).classList.add('active');
         },
 
+        showNameScreen() {
+            // Nueva partida: pedir nombre antes del clan
+            this.pendingName = '';
+            this.showScreen('name-screen');
+            setTimeout(() => {
+                const input = document.getElementById('player-name-input');
+                if (input) {
+                    input.value = '';
+                    input.focus();
+                }
+                const err = document.getElementById('name-error');
+                if (err) {
+                    err.style.display = 'none';
+                    err.textContent = '';
+                }
+            }, 50);
+        },
+
+        validateAndSaveName() {
+            const input = document.getElementById('player-name-input');
+            const err = document.getElementById('name-error');
+            const raw = (input?.value || '').trim();
+
+            const valid = raw.length > 0 && raw.length <= 20 && /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(raw);
+            if (!valid) {
+                if (err) {
+                    err.style.display = 'block';
+                    err.textContent = 'Nombre inválido. Usa solo letras y espacios (máx 20), sin dejarlo vacío.';
+                }
+                return;
+            }
+
+            this.pendingName = raw.replace(/\s+/g, ' ');
+            this.showClanSelect();
+        },
+
+        getPlayerDisplayName() {
+            if (!this.player) return 'Ninja';
+            return this.player.name ? this.player.name : `${this.player.clan} Ninja`;
+        },
+
         showClanSelect() {
             const container = document.getElementById('clan-select');
             container.innerHTML = '';
@@ -44,6 +85,7 @@ rollDice(sides = 20) {
         selectClan(clanKey) {
             const clan = this.clans[clanKey];
             this.player = {
+                name: (this.pendingName || '').trim(),
                 clan: clan.name,
                 clanKey: clanKey,
                 maxHp: clan.hp,
@@ -95,49 +137,123 @@ rollDice(sides = 20) {
                 },
 
                 // Misiones con tiempo
-                urgentMission: null
+                urgentMission: null,
+
+                // NPCs / relaciones
+                npcRelations: {}, // npcId -> -100..100
+                npcRivals: {}, // npcId -> true
+                npcDailyBattleStamp: {}, // npcId -> 'YYYY-M-D'
+
+                // Progreso para requisitos (exámenes)
+                missionsCompletedTotal: 0,
+                missionsCompletedByRank: { D: 0, C: 0, B: 0, A: 0, S: 0, U: 0, F: 0 },
+                missionsCompletedBPlus: 0,
+                missionsCompletedSWhileChunin: 0,
+
+                // Exámenes
+                examState: null,
+                examCooldowns: { chunin: 0, jonin: 0 },
+                lastExamNoticeAbsDay: -1
             };
-            
-            this.doKekkeiGenkaiRoll();
+
+            const outcome = this.rollKekkeiGenkai(clanKey);
+            if (outcome.mode === 'skip') {
+                this.finishCharacterCreation();
+                return;
+            }
+
+            this.doKekkeiGenkaiRoll(outcome);
         },
 
-        doKekkeiGenkaiRoll() {
-            this.showScreen('kekkei-screen');
-            
-            setTimeout(() => {
+        findKekkeiByName(name) {
+            return (this.kekkeiGenkaiList || []).find(k => k.name === name) || null;
+        },
+
+        rollKekkeiGenkai(clanKey) {
+            const rule = this.clanKekkeiRules ? this.clanKekkeiRules[clanKey] : null;
+
+            // Si no hay regla: por defecto NO tiene posibilidad y se salta la pantalla.
+            if (!rule || rule.type === 'none') {
+                return { mode: 'skip', kind: 'none' };
+            }
+
+            if (rule.type === 'guaranteed') {
+                const kg = this.findKekkeiByName(rule.kekkei);
+                return { mode: 'screen', kind: 'guaranteed', kg };
+            }
+
+            if (rule.type === 'chance') {
+                const chance = Number(rule.chance ?? 0);
                 const roll = Math.random() * 100;
-                let wonKekkei = null;
-                
-                for (let kg of this.kekkeiGenkaiList) {
-                    if (roll <= kg.chance) {
-                        wonKekkei = kg;
-                        break;
-                    }
+                if (roll <= chance) {
+                    const kg = this.findKekkeiByName(rule.kekkei);
+                    return { mode: 'screen', kind: 'rolled_win', kg, chance };
                 }
-                
-                const resultDiv = document.getElementById('kekkei-result');
-                
-                if (wonKekkei) {
-                    this.player.kekkeiGenkai = wonKekkei;
+                return { mode: 'screen', kind: 'rolled_lose', kg: null, chance };
+            }
+
+            return { mode: 'skip', kind: 'none' };
+        },
+
+        doKekkeiGenkaiRoll(outcome) {
+            this.showScreen('kekkei-screen');
+
+            const resultDiv = document.getElementById('kekkei-result');
+            if (resultDiv) {
+                resultDiv.style.background = 'linear-gradient(135deg, #ffd700 0%, #ff8c00 100%)';
+                resultDiv.innerHTML = `<h2>🌟 Preparando el destino de tu linaje... 🌟</h2>`;
+            }
+
+            setTimeout(() => {
+                const out = outcome || { kind: 'rolled_lose' };
+                const kg = out.kg || null;
+                const chanceText = (typeof out.chance === 'number') ? `${out.chance}%` : '';
+
+                if (out.kind === 'guaranteed' && kg) {
+                    this.player.kekkeiGenkai = kg;
                     this.player.kekkeiLevel = 1;
                     this.player.kekkeiExp = 0;
                     this.applyKekkeiGenkaiBonuses();
-                    
-                    resultDiv.innerHTML = `
-                        <h2>🌟 ¡KEKKEI GENKAI DESBLOQUEADO! 🌟</h2>
-                        <h1 style="font-size: 2.5em; margin: 20px 0;">${wonKekkei.name}</h1>
-                        <p style="font-size: 1.2em;">${wonKekkei.levels[0].name}</p>
-                        <p style="margin-top: 15px; color: #000;">¡Eres uno de los POCOS elegidos! (${kg.chance}% de probabilidad)</p>
-                    `;
-                } else {
+
+                    if (resultDiv) {
+                        resultDiv.innerHTML = `
+                            <h2>🌟 ¡KEKKEI GENKAI ANCESTRAL! 🌟</h2>
+                            <h1 style="font-size: 2.5em; margin: 20px 0;">${kg.name}</h1>
+                            <p style="font-size: 1.2em;">${kg.levels?.[0]?.name || ''}</p>
+                            <p style="margin-top: 15px; color: #000;">¡Tu clan posee este poder ancestral!</p>
+                        `;
+                    }
+                    return;
+                }
+
+                if (out.kind === 'rolled_win' && kg) {
+                    this.player.kekkeiGenkai = kg;
+                    this.player.kekkeiLevel = 1;
+                    this.player.kekkeiExp = 0;
+                    this.applyKekkeiGenkaiBonuses();
+
+                    if (resultDiv) {
+                        resultDiv.innerHTML = `
+                            <h2>🌟 ¡KEKKEI GENKAI DESBLOQUEADO! 🌟</h2>
+                            <h1 style="font-size: 2.5em; margin: 20px 0;">${kg.name}</h1>
+                            <p style="font-size: 1.2em;">${kg.levels?.[0]?.name || ''}</p>
+                            <p style="margin-top: 15px; color: #000;">¡Fuiste bendecido! ${chanceText ? `(${chanceText})` : ''}</p>
+                        `;
+                    }
+                    return;
+                }
+
+                // Lose
+                if (resultDiv) {
                     resultDiv.innerHTML = `
                         <h2>Sorteo de Kekkei Genkai</h2>
-                        <p style="font-size: 1.2em; margin: 20px 0;">No fuiste bendecido con un Kekkei Genkai...</p>
+                        <p style="font-size: 1.2em; margin: 20px 0;">No obtuviste Kekkei Genkai.</p>
                         <p>Los Kekkei Genkai son extremadamente raros. Tu determinación te hará fuerte.</p>
+                        ${chanceText ? `<p style="margin-top: 12px; color: rgba(0,0,0,0.75)">Probabilidad: ${chanceText}</p>` : ''}
                     `;
                     resultDiv.style.background = 'linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%)';
                 }
-            }, 1000);
+            }, 900);
         },
 
         applyKekkeiGenkaiBonuses() {
@@ -175,7 +291,7 @@ rollDice(sides = 20) {
         },
 
         updateVillageUI() {
-            document.getElementById('player-name-village').textContent = `${this.player.clan} Ninja`;
+            document.getElementById('player-name-village').textContent = `${this.getPlayerDisplayName()}`;
             document.getElementById('player-rank').textContent = this.player.rank;
             document.getElementById('player-level-village').textContent = this.player.level;
             document.getElementById('player-ryo').textContent = this.player.ryo;
@@ -227,6 +343,7 @@ rollDice(sides = 20) {
 
             this.ensureWorldHUD();
             this.updateWorldHUD();
+            this.showExamCountdown();
         },
 
         updateBar(elementId, current, max, label) {
@@ -243,6 +360,7 @@ rollDice(sides = 20) {
             if (!this.player) return;
 
             const defaults = {
+                name: '',
                 location: 'konoha',
                 day: 1,
                 month: 1,
@@ -268,6 +386,21 @@ rollDice(sides = 20) {
                 },
                 urgentMission: null
                 ,
+
+                // NPCs / relaciones
+                npcRelations: {}, // npcId -> -100..100
+                npcRivals: {}, // npcId -> true
+                npcDailyBattleStamp: {}, // npcId -> 'YYYY-M-D'
+
+                // Progreso para requisitos (exámenes)
+                missionsCompletedTotal: 0,
+                missionsCompletedByRank: { D: 0, C: 0, B: 0, A: 0, S: 0, U: 0, F: 0 },
+                missionsCompletedBPlus: 0,
+
+                // Exámenes
+                examState: null, // { active, type, phase, data }
+                examCooldowns: { chunin: 0, jonin: 0 }, // absolute day until can retry
+                lastExamNoticeAbsDay: -1,
 
                 // Renegado / deserción
                 isRenegade: false,
@@ -324,6 +457,22 @@ rollDice(sides = 20) {
             this.player.anbuEliminated = Math.max(0, this.player.anbuEliminated || 0);
             this.player.criminalMissions = Math.max(0, this.player.criminalMissions || 0);
             this.player.renegadesCaptured = Math.max(0, this.player.renegadesCaptured || 0);
+
+            if (typeof this.player.npcRelations !== 'object' || !this.player.npcRelations) this.player.npcRelations = {};
+            if (typeof this.player.npcRivals !== 'object' || !this.player.npcRivals) this.player.npcRivals = {};
+            if (typeof this.player.npcDailyBattleStamp !== 'object' || !this.player.npcDailyBattleStamp) this.player.npcDailyBattleStamp = {};
+
+            this.player.missionsCompletedTotal = Math.max(0, this.player.missionsCompletedTotal || 0);
+            this.player.missionsCompletedBPlus = Math.max(0, this.player.missionsCompletedBPlus || 0);
+            this.player.missionsCompletedSWhileChunin = Math.max(0, this.player.missionsCompletedSWhileChunin || 0);
+            if (typeof this.player.missionsCompletedByRank !== 'object' || !this.player.missionsCompletedByRank) {
+                this.player.missionsCompletedByRank = { D: 0, C: 0, B: 0, A: 0, S: 0, U: 0, F: 0 };
+            }
+
+            if (typeof this.player.examCooldowns !== 'object' || !this.player.examCooldowns) this.player.examCooldowns = { chunin: 0, jonin: 0 };
+            this.player.examCooldowns.chunin = Math.max(0, this.player.examCooldowns.chunin || 0);
+            this.player.examCooldowns.jonin = Math.max(0, this.player.examCooldowns.jonin || 0);
+            this.player.lastExamNoticeAbsDay = Number.isFinite(this.player.lastExamNoticeAbsDay) ? this.player.lastExamNoticeAbsDay : -1;
 
             if (!Array.isArray(this.player.blackMarketInventory)) this.player.blackMarketInventory = [];
             if (!Array.isArray(this.player.kinjutsuLearned)) this.player.kinjutsuLearned = [];
@@ -497,6 +646,7 @@ rollDice(sides = 20) {
                     this.applyDailyUpkeep();
                     this.checkRandomDailyEvents();
                     this.renegadeDailyTick();
+                    this.checkExamDay();
                 }
             }
 
@@ -1515,6 +1665,782 @@ rollDice(sides = 20) {
             return events.slice(0, 4);
         },
 
+        // -----------------------------
+        // Exámenes (Chunin / Jonin)
+        // -----------------------------
+        getAbsoluteDay(p = this.player) {
+            // 30 días por mes, 12 meses por año
+            return (p.year * this.monthsPerYear * this.daysPerMonth)
+                + ((p.month - 1) * this.daysPerMonth)
+                + (p.day - 1);
+        },
+
+        getAbsoluteDayForDate(year, month, day) {
+            return (year * this.monthsPerYear * this.daysPerMonth)
+                + ((month - 1) * this.daysPerMonth)
+                + (day - 1);
+        },
+
+        getNextExamAbsoluteDay(currentAbs) {
+            const y = this.player.year;
+            const a = this.getAbsoluteDayForDate(y, 1, 1);
+            const b = this.getAbsoluteDayForDate(y, 7, 1);
+            if (currentAbs <= a) return a;
+            if (currentAbs <= b) return b;
+            // próximo año
+            return this.getAbsoluteDayForDate(y + 1, 1, 1);
+        },
+
+        getExamTypeForRank(rank) {
+            if (rank === 'Genin') return 'chunin';
+            if (rank === 'Chunin') return 'jonin';
+            return null;
+        },
+
+        isExamDay() {
+            return this.player.location === 'konoha' && this.player.day === 1 && (this.player.month === 1 || this.player.month === 7);
+        },
+
+        getExamTitle(type) {
+            return type === 'jonin' ? 'Examen Jonin' : 'Examen Chunin';
+        },
+
+        showExamCountdown() {
+            const el = document.getElementById('exam-widget');
+            if (!el || !this.player) return;
+
+            const type = this.getExamTypeForRank(this.player.rank);
+            if (!type) {
+                el.innerHTML = '<div style="opacity:0.8;">📅 PRÓXIMO EXAMEN: <b>—</b> (ya eres Jonin o superior)</div>';
+                return;
+            }
+
+            const nowAbs = this.getAbsoluteDay();
+            const nextAbs = this.getNextExamAbsoluteDay(nowAbs);
+            const daysLeft = Math.max(0, nextAbs - nowAbs);
+
+            const cooldownUntil = this.player.examCooldowns?.[type] || 0;
+            const cooldownLeft = Math.max(0, cooldownUntil - nowAbs);
+
+            const title = this.getExamTitle(type);
+            const today = this.isExamDay();
+            const canAttemptToday = today && cooldownLeft === 0;
+
+            const timeText = cooldownLeft > 0
+                ? `Próximo intento en ${cooldownLeft} día(s)`
+                : (daysLeft === 0 ? 'HOY' : `En ${daysLeft} día(s)`);
+
+            el.innerHTML = `
+                <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                    <div>
+                        <div style="color: var(--gold); font-weight:bold;">📅 PRÓXIMO EXAMEN</div>
+                        <div style="margin-top:4px;"><b>${title}</b></div>
+                        <div style="margin-top:4px; opacity:0.9;">⏰ ${timeText}</div>
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+                        <button class="btn btn-small btn-secondary" onclick="game.showExamRequirements()">Ver Requisitos</button>
+                        <button class="btn btn-small" ${canAttemptToday ? '' : 'disabled'} onclick="game.enrollInExam()">Inscribirse</button>
+                    </div>
+                </div>
+            `;
+        },
+
+        showExamRequirements() {
+            if (!this.player) return;
+            const type = this.getExamTypeForRank(this.player.rank);
+            if (!type) {
+                alert('No tienes exámenes pendientes.');
+                return;
+            }
+
+            if (type === 'chunin') {
+                alert(
+                    '📜 Requisitos Examen Chunin\n\n' +
+                    '- Rango: Genin\n' +
+                    '- 2 misiones rango A completadas\n' +
+                    '- 2 misiones rango B completadas\n' +
+                    '- 2000 Ryo (inscripción)\n' +
+                    '- No haber fallado en los últimos 180 días\n'
+                );
+            } else {
+                alert(
+                    '📜 Requisitos Examen Jonin\n\n' +
+                    '- Rango: Chunin\n' +
+                    '- 5 misiones rango S completadas (siendo Chunin)\n' +
+                    '- 8000 Ryo (inscripción)\n' +
+                    '- No haber fallado en los últimos 180 días\n'
+                );
+            }
+        },
+
+        checkExamDay() {
+            if (!this.player) return;
+            const type = this.getExamTypeForRank(this.player.rank);
+            if (!type) return;
+
+            const nowAbs = this.getAbsoluteDay();
+            const nextAbs = this.getNextExamAbsoluteDay(nowAbs);
+            const daysLeft = Math.max(0, nextAbs - nowAbs);
+
+            // Notificaciones: 30/14/7/3/1 y HOY
+            const notifyDays = new Set([30, 14, 7, 3, 1, 0]);
+            if (notifyDays.has(daysLeft) && this.player.lastExamNoticeAbsDay !== nowAbs) {
+                this.player.lastExamNoticeAbsDay = nowAbs;
+                const title = this.getExamTitle(type);
+                if (daysLeft === 0) alert(`🎯 ¡HOY es el ${title}! Ve a la Aldea y presiona “Inscribirse”.`);
+                else alert(`📅 ${title}: faltan ${daysLeft} día(s).`);
+                this.saveGame();
+            }
+        },
+
+        enrollInExam() {
+            if (!this.player) return;
+            const type = this.getExamTypeForRank(this.player.rank);
+            if (!type) {
+                alert('No tienes exámenes pendientes.');
+                return;
+            }
+            if (!this.isExamDay()) {
+                alert('Hoy no es día de examen.');
+                return;
+            }
+
+            const nowAbs = this.getAbsoluteDay();
+            const cooldownUntil = this.player.examCooldowns?.[type] || 0;
+            if (cooldownUntil > nowAbs) {
+                alert(`Aún no puedes intentarlo. Próximo intento en ${cooldownUntil - nowAbs} día(s).`);
+                return;
+            }
+
+            const ok = this.checkExamRequirements(type, true);
+            if (!ok) return;
+
+            this.player.examState = { active: true, type, phase: 'intro', data: {} };
+            this.saveGame();
+            if (type === 'chunin') this.startChuninExam();
+            else this.startJoninExam();
+        },
+
+        checkExamRequirements(type, chargeFee = false) {
+            const byRank = this.player.missionsCompletedByRank || { D: 0, C: 0, B: 0, A: 0, S: 0 };
+
+            if (type === 'chunin') {
+                if (this.player.rank !== 'Genin') return alert('Solo Genin puede intentar el examen Chunin.'), false;
+                if ((byRank.A || 0) < 2) return alert('Requiere 2 misiones rango A completadas.'), false;
+                if ((byRank.B || 0) < 2) return alert('Requiere 2 misiones rango B completadas.'), false;
+                if (this.player.ryo < 2000) return alert('Requiere 2000 Ryo para inscribirse.'), false;
+                if (chargeFee) this.player.ryo -= 2000;
+                return true;
+            }
+
+            if (this.player.rank !== 'Chunin') return alert('Solo Chunin puede intentar el examen Jonin.'), false;
+            if ((this.player.missionsCompletedSWhileChunin || 0) < 5) return alert('Requiere 5 misiones rango S completadas.'), false;
+            if (this.player.ryo < 8000) return alert('Requiere 8000 Ryo para inscribirse.'), false;
+            if (chargeFee) this.player.ryo -= 8000;
+            return true;
+        },
+
+        renderExamScreen(html) {
+            this.showScreen('exam-screen');
+            const el = document.getElementById('exam-content');
+            if (el) el.innerHTML = html;
+        },
+
+        abandonExam() {
+            if (!this.player?.examState?.active) {
+                this.showScreen('village-screen');
+                this.updateVillageUI();
+                return;
+            }
+            const ok = confirm('¿Abandonar el examen? Perderás el intento (cooldown 180 días).');
+            if (!ok) return;
+            this.examFail('abandon');
+        },
+
+        startChuninExam() {
+            if (!this.player?.examState) this.player.examState = { active: true, type: 'chunin', phase: 'intro', data: {} };
+            this.player.examState.active = true;
+            this.player.examState.type = 'chunin';
+            if (!this.player.examState.phase) this.player.examState.phase = 'intro';
+            this.renderExamFromState();
+        },
+
+        startJoninExam() {
+            if (!this.player?.examState) this.player.examState = { active: true, type: 'jonin', phase: 'intro', data: {} };
+            this.player.examState.active = true;
+            this.player.examState.type = 'jonin';
+            if (!this.player.examState.phase) this.player.examState.phase = 'intro';
+            this.renderExamFromState();
+        },
+
+        renderExamFromState() {
+            const st = this.player?.examState;
+            if (!st?.active) return;
+
+            if (st.type === 'chunin') {
+                this.renderChuninExam();
+            } else {
+                this.renderJoninExam();
+            }
+        },
+
+        getExamQuestionBank() {
+            if (this.examQuestionBank) return this.examQuestionBank;
+            this.examQuestionBank = [
+                { q: 'Un equipo enemigo está en terreno alto y tú en terreno bajo. ¿Qué haces?', options: ['Atacar directamente', 'Retirarte y buscar ventaja', 'Usar Genjutsu', 'Rendirte'], correct: 1 },
+                { q: 'Tu compañero está herido en misión. ¿Prioridad?', options: ['Completar la misión', 'Evacuar al compañero', 'Ambos por igual', 'Pedir refuerzos'], correct: 3 },
+                { q: 'El enemigo usa clones para confundir. ¿Respuesta más segura?', options: ['Gastar todo el chakra', 'Buscar patrones y mantener distancia', 'Cerrar los ojos', 'Correr en línea recta'], correct: 1 },
+                { q: 'Tu chakra se agota. ¿Qué decisión es mejor?', options: ['Seguir atacando', 'Defender y recuperar control', 'Ignorar dolor', 'Provocar al enemigo'], correct: 1 },
+                { q: 'Una emboscada en un puente estrecho. ¿Qué haces primero?', options: ['Cargar', 'Explorar rutas alternas', 'Gritar', 'Separarte del equipo'], correct: 1 },
+                { q: '¿Qué es más importante para un líder de escuadrón?', options: ['Ganar siempre', 'Comunicación y coordinación', 'Ser el más fuerte', 'Nunca retirarse'], correct: 1 },
+                { q: 'El enemigo usa un elemento superior al tuyo. ¿Qué conviene?', options: ['Forzar choque frontal', 'Cambiar táctica y explotar debilidades', 'Gastar tus items ya', 'Aceptar derrota'], correct: 1 },
+                { q: 'Te piden elegir entre dos objetivos. ¿Cuál regla general aplica?', options: ['Elegir el más fácil', 'Elegir el de mayor impacto', 'Elegir al azar', 'Elegir el más popular'], correct: 1 },
+                { q: 'En combate largo, ¿qué recurso es clave administrar?', options: ['Ryo', 'Chakra', 'Peinados', 'Rumores'], correct: 1 },
+                { q: '¿Cuál es la mejor manera de evitar una trampa simple?', options: ['Ignorar señales', 'Observar y avanzar con cautela', 'Correr', 'Saltar sin mirar'], correct: 1 },
+                // Pregunta trampa
+                { q: 'Pregunta trampa: un examinador te mira fijo. ¿Qué haces?', options: ['Presiono y sigo', 'Me paralizo', 'Abandono el examen', 'Insulto al examinador'], trapPass: 2 }
+            ];
+            return this.examQuestionBank;
+        },
+
+        renderChuninExam() {
+            const st = this.player.examState;
+            const phase = st.phase;
+
+            if (phase === 'intro') {
+                this.renderExamScreen(`
+                    <div class="story-text">
+                        <p>Has llegado al Centro de Misiones. Los examinadores te reciben en silencio.</p>
+                        <p style="margin-top:10px;">El Examen Chunin consta de 3 fases: escrito, Bosque de la Muerte y torneo final.</p>
+                    </div>
+                    <div style="text-align:center; margin-top: 14px;">
+                        <button class="btn" onclick="game.examWrittenTestStart()">Iniciar Fase 1 (Escrito)</button>
+                    </div>
+                `);
+                return;
+            }
+
+            if (phase === 'written') {
+                this.renderExamWrittenQuestion();
+                return;
+            }
+
+            if (phase === 'forest_intro') {
+                this.renderExamScreen(`
+                    <div class="story-text">
+                        <p><b>FASE 2: Bosque de la Muerte</b></p>
+                        <p>3 combates seguidos. Tu HP y Chakra no se recuperan entre combates.</p>
+                        <p style="margin-top:8px;">Después de cada combate podrás usar 1 item del inventario.</p>
+                    </div>
+                    <div style="text-align:center; margin-top: 14px;">
+                        <button class="btn" onclick="game.examForestStartFight()">Iniciar Combate 1</button>
+                    </div>
+                `);
+                return;
+            }
+
+            if (phase === 'forest_between') {
+                const idx = st.data?.forestIndex ?? 0;
+                this.renderExamScreen(`
+                    <div class="story-text">
+                        <p><b>Intermedio</b> — Puedes usar 1 item antes del siguiente combate.</p>
+                    </div>
+                    <div style="margin-top:12px;">
+                        <button class="btn btn-small" onclick="game.examUseItemPrompt()">Usar item</button>
+                        <button class="btn" style="margin-left:8px;" onclick="game.examForestStartFight()">Continuar (Combate ${idx + 1})</button>
+                    </div>
+                `);
+                return;
+            }
+
+            if (phase === 'tournament_intro') {
+                this.renderExamScreen(`
+                    <div class="story-text">
+                        <p><b>FASE 3: Torneo Final</b></p>
+                        <p>1 vs 1 contra un rival aleatorio. Si pierdes, el Comité puede promoverte igualmente.</p>
+                    </div>
+                    <div style="text-align:center; margin-top: 14px;">
+                        <button class="btn" onclick="game.examTournamentStart()">Entrar al Torneo</button>
+                    </div>
+                `);
+                return;
+            }
+
+            if (phase === 'tournament') {
+                // En combate ahora.
+                this.renderExamScreen('<div class="story-text">Preparando el combate del torneo...</div>');
+                return;
+            }
+        },
+
+        examWrittenTestStart() {
+            const bank = this.getExamQuestionBank();
+            const indices = [...bank.keys()];
+            // Mezclar
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+            // Tomar 4 normales + 1 trampa (si hay)
+            const trapIdx = bank.findIndex(q => typeof q.trapPass === 'number');
+            const chosen = indices.filter(i => i !== trapIdx).slice(0, 4);
+            if (trapIdx >= 0) chosen.splice(Math.floor(Math.random() * (chosen.length + 1)), 0, trapIdx);
+
+            this.player.examState.phase = 'written';
+            this.player.examState.data = { order: chosen, pos: 0, correct: 0 };
+            this.saveGame();
+            this.renderExamWrittenQuestion();
+        },
+
+        renderExamWrittenQuestion() {
+            const st = this.player.examState;
+            const bank = this.getExamQuestionBank();
+            const order = st.data?.order || [];
+            const pos = st.data?.pos || 0;
+            const correct = st.data?.correct || 0;
+            const qObj = bank[order[pos]];
+
+            if (!qObj) {
+                this.examFail('written');
+                return;
+            }
+
+            const renderOptions = (qObj.options || []).map((opt, idx) => {
+                return `<button class="btn btn-small" style="width:100%; margin:6px 0;" onclick="game.examWrittenAnswer(${idx})">${String.fromCharCode(65 + idx)}) ${opt}</button>`;
+            }).join('');
+
+            this.renderExamScreen(`
+                <div class="story-text">
+                    <p><b>FASE 1: Examen Escrito</b></p>
+                    <p>Pregunta ${pos + 1}/5 • Correctas: ${correct}</p>
+                </div>
+                <div style="margin-top:12px;">
+                    <div style="font-weight:bold; margin-bottom:10px;">${qObj.q}</div>
+                    <div class="progress-bar" style="height:14px;"><div id="exam-timer-fill" class="progress-fill" style="width:100%"></div></div>
+                    <div style="margin-top:10px;">${renderOptions}</div>
+                </div>
+            `);
+
+            this.startExamTimer(10, () => this.examWrittenAnswer(null));
+        },
+
+        startExamTimer(seconds, onExpire) {
+            if (this.examTimerId) {
+                clearInterval(this.examTimerId);
+                this.examTimerId = null;
+            }
+
+            const start = Date.now();
+            const totalMs = seconds * 1000;
+            const fill = document.getElementById('exam-timer-fill');
+
+            this.examTimerId = setInterval(() => {
+                const elapsed = Date.now() - start;
+                const pct = Math.max(0, 1 - (elapsed / totalMs));
+                if (fill) fill.style.width = `${Math.floor(pct * 100)}%`;
+                if (elapsed >= totalMs) {
+                    clearInterval(this.examTimerId);
+                    this.examTimerId = null;
+                    onExpire();
+                }
+            }, 100);
+        },
+
+        examWrittenAnswer(choiceIndex) {
+            const st = this.player.examState;
+            if (!st || st.phase !== 'written') return;
+
+            if (this.examTimerId) {
+                clearInterval(this.examTimerId);
+                this.examTimerId = null;
+            }
+
+            const bank = this.getExamQuestionBank();
+            const order = st.data?.order || [];
+            const pos = st.data?.pos || 0;
+            const qObj = bank[order[pos]];
+            if (!qObj) return;
+
+            // Trampa: si abandonas, pasas.
+            if (typeof qObj.trapPass === 'number' && choiceIndex === qObj.trapPass) {
+                st.phase = 'forest_intro';
+                st.data = { forestIndex: 0 };
+                this.saveGame();
+                alert('🎭 Pregunta trampa: tu decisión fue evaluada. Avanzas a la siguiente fase.');
+                this.renderExamFromState();
+                return;
+            }
+
+            const correctIdx = qObj.correct;
+            if (typeof choiceIndex === 'number' && choiceIndex === correctIdx) {
+                st.data.correct = (st.data.correct || 0) + 1;
+            }
+
+            st.data.pos = (st.data.pos || 0) + 1;
+
+            if (st.data.pos >= 5) {
+                if ((st.data.correct || 0) >= 3) {
+                    st.phase = 'forest_intro';
+                    st.data = { forestIndex: 0 };
+                    this.saveGame();
+                    this.renderExamFromState();
+                } else {
+                    this.examFail('written');
+                }
+                return;
+            }
+
+            this.saveGame();
+            this.renderExamWrittenQuestion();
+        },
+
+        getChuninForestFights() {
+            return [
+                // Combate 1: 2x Genin fuerte
+                [
+                    { name: 'Genin Fuerte', hp: 100, chakra: 60, attack: 18, defense: 12, accuracy: 14, genjutsu: 8, exp: 0, ryo: 0 },
+                    { name: 'Genin Fuerte', hp: 100, chakra: 60, attack: 18, defense: 12, accuracy: 14, genjutsu: 8, exp: 0, ryo: 0 }
+                ],
+                // Combate 2: 1x Chunin
+                [
+                    { name: 'Ninja Chunin', hp: 180, chakra: 120, attack: 25, defense: 18, accuracy: 16, genjutsu: 10, exp: 0, ryo: 0 }
+                ],
+                // Combate 3: 1x Jonin examinador
+                [
+                    { name: 'Jōnin Examinador', hp: 250, chakra: 160, attack: 32, defense: 22, accuracy: 18, genjutsu: 14, exp: 0, ryo: 0 }
+                ]
+            ];
+        },
+
+        examForestStartFight() {
+            const st = this.player.examState;
+            const fights = this.getChuninForestFights();
+            const idx = st.data?.forestIndex ?? 0;
+            const enemies = fights[idx];
+            if (!enemies) {
+                st.phase = 'tournament_intro';
+                st.data = {};
+                this.saveGame();
+                this.renderExamFromState();
+                return;
+            }
+
+            st.phase = 'forest_fight';
+            this.saveGame();
+            this.startExamFight(enemies, { examType: 'chunin', examPhase: 'forest', noBetweenHeal: true });
+        },
+
+        examUseItemPrompt() {
+            if (!Array.isArray(this.player.inventory) || this.player.inventory.length === 0) {
+                alert('No tienes items.');
+                return;
+            }
+            const options = this.player.inventory.map((it, idx) => `${idx + 1}) ${it.name}`).join('\n');
+            const pick = prompt(`Elige un item para usar (número):\n${options}`);
+            const idx = Number(pick) - 1;
+            if (!Number.isFinite(idx) || idx < 0 || idx >= this.player.inventory.length) return;
+            const item = this.player.inventory[idx];
+            // aplicar
+            if (item.effect?.hp) this.player.hp = Math.min(this.player.maxHp, this.player.hp + item.effect.hp);
+            if (item.effect?.chakra) this.player.chakra = Math.min(this.player.maxChakra, this.player.chakra + item.effect.chakra);
+            this.player.inventory.splice(idx, 1);
+            this.saveGame();
+            alert('Item usado.');
+            this.renderExamFromState();
+        },
+
+        getExamRivals() {
+            // 10 rivales base
+            return [
+                { name: 'Hayato', clan: 'Inuzuka', level: 5, stats: { hp: 210, chakra: 120, attack: 26, defense: 16, accuracy: 16, genjutsu: 8 } },
+                { name: 'Reika', clan: 'Nara', level: 5, stats: { hp: 190, chakra: 150, attack: 22, defense: 16, accuracy: 17, genjutsu: 14 } },
+                { name: 'Torune', clan: 'Aburame', level: 6, stats: { hp: 220, chakra: 140, attack: 24, defense: 18, accuracy: 16, genjutsu: 12 } },
+                { name: 'Satsuki', clan: 'Yamanaka', level: 5, stats: { hp: 190, chakra: 160, attack: 21, defense: 15, accuracy: 18, genjutsu: 15 } },
+                { name: 'Gengo', clan: 'Akimichi', level: 6, stats: { hp: 240, chakra: 120, attack: 28, defense: 18, accuracy: 15, genjutsu: 8 } },
+                { name: 'Mika', clan: 'Sarutobi', level: 6, stats: { hp: 210, chakra: 160, attack: 25, defense: 17, accuracy: 17, genjutsu: 10 } },
+                { name: 'Ren', clan: 'Hatake', level: 6, stats: { hp: 210, chakra: 170, attack: 26, defense: 18, accuracy: 18, genjutsu: 10 } },
+                { name: 'Kaede', clan: 'Hyuga', level: 5, stats: { hp: 200, chakra: 140, attack: 25, defense: 18, accuracy: 17, genjutsu: 10 } },
+                { name: 'Shiro', clan: 'Inuzuka', level: 6, stats: { hp: 230, chakra: 120, attack: 27, defense: 17, accuracy: 16, genjutsu: 8 } },
+                { name: 'Aoi', clan: 'Uchiha', level: 6, stats: { hp: 210, chakra: 170, attack: 25, defense: 17, accuracy: 18, genjutsu: 14 } }
+            ];
+        },
+
+        examTournamentStart() {
+            const st = this.player.examState;
+            const pool = this.getExamRivals();
+            const pick = pool[Math.floor(Math.random() * pool.length)];
+            st.phase = 'tournament';
+            st.data = { rival: pick };
+            this.saveGame();
+
+            const s = pick.stats;
+            const enemy = { name: `${pick.name} (${pick.clan})`, hp: s.hp, chakra: s.chakra, attack: s.attack, defense: s.defense, accuracy: s.accuracy, genjutsu: s.genjutsu, exp: 0, ryo: 0 };
+            this.startExamFight([enemy], { examType: 'chunin', examPhase: 'tournament' });
+        },
+
+        renderJoninExam() {
+            const st = this.player.examState;
+            const phase = st.phase;
+
+            if (phase === 'intro') {
+                this.renderExamScreen(`
+                    <div class="story-text">
+                        <p>Los examinadores te observan. La vara para Jonin es cruel.</p>
+                        <p style="margin-top:10px;">Pruebas: misión en campo, combate de élite y liderazgo.</p>
+                    </div>
+                    <div style="text-align:center; margin-top: 14px;">
+                        <button class="btn" onclick="game.joninTest1Start()">Iniciar Prueba 1</button>
+                    </div>
+                `);
+                return;
+            }
+
+            if (phase === 'between') {
+                this.renderExamScreen(`
+                    <div class="story-text"><p>Puedes usar 1 item antes de la siguiente prueba.</p></div>
+                    <div style="margin-top:12px;">
+                        <button class="btn btn-small" onclick="game.examUseItemPrompt()">Usar item</button>
+                        <button class="btn" style="margin-left:8px;" onclick="game.joninNextTest()">Continuar</button>
+                    </div>
+                `);
+                return;
+            }
+
+            this.renderExamScreen('<div class="story-text">Preparando prueba...</div>');
+        },
+
+        joninTest1Start() {
+            const st = this.player.examState;
+            st.phase = 'jonin_test1';
+            st.data = { step: 0 };
+            this.saveGame();
+
+            const enemies = [
+                { name: 'Jōnin de Campo', hp: 260, chakra: 170, attack: 34, defense: 22, accuracy: 18, genjutsu: 14, exp: 0, ryo: 0 },
+                { name: 'Jōnin de Campo', hp: 260, chakra: 170, attack: 34, defense: 22, accuracy: 18, genjutsu: 14, exp: 0, ryo: 0 },
+                { name: 'Jōnin Veterano', hp: 320, chakra: 220, attack: 38, defense: 26, accuracy: 18, genjutsu: 16, exp: 0, ryo: 0 }
+            ];
+
+            this.startExamFight(enemies, { examType: 'jonin', examPhase: 'test1', noBetweenHeal: true });
+        },
+
+        joninNextTest() {
+            const st = this.player.examState;
+            if (st.phase === 'between' && st.data?.next === 'test2') {
+                this.joninTest2Start();
+                return;
+            }
+            if (st.phase === 'between' && st.data?.next === 'test3') {
+                this.joninTest3Start();
+                return;
+            }
+        },
+
+        joninTest2Start() {
+            const st = this.player.examState;
+            st.phase = 'jonin_test2';
+            st.data = {};
+            this.saveGame();
+
+            // Simulación de 2 vs 1: enemigo con doble ataque.
+            const enemy = {
+                name: 'Dúo Jōnin (2 vs 1)',
+                hp: 520,
+                chakra: 300,
+                attack: 28,
+                defense: 24,
+                accuracy: 18,
+                genjutsu: 14,
+                exp: 0,
+                ryo: 0,
+                doubleAttack: {
+                    attacks: [
+                        { attack: 34, accuracy: 18 },
+                        { attack: 34, accuracy: 18 }
+                    ]
+                }
+            };
+            this.startExamFight([enemy], { examType: 'jonin', examPhase: 'test2' });
+        },
+
+        joninTest3Start() {
+            const st = this.player.examState;
+            st.phase = 'jonin_test3';
+            st.data = { allies: [
+                { name: 'Genin A', hp: 120, maxHp: 120 },
+                { name: 'Genin B', hp: 120, maxHp: 120 }
+            ] };
+            this.saveGame();
+
+            const enemies = [
+                { name: 'Bandido Élite', hp: 240, chakra: 120, attack: 30, defense: 20, accuracy: 16, genjutsu: 10, exp: 0, ryo: 0 },
+                { name: 'Bandido Élite', hp: 240, chakra: 120, attack: 30, defense: 20, accuracy: 16, genjutsu: 10, exp: 0, ryo: 0 },
+                { name: 'Jōnin Hostil', hp: 320, chakra: 180, attack: 36, defense: 24, accuracy: 18, genjutsu: 12, exp: 0, ryo: 0 }
+            ];
+            this.startExamFight(enemies, { examType: 'jonin', examPhase: 'test3', protectAllies: true, noBetweenHeal: true });
+        },
+
+        startExamFight(enemies, opts = {}) {
+            // Prepara un combate que NO termina en pantalla de victoria/derrota normal
+            const list = Array.isArray(enemies) ? enemies : [];
+            if (list.length === 0) {
+                this.examFail('combat');
+                return;
+            }
+
+            this.currentMission = {
+                name: '🎯 Examen Ninja',
+                rank: 'EX',
+                description: 'Combate de examen.',
+                enemies: [],
+                ryo: 0,
+                exp: 0,
+                turns: 0,
+                isExamFight: true,
+                examMeta: {
+                    examType: opts.examType || this.player.examState?.type,
+                    examPhase: opts.examPhase || this.player.examState?.phase,
+                    noBetweenHeal: !!opts.noBetweenHeal,
+                    protectAllies: !!opts.protectAllies
+                }
+            };
+
+            this.enemyQueue = list.slice(1).map(e => ({ ...e, maxHp: e.hp, maxChakra: e.chakra, controlledTurns: 0 }));
+            const first = list[0];
+            this.totalWaves = list.length;
+            this.currentWave = 1;
+            this.currentEnemy = { ...first, maxHp: first.hp, maxChakra: first.chakra, controlledTurns: 0 };
+
+            this.showScreen('combat-screen');
+            this.startCombat();
+        },
+
+        handleExamFightVictory() {
+            // limpiar estado de combate
+            this.currentEnemy = null;
+            this.enemyQueue = [];
+            this.totalWaves = 0;
+            this.currentWave = 0;
+
+            const st = this.player.examState;
+            if (!st?.active) {
+                this.currentMission = null;
+                this.showScreen('village-screen');
+                this.updateVillageUI();
+                return;
+            }
+
+            if (st.type === 'chunin') {
+                if (st.phase === 'forest_fight') {
+                    st.data.forestIndex = (st.data.forestIndex ?? 0) + 1;
+                    if (st.data.forestIndex >= this.getChuninForestFights().length) {
+                        st.phase = 'tournament_intro';
+                        st.data = {};
+                    } else {
+                        st.phase = 'forest_between';
+                    }
+                    this.saveGame();
+                    this.renderExamFromState();
+                    return;
+                }
+
+                if (st.phase === 'tournament') {
+                    this.examPass('chunin');
+                    return;
+                }
+            }
+
+            if (st.type === 'jonin') {
+                if (st.phase === 'jonin_test1') {
+                    st.phase = 'between';
+                    st.data = { next: 'test2' };
+                    this.saveGame();
+                    this.renderExamFromState();
+                    return;
+                }
+                if (st.phase === 'jonin_test2') {
+                    st.phase = 'between';
+                    st.data = { next: 'test3' };
+                    this.saveGame();
+                    this.renderExamFromState();
+                    return;
+                }
+                if (st.phase === 'jonin_test3') {
+                    this.examPass('jonin');
+                    return;
+                }
+            }
+
+            // fallback
+            this.examFail('unknown');
+        },
+
+        handleExamFightDefeat() {
+            // limpiar estado de combate
+            this.currentEnemy = null;
+            this.enemyQueue = [];
+            this.totalWaves = 0;
+            this.currentWave = 0;
+
+            const st = this.player.examState;
+            if (!st?.active) {
+                this.currentMission = null;
+                this.showScreen('village-screen');
+                this.updateVillageUI();
+                return;
+            }
+
+            if (st.type === 'chunin' && st.phase === 'tournament') {
+                const roll = this.rollDice(20);
+                if (roll >= 12) {
+                    alert(`📜 Comité: tirada D20=${roll}. Deciden promoverte igualmente.`);
+                    this.examPass('chunin');
+                    return;
+                }
+                alert(`📜 Comité: tirada D20=${roll}. No hay promoción.`);
+                this.examFail('tournament');
+                return;
+            }
+
+            this.examFail('combat');
+        },
+
+        examPass(type) {
+            if (!this.player) return;
+            this.currentMission = null;
+            this.player.hp = this.player.maxHp;
+            this.player.chakra = this.player.maxChakra;
+            if (type === 'chunin') {
+                this.player.rank = 'Chunin';
+                alert('🎉 ¡Aprobaste el Examen Chunin!');
+            } else {
+                this.player.rank = 'Jonin';
+                alert('🎉 ¡Aprobaste el Examen Jonin!');
+            }
+            this.player.examState = null;
+            this.saveGame();
+            this.showScreen('village-screen');
+            this.updateVillageUI();
+            this.showMissions();
+        },
+
+        examFail(reason) {
+            if (!this.player) return;
+            this.currentMission = null;
+            this.player.hp = this.player.maxHp;
+            this.player.chakra = this.player.maxChakra;
+            const type = this.player.examState?.type || this.getExamTypeForRank(this.player.rank) || 'chunin';
+            const nowAbs = this.getAbsoluteDay();
+            this.player.examCooldowns = this.player.examCooldowns || { chunin: 0, jonin: 0 };
+            this.player.examCooldowns[type] = nowAbs + 180;
+            this.player.examState = null;
+            this.saveGame();
+            alert('Has fallado el examen. Entrena más y vuelve a intentarlo (180 días).');
+            this.showScreen('village-screen');
+            this.updateVillageUI();
+            this.showMissions();
+        },
+
         activateVillageTab(tabName) {
             // Tabs principales del village (misiones/academia/tienda/entrenamiento/stats)
             const village = document.getElementById('village-screen');
@@ -1533,10 +2459,349 @@ rollDice(sides = 20) {
             });
 
             if (tabName === 'missions') this.showMissions();
+            else if (tabName === 'npcs') this.showNPCList();
             else if (tabName === 'academy') this.showAcademy('genin');
             else if (tabName === 'shop') this.showShop();
             else if (tabName === 'training') this.showTraining();
             else if (tabName === 'stats') this.showStats();
+        },
+
+        // -----------------------------
+        // NPCs / relaciones
+        // -----------------------------
+        getNpcRelationship(npcId) {
+            if (!this.player?.npcRelations) this.player.npcRelations = {};
+            return this.player.npcRelations[npcId] ?? 0;
+        },
+
+        getNpcRelationshipLevel(rel, npcId) {
+            if (this.player?.npcRivals && this.player.npcRivals[npcId]) return 'Rival';
+            if (rel <= -50) return 'Enemigo';
+            if (rel >= 76) return 'Compañero';
+            if (rel >= 51) return 'Mejor Amigo';
+            if (rel >= 26) return 'Amigo';
+            if (rel >= 1) return 'Conocido';
+            return 'Desconocido';
+        },
+
+        updateRelationship(npcId, amount) {
+            if (!this.player) return;
+            const current = this.getNpcRelationship(npcId);
+            const next = this.clamp(current + amount, -100, 100);
+            this.player.npcRelations[npcId] = next;
+            this.saveGame();
+        },
+
+        pickNpcDialogue(npc, relLevel) {
+            const d = npc.dialogues || {};
+            const pick = (arr) => Array.isArray(arr) && arr.length ? arr[Math.floor(Math.random() * arr.length)] : '';
+            if (relLevel === 'Desconocido') return pick(d.first_meeting) || '...';
+            if (relLevel === 'Enemigo') return pick(d.enemy) || pick(d.neutral) || '...';
+            if (relLevel === 'Rival') return pick(d.rival) || pick(d.neutral) || '...';
+            if (relLevel === 'Compañero' || relLevel === 'Mejor Amigo') return pick(d.best_friend) || pick(d.friendly) || pick(d.neutral) || '...';
+            if (relLevel === 'Amigo') return pick(d.friendly) || pick(d.neutral) || '...';
+            return pick(d.neutral) || '...';
+        },
+
+        showNPCList() {
+            const listEl = document.getElementById('npc-list');
+            const modal = document.getElementById('npc-modal');
+            if (!listEl) return;
+            if (modal) {
+                modal.style.display = 'none';
+                modal.innerHTML = '';
+            }
+
+            const npcs = this.npcs || {};
+            const rows = Object.values(npcs).map(npc => {
+                const rel = this.getNpcRelationship(npc.id);
+                const level = this.getNpcRelationshipLevel(rel, npc.id);
+                return `
+                    <div class="npc-card" onclick="game.showNPCInteraction('${npc.id}')">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                            <div style="font-weight:bold; color: var(--accent);">${npc.icon} ${npc.name}</div>
+                            <div style="opacity:0.85;">${level}</div>
+                        </div>
+                        <div style="margin-top:8px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                            <div style="color: rgba(240,240,240,0.75);">Relación</div>
+                            <div><b>${rel}</b></div>
+                        </div>
+                        <div style="margin-top:6px; color: rgba(240,240,240,0.75); font-size:0.9em;">${npc.village} • ${npc.rank}</div>
+                    </div>
+                `;
+            });
+
+            listEl.innerHTML = rows.join('');
+        },
+
+        showNPCInteraction(npcId) {
+            const npc = (this.npcs || {})[npcId];
+            const modal = document.getElementById('npc-modal');
+            if (!npc || !modal) return;
+
+            const rel = this.getNpcRelationship(npcId);
+            const relLevel = this.getNpcRelationshipLevel(rel, npcId);
+            const dialogue = this.pickNpcDialogue(npc, relLevel);
+
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                    <div style="font-size:1.15em; font-weight:bold; color: var(--gold);">${npc.icon} ${npc.name}</div>
+                    <div style="opacity:0.9;">${relLevel} • Relación: <b>${rel}</b></div>
+                </div>
+                <div style="margin-top:10px; color: rgba(240,240,240,0.85);">“${dialogue}”</div>
+                <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+                    <button class="btn btn-small" onclick="game.talkToNPC('${npcId}')">Hablar</button>
+                    <button class="btn btn-small" onclick="game.showNpcMissions('${npcId}')">Misión</button>
+                    <button class="btn btn-small" onclick="game.showNpcTrainings('${npcId}')">Entrenar</button>
+                    <button class="btn btn-small" onclick="game.giftNPC('${npcId}')">Regalo</button>
+                    <button class="btn btn-small btn-secondary" onclick="game.friendlyBattle('${npcId}')">Combate amistoso</button>
+                </div>
+                <div id="npc-extra" style="margin-top:12px;"></div>
+            `;
+        },
+
+        talkToNPC(npcId) {
+            const npc = (this.npcs || {})[npcId];
+            if (!npc) return;
+            // Si estaba “desconocido”, el primer saludo lo mueve a conocido.
+            if (this.getNpcRelationship(npcId) === 0) this.updateRelationship(npcId, 1);
+            this.updateRelationship(npcId, 2);
+            this.showNPCInteraction(npcId);
+        },
+
+        giftNPC(npcId) {
+            const npc = (this.npcs || {})[npcId];
+            if (!npc || !this.player) return;
+
+            if (!Array.isArray(this.player.inventory) || this.player.inventory.length === 0) {
+                alert('No tienes items para regalar.');
+                return;
+            }
+
+            const options = this.player.inventory.map((it, idx) => `${idx + 1}) ${it.name}`).join('\n');
+            const pick = prompt(`Elige un item para regalar (número):\n${options}`);
+            const idx = Number(pick) - 1;
+            if (!Number.isFinite(idx) || idx < 0 || idx >= this.player.inventory.length) return;
+
+            const item = this.player.inventory[idx];
+            const liked = (npc.gifts || []).includes(item.name);
+            const delta = liked ? (8 + Math.floor(Math.random() * 8)) : 2;
+            this.updateRelationship(npcId, delta);
+            this.player.inventory.splice(idx, 1);
+            this.saveGame();
+
+            alert(`${npc.name} ${liked ? 'aprecia' : 'acepta'} tu regalo. Relación +${delta}.`);
+            this.showNPCInteraction(npcId);
+        },
+
+        showNpcMissions(npcId) {
+            const npc = (this.npcs || {})[npcId];
+            const extra = document.getElementById('npc-extra');
+            if (!npc || !extra) return;
+            const rel = this.getNpcRelationship(npcId);
+            const relLevel = this.getNpcRelationshipLevel(rel, npcId);
+
+            const missions = this.getNPCMissions(npcId, relLevel);
+            if (missions.length === 0) {
+                extra.innerHTML = '<div class="story-text">No hay misiones disponibles con este NPC (sube la relación).</div>';
+                return;
+            }
+
+            extra.innerHTML = `
+                <div style="color: var(--accent); font-weight:bold;">Misiones de ${npc.name}</div>
+                ${missions.map(m => {
+                    return `
+                        <div class="mission-card" style="margin-top:10px;" onclick='game.startNpcMission(${JSON.stringify(m).replace(/'/g, "\\'")})'>
+                            <h4>📌 ${m.name} [${m.rank}]</h4>
+                            <p>${m.description}</p>
+                            <p style="color:#ffd700; margin-top:8px;">${m.ryo} Ryo | ${m.exp} EXP</p>
+                        </div>
+                    `;
+                }).join('')}
+            `;
+        },
+
+        getNPCMissions(npcId, relLevel) {
+            const npc = (this.npcs || {})[npcId];
+            if (!npc) return [];
+            const list = Array.isArray(npc.missions) ? npc.missions : [];
+
+            if (relLevel === 'Amigo' || relLevel === 'Mejor Amigo' || relLevel === 'Compañero') return list;
+            if (relLevel === 'Conocido') return list.slice(0, 1);
+            return [];
+        },
+
+        startNpcMission(mission) {
+            if (!mission) return;
+            const cloned = { ...mission, npcMission: true };
+            this.startMission(cloned);
+        },
+
+        showNpcTrainings(npcId) {
+            const npc = (this.npcs || {})[npcId];
+            const extra = document.getElementById('npc-extra');
+            if (!npc || !extra) return;
+
+            const rel = this.getNpcRelationship(npcId);
+            const relLevel = this.getNpcRelationshipLevel(rel, npcId);
+
+            if (!(relLevel === 'Mejor Amigo' || relLevel === 'Compañero')) {
+                extra.innerHTML = '<div class="story-text">Necesitas ser Mejor Amigo para entrenamientos especiales.</div>';
+                return;
+            }
+
+            const trainings = Array.isArray(npc.trainings) ? npc.trainings : [];
+            if (trainings.length === 0) {
+                extra.innerHTML = '<div class="story-text">Este NPC no tiene entrenamientos disponibles.</div>';
+                return;
+            }
+
+            extra.innerHTML = `
+                <div style="color: var(--accent); font-weight:bold;">Entrenamientos de ${npc.name}</div>
+                ${trainings.map(t => {
+                    return `
+                        <div class="shop-item" style="margin-top:10px;">
+                            <h4>💪 ${t.name}</h4>
+                            <p>${t.description}</p>
+                            <p class="price">💰 ${t.price} Ryo</p>
+                            <button class="btn btn-small" onclick='game.doNpcTraining("${npcId}", ${JSON.stringify(t).replace(/'/g, "\\'")})'>Entrenar</button>
+                        </div>
+                    `;
+                }).join('')}
+            `;
+        },
+
+        doNpcTraining(npcId, training) {
+            const npc = (this.npcs || {})[npcId];
+            if (!npc || !training || !this.player) return;
+            if (this.player.ryo < training.price) {
+                alert('No tienes suficiente Ryo.');
+                return;
+            }
+
+            this.player.ryo -= training.price;
+            const eff = training.effect || {};
+            if (eff.all) {
+                this.player.taijutsu += eff.all;
+                this.player.ninjutsu += eff.all;
+                this.player.genjutsu += eff.all;
+            }
+            if (eff.taijutsu) this.player.taijutsu += eff.taijutsu;
+            if (eff.ninjutsu) this.player.ninjutsu += eff.ninjutsu;
+            if (eff.genjutsu) this.player.genjutsu += eff.genjutsu;
+            if (eff.maxHp) {
+                this.player.maxHp += eff.maxHp;
+                this.player.hp = this.player.maxHp;
+            }
+            if (eff.maxChakra) {
+                this.player.maxChakra += eff.maxChakra;
+                this.player.chakra = this.player.maxChakra;
+            }
+
+            this.updateRelationship(npcId, 1);
+            this.updateVillageUI();
+            this.saveGame();
+            alert(`Entrenamiento completado con ${npc.name}.`);
+            this.showNPCInteraction(npcId);
+        },
+
+        getNpcBattleStamp() {
+            return `${this.player.year}-${this.player.month}-${this.player.day}`;
+        },
+
+        friendlyBattle(npcId) {
+            const npc = (this.npcs || {})[npcId];
+            if (!npc || !this.player) return;
+
+            const stamp = this.getNpcBattleStamp();
+            const last = this.player.npcDailyBattleStamp?.[npcId];
+            if (last === stamp) {
+                alert('Ya hiciste un combate amistoso con este NPC hoy.');
+                return;
+            }
+
+            const rankOrder = { Genin: 1, Chunin: 2, 'Chūnin': 2, Jonin: 3, 'Jōnin': 3, ANBU: 4, Kage: 5, Hokage: 5, Sannin: 4, Viajero: 3, Médica: 3, Consejero: 3, 'Ex-Hokage': 5, Jinchūriki: 4 };
+            const npcRank = rankOrder[npc.rank] ?? 3;
+            const playerRank = rankOrder[this.player.rank] ?? 1;
+            if (npcRank < playerRank) {
+                alert('Este NPC solo ofrece combate amistoso si su rango es igual o mayor al tuyo.');
+                return;
+            }
+
+            this.currentMission = {
+                name: `🤝 Combate amistoso: ${npc.name}`,
+                rank: 'F',
+                description: 'Sin muerte. El combate termina al llegar a 1 HP.',
+                enemies: [],
+                ryo: 0,
+                exp: 120,
+                turns: 0,
+                friendlyBattle: true,
+                npcId
+            };
+
+            const s = npc.stats || {};
+            const enemy = {
+                name: npc.name,
+                hp: s.hp || 220,
+                chakra: s.chakra || 120,
+                attack: s.attack || 25,
+                defense: s.defense || 18,
+                accuracy: s.accuracy || 14,
+                genjutsu: s.genjutsu || 10,
+                exp: 0,
+                ryo: 0
+            };
+
+            this.enemyQueue = [];
+            this.totalWaves = 1;
+            this.currentWave = 1;
+            this.currentEnemy = { ...enemy, maxHp: enemy.hp, maxChakra: enemy.chakra, controlledTurns: 0 };
+            this.startCombat();
+        },
+
+        finishFriendlyBattle(didWin) {
+            const npcId = this.currentMission?.npcId;
+            const npc = npcId ? (this.npcs || {})[npcId] : null;
+            const stamp = npcId ? this.getNpcBattleStamp() : null;
+
+            if (npcId && stamp) {
+                this.player.npcDailyBattleStamp = this.player.npcDailyBattleStamp || {};
+                this.player.npcDailyBattleStamp[npcId] = stamp;
+            }
+
+            const relGain = didWin ? 5 : 3;
+            if (npcId) {
+                this.updateRelationship(npcId, relGain);
+                if (!didWin) {
+                    this.player.npcRivals = this.player.npcRivals || {};
+                    this.player.npcRivals[npcId] = true;
+                }
+            }
+
+            const expGain = didWin ? 80 : 40;
+            this.player.exp += expGain;
+            if (this.player.exp >= this.player.expToNext) {
+                this.levelUp();
+            }
+
+            this.currentEnemy = null;
+            this.currentMission = null;
+            this.enemyQueue = [];
+            this.totalWaves = 0;
+            this.currentWave = 0;
+            this.saveGame();
+
+            setTimeout(() => {
+                this.showScreen('village-screen');
+                this.updateVillageUI();
+                this.activateVillageTab('npcs');
+                if (npc) {
+                    alert(`${didWin ? '🏆' : '🤝'} Combate amistoso vs ${npc.name}: ${didWin ? 'GANASTE' : 'PERDISTE'}\n+${expGain} EXP | +${relGain} Relación`);
+                    this.showNPCInteraction(npc.id);
+                }
+            }, 300);
         },
 
         toggleTravelPanel() {
@@ -1882,9 +3147,15 @@ rollDice(sides = 20) {
             let availableMissions = [];
 
             if (this.player.rank === 'Genin') {
-                availableMissions = this.missions.genin;
+                const baForGenin = Array.isArray(this.missions.chunin)
+                    ? this.missions.chunin.filter(m => ['B', 'A'].includes((m.rank || '').toUpperCase()))
+                    : [];
+                availableMissions = [...this.missions.genin, ...baForGenin];
             } else if (this.player.rank === 'Chunin') {
-                availableMissions = this.missions.chunin;
+                const sForChunin = Array.isArray(this.missions.jonin)
+                    ? this.missions.jonin.filter(m => (m.rank || '').toUpperCase() === 'S')
+                    : [];
+                availableMissions = [...this.missions.chunin, ...sForChunin];
             } else if (this.player.rank === 'Jonin') {
                 availableMissions = this.missions.jonin;
             } else if (this.player.rank === 'ANBU' || this.player.rank === 'Kage') {
@@ -2250,7 +3521,7 @@ rollDice(sides = 20) {
             const statsDisplay = document.getElementById('stats-display');
             statsDisplay.innerHTML = `
                 <div class="player-info">
-                    <h3 style="color: #ff8c00;">${this.player.clan} Ninja</h3>
+                    <h3 style="color: #ff8c00;">${this.getPlayerDisplayName()}</h3>
                     <div class="info-grid">
                         <div class="info-item">❤️ HP: ${Math.floor(this.player.hp)}/${this.player.maxHp}</div>
                         <div class="info-item">💙 Chakra: ${Math.floor(this.player.chakra)}/${this.player.maxChakra}</div>
@@ -2305,9 +3576,13 @@ rollDice(sides = 20) {
                 
                 this.player = JSON.parse(save);
                 this.migratePlayerSave();
-                this.showScreen('village-screen');
-                this.updateVillageUI();
-                this.showMissions();
+                if (this.player?.examState?.active) {
+                    this.renderExamFromState();
+                } else {
+                    this.showScreen('village-screen');
+                    this.updateVillageUI();
+                    this.showMissions();
+                }
                 alert('¡Partida cargada!');
             } catch(e) {
                 console.error('Error cargando:', e);
@@ -2376,7 +3651,7 @@ rollDice(sides = 20) {
             this.kawairimiUsed = false;
             this.defendActive = false;
             
-            document.getElementById('combat-player-name').textContent = this.player.clan + ' Ninja';
+            document.getElementById('combat-player-name').textContent = this.getPlayerDisplayName();
             document.getElementById('enemy-name').textContent = this.currentEnemy.name + 
                 (this.totalWaves > 1 ? ` (${this.currentWave}/${this.totalWaves})` : '');
             document.getElementById('enemy-stats').textContent = 
@@ -2458,6 +3733,12 @@ rollDice(sides = 20) {
                 this.updateBar('enemy-health-bar', this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
                 
                 if (this.currentEnemy.hp <= 0) {
+                    if (this.currentMission?.friendlyBattle) {
+                        this.currentEnemy.hp = 1;
+                        this.updateBar('enemy-health-bar', this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                        this.finishFriendlyBattle(true);
+                        return;
+                    }
                     this.winCombat();
                     return;
                 }
@@ -2578,6 +3859,12 @@ rollDice(sides = 20) {
                 this.updateBar('enemy-health-bar', this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
                 
                 if (this.currentEnemy.hp <= 0) {
+                    if (this.currentMission?.friendlyBattle) {
+                        this.currentEnemy.hp = 1;
+                        this.updateBar('enemy-health-bar', this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                        this.finishFriendlyBattle(true);
+                        return;
+                    }
                     this.winCombat();
                     return;
                 }
@@ -2742,10 +4029,17 @@ rollDice(sides = 20) {
                 }
             }
 
-            this.addCombatLog(`${this.currentEnemy.name} ataca...`, 'log-attack');
+            const attacks = Array.isArray(this.currentEnemy?.doubleAttack?.attacks)
+                ? this.currentEnemy.doubleAttack.attacks
+                : [null];
 
-            const attackRoll = this.rollDice(20);
-            const totalAttack = attackRoll + this.currentEnemy.attack + (this.currentEnemy.accuracy || 0);
+            this.addCombatLog(
+                attacks.length > 1
+                    ? `${this.currentEnemy.name} ataca... (x${attacks.length})`
+                    : `${this.currentEnemy.name} ataca...`,
+                'log-attack'
+            );
+
             const stats = this.getEffectiveStats();
             let playerDefense = 10 + Math.floor(stats.taijutsu / 2);
             if (stats.teamEvasionBonus > 0) {
@@ -2767,49 +4061,91 @@ rollDice(sides = 20) {
                     return;
                 }
                 
-                this.addCombatLog(`Enemigo tira: <span class="dice-roll">${attackRoll}</span> + ${this.currentEnemy.attack} + ${this.currentEnemy.accuracy} = ${totalAttack} vs Defensa ${playerDefense}`, 'log-attack');
+                const examMeta = this.currentMission?.examMeta;
 
-                if (totalAttack >= playerDefense) {
-                    const baseDamage = this.rollDice(8) + this.rollDice(6);
-                    const damage = Math.max(1, baseDamage + Math.floor(this.currentEnemy.attack / 1.5));
-                    this.player.hp -= damage;
+                for (let i = 0; i < attacks.length; i++) {
+                    const part = attacks[i] || {};
+                    const partAttack = Number.isFinite(part.attack) ? part.attack : this.currentEnemy.attack;
+                    const partAcc = Number.isFinite(part.accuracy) ? part.accuracy : (this.currentEnemy.accuracy || 0);
 
-                    if (this.player.jashinTurns > 0) {
-                        const reflect = Math.max(1, Math.floor(damage * (this.player.jashinReflect || 0.3)));
-                        this.currentEnemy.hp -= reflect;
-                        this.addCombatLog(`🩸 Reflejas ${reflect} de daño al enemigo.`, 'log-special');
-                        this.updateBar('enemy-health-bar', this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
-                        if (this.currentEnemy.hp <= 0) {
-                            this.winCombat();
+                    const attackRoll = this.rollDice(20);
+                    const totalAttack = attackRoll + partAttack + partAcc;
+                    this.addCombatLog(`Enemigo tira: <span class="dice-roll">${attackRoll}</span> + ${partAttack} + ${partAcc} = ${totalAttack} vs Defensa ${playerDefense}`, 'log-attack');
+
+                    if (totalAttack >= playerDefense) {
+                        const baseDamage = this.rollDice(8) + this.rollDice(6);
+                        const damage = Math.max(1, baseDamage + Math.floor(partAttack / 1.5));
+
+                        // Jonin Test 3: proteger aliados (25% de probabilidad de que golpeen a un aliado)
+                        if (examMeta?.protectAllies && this.player?.examState?.active && this.player.examState.type === 'jonin') {
+                            const allies = this.player.examState.data?.allies;
+                            if (Array.isArray(allies) && allies.length > 0 && Math.random() < 0.25) {
+                                const ally = allies[Math.floor(Math.random() * allies.length)];
+                                const allyDamage = Math.max(1, Math.floor(damage * 0.9));
+                                ally.hp = Math.max(0, (ally.hp || 0) - allyDamage);
+                                this.addCombatLog(`⚠️ ${this.currentEnemy.name} golpea a ${ally.name}: -${allyDamage} HP.`, 'log-damage');
+                                this.saveGame();
+                                if (ally.hp <= 0) {
+                                    this.addCombatLog(`❌ ${ally.name} cae.`, 'log-damage');
+                                    this.handleExamFightDefeat();
+                                    return;
+                                }
+                                continue;
+                            }
+                        }
+
+                        this.player.hp -= damage;
+
+                        if (this.player.jashinTurns > 0) {
+                            const reflect = Math.max(1, Math.floor(damage * (this.player.jashinReflect || 0.3)));
+                            this.currentEnemy.hp -= reflect;
+                            this.addCombatLog(`🩸 Reflejas ${reflect} de daño al enemigo.`, 'log-special');
+                            this.updateBar('enemy-health-bar', this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                            if (this.currentEnemy.hp <= 0) {
+                                this.winCombat();
+                                return;
+                            }
+                        }
+
+                        this.addCombatLog(`¡Te golpean duramente! Recibes ${damage} de daño.`, 'log-damage');
+                        this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
+
+                        if (this.player.hp <= 0 && this.player.izanagiAvailable && !this.player.izanagiUsed) {
+                            this.player.izanagiUsed = true;
+                            this.player.izanagiAvailable = false;
+                            this.player.hp = this.player.maxHp;
+                            this.player.chakra = Math.min(this.player.maxChakra, this.player.chakra + 50);
+                            this.addCombatLog('👁️ IZANAGI: reescribes la realidad y vuelves con vida.', 'log-special');
+                            this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
+                            this.updateBar('combat-player-chakra-bar', this.player.chakra, this.player.maxChakra, 'Chakra');
+                        }
+
+                        if (this.player.hp <= 0 && this.player.jashinTurns > 0) {
+                            this.player.hp = 1;
+                            this.addCombatLog('🩸 Ritual activo: no puedes morir todavía.', 'log-special');
+                            this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
+                        }
+
+                        if (this.player.hp <= 0 && this.currentMission?.friendlyBattle) {
+                            this.player.hp = 1;
+                            this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
+                            this.addCombatLog('🤝 Combate amistoso: caes, pero no mueres. (HP=1)', 'log-special');
+                            this.finishFriendlyBattle(false);
                             return;
                         }
-                    }
 
-                    this.addCombatLog(`¡Te golpean duramente! Recibes ${damage} de daño.`, 'log-damage');
-                    this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
+                        if (this.player.hp <= 0 && this.currentMission?.isExamFight) {
+                            this.handleExamFightDefeat();
+                            return;
+                        }
 
-                    if (this.player.hp <= 0 && this.player.izanagiAvailable && !this.player.izanagiUsed) {
-                        this.player.izanagiUsed = true;
-                        this.player.izanagiAvailable = false;
-                        this.player.hp = this.player.maxHp;
-                        this.player.chakra = Math.min(this.player.maxChakra, this.player.chakra + 50);
-                        this.addCombatLog('👁️ IZANAGI: reescribes la realidad y vuelves con vida.', 'log-special');
-                        this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
-                        this.updateBar('combat-player-chakra-bar', this.player.chakra, this.player.maxChakra, 'Chakra');
+                        if (this.player.hp <= 0) {
+                            this.defeat();
+                            return;
+                        }
+                    } else {
+                        this.addCombatLog('¡Esquivas el ataque!', 'log-miss');
                     }
-
-                    if (this.player.hp <= 0 && this.player.jashinTurns > 0) {
-                        this.player.hp = 1;
-                        this.addCombatLog('🩸 Ritual activo: no puedes morir todavía.', 'log-special');
-                        this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
-                    }
-
-                    if (this.player.hp <= 0) {
-                        this.defeat();
-                        return;
-                    }
-                } else {
-                    this.addCombatLog('¡Esquivas el ataque!', 'log-miss');
                 }
 
                 if (this.player.combatBuff && this.player.combatBuff.turns) {
@@ -2846,7 +4182,7 @@ rollDice(sides = 20) {
 
             // Cura entre combates (Sakura)
             const stats = this.getEffectiveStats();
-            if (stats.betweenCombatHealPct > 0) {
+            if (stats.betweenCombatHealPct > 0 && !this.currentMission?.examMeta?.noBetweenHeal) {
                 const heal = Math.max(1, Math.floor(this.player.maxHp * stats.betweenCombatHealPct));
                 this.player.hp = Math.min(this.player.maxHp, this.player.hp + heal);
                 this.addCombatLog(`💗 Tu equipo te asiste y recuperas ${heal} HP.`, 'log-heal');
@@ -2881,6 +4217,18 @@ rollDice(sides = 20) {
                     if (this.player?.travelState) {
                         this.processNextTravelDay();
                     }
+                }, 900);
+                return;
+            }
+
+            // Examen: volver al flujo del examen sin recompensas/fin de misión normal
+            if (this.currentMission && this.currentMission.isExamFight) {
+                this.saveGame();
+                setTimeout(() => {
+                    this.currentMission = null;
+                    this.currentEnemy = null;
+                    this.enemyQueue = [];
+                    this.handleExamFightVictory();
                 }, 900);
                 return;
             }
@@ -2933,6 +4281,29 @@ rollDice(sides = 20) {
             } else {
                 this.applyReputationDelta(this.player.location, 5);
             }
+
+            // Relación con NPC (misiones especiales)
+            if (this.currentMission && this.currentMission.npcId && this.currentMission.relationshipGain) {
+                this.updateRelationship(this.currentMission.npcId, Number(this.currentMission.relationshipGain) || 0);
+            }
+
+            // Conteo de misiones por rango (para requisitos de exámenes)
+            if (this.currentMission && !this.currentMission.friendlyBattle) {
+                const mr = (this.currentMission.rank || '').toUpperCase();
+                if (!this.player.missionsCompletedByRank || typeof this.player.missionsCompletedByRank !== 'object') {
+                    this.player.missionsCompletedByRank = { D: 0, C: 0, B: 0, A: 0, S: 0, U: 0, F: 0 };
+                }
+                if (mr) {
+                    this.player.missionsCompletedByRank[mr] = (this.player.missionsCompletedByRank[mr] || 0) + 1;
+                    this.player.missionsCompletedTotal = (this.player.missionsCompletedTotal || 0) + 1;
+                    if (['B', 'A', 'S'].includes(mr)) {
+                        this.player.missionsCompletedBPlus = (this.player.missionsCompletedBPlus || 0) + 1;
+                    }
+                    if (mr === 'S' && this.player.rank === 'Chunin') {
+                        this.player.missionsCompletedSWhileChunin = (this.player.missionsCompletedSWhileChunin || 0) + 1;
+                    }
+                }
+            }
             
             let victoryText = `¡Misión "${this.currentMission.name}" completada!<br>
                 Has derrotado a ${this.totalWaves} enemigo(s).<br><br>
@@ -2968,18 +4339,7 @@ rollDice(sides = 20) {
             this.player.ninjutsu += 2;
             this.player.genjutsu += 2;
             
-            if (this.player.level === 4 && this.player.rank === 'Genin') {
-                this.player.rank = 'Chunin';
-                alert('¡PROMOCIÓN! Ahora eres Chunin. ¡Nuevas misiones disponibles!');
-            } else if (this.player.level === 7 && this.player.rank === 'Chunin') {
-                this.player.rank = 'Jonin';
-                alert('¡PROMOCIÓN! Ahora eres Jonin. ¡Misiones de alto rango desbloqueadas!');
-            } else if (this.player.level === 10 && this.player.rank === 'Jonin') {
-                this.player.rank = 'ANBU';
-                alert('¡PROMOCIÓN! Te has unido a ANBU. ¡Misiones S-Rank disponibles!');
-            } else {
-                alert(`¡NIVEL ${this.player.level}! Todos tus stats han aumentado.`);
-            }
+            alert(`¡NIVEL ${this.player.level}! Todos tus stats han aumentado.`);
         },
 
         levelUpKekkei() {
@@ -3027,6 +4387,10 @@ rollDice(sides = 20) {
         },
 
         defeat() {
+            if (this.currentMission?.isExamFight) {
+                this.handleExamFightDefeat();
+                return;
+            }
             if (this.currentMission && this.currentMission.isAnbuHunt && this.player?.isRenegade) {
                 alert('⛓️ Has sido capturado por ANBU. Fin de tu camino renegado.');
                 try { localStorage.removeItem('ninjaRPGSave'); } catch (e) { /* ignore */ }

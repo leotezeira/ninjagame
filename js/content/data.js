@@ -47,6 +47,486 @@ export const BASE_GAME = {
             hinata: { id: 'hinata', name: 'Hinata', costPerDay: 550, perk: 'team_evasion', perkValue: 0.15 }
         },
 
+        // NPCs y relaciones (Sistema social)
+        // La relación persistente se guarda en player.npcRelations.
+        npcs: {
+            naruto: {
+                id: 'naruto',
+                name: 'Naruto Uzumaki',
+                icon: '🦊',
+                village: 'konoha',
+                rank: 'Hokage',
+                level: 20,
+                personality: 'energetic',
+                relationship: 0,
+                relationshipLevel: 'Desconocido',
+                location: 'hokage_office',
+                availability: 'always',
+                stats: { hp: 520, chakra: 380, attack: 55, defense: 34, accuracy: 22, genjutsu: 10 },
+                dialogues: {
+                    first_meeting: ['¡Dattebayo! ¿Quién sos tú?'],
+                    neutral: ['Sigue entrenando. El esfuerzo siempre rinde.'],
+                    friendly: ['¡Vamos por un ramen! Después entrenamos.'],
+                    best_friend: ['Confío en ti. Cuenta conmigo cuando lo necesites.'],
+                    rival: ['¡Te voy a superar, ya verás!'],
+                    enemy: ['No puedo perdonar lo que hiciste.']
+                },
+                interactions: ['talk', 'mission', 'training', 'gift', 'friendly_battle'],
+                missions: [
+                    { name: '🍜 Entregar Ramen a Iruka', rank: 'D', description: 'Naruto te pide llevar ramen a la Academia sin derramar nada.', enemies: [{ type: 'genin', index: 0, count: 1 }], ryo: 90, exp: 40, turns: 1, npcId: 'naruto', relationshipGain: 10 },
+                    { name: '🌀 Practicar Rasengan', rank: 'C', description: 'Sesión intensa para mejorar control de chakra.', enemies: [{ type: 'genin', index: 1, count: 2 }], ryo: 160, exp: 70, turns: 2, npcId: 'naruto', relationshipGain: 10 }
+                ],
+                trainings: [
+                    { name: 'Entrenamiento con Naruto', price: 250, description: '+2 Ninjutsu, +1 Taijutsu', effect: { ninjutsu: 2, taijutsu: 1 } }
+                ],
+                gifts: ['🍜 Ramen Ichiraku', '🍙 Bento'],
+                rewards: { friendDiscount: 0.05, bestFriendDiscount: 0.10 }
+            },
+            sasuke: {
+                id: 'sasuke',
+                name: 'Sasuke Uchiha',
+                icon: '⚡',
+                village: 'vagabundo',
+                rank: 'Viajero',
+                level: 20,
+                personality: 'stoic',
+                relationship: 0,
+                relationshipLevel: 'Desconocido',
+                location: 'valle',
+                availability: 'random',
+                stats: { hp: 480, chakra: 360, attack: 60, defense: 32, accuracy: 24, genjutsu: 18 },
+                dialogues: {
+                    first_meeting: ['No me sigas.'],
+                    neutral: ['La fuerza tiene un precio.'],
+                    friendly: ['Si vas a entrenar, no desperdicies mi tiempo.'],
+                    best_friend: ['Te debo una.'],
+                    rival: ['Demuestra que mereces tu nombre.'],
+                    enemy: ['No te interpondrás.']
+                },
+                interactions: ['talk', 'mission', 'training', 'gift', 'friendly_battle'],
+                missions: [
+                    { name: '📜 Recuperar pergamino perdido', rank: 'C', description: 'Sasuke dejó un pergamino en una ruta peligrosa.', enemies: [{ type: 'genin', index: 2, count: 2 }], ryo: 200, exp: 90, turns: 2, npcId: 'sasuke', relationshipGain: 10 },
+                    { name: '⚔️ Duelo de precisión', rank: 'B', description: 'Combate de práctica exigente.', enemies: [{ type: 'chunin', index: 1, count: 2 }], ryo: 600, exp: 180, turns: 3, npcId: 'sasuke', relationshipGain: 10 }
+                ],
+                trainings: [
+                    { name: 'Entrenamiento con Sasuke', price: 500, description: '+3 Taijutsu, +2 Genjutsu', effect: { taijutsu: 3, genjutsu: 2 } }
+                ],
+                gifts: ['💊 Píldora Militar'],
+                rewards: { unlockBattle: true }
+            },
+            sakura: {
+                id: 'sakura',
+                name: 'Sakura Haruno',
+                icon: '🌸',
+                village: 'konoha',
+                rank: 'Médica',
+                level: 18,
+                personality: 'supportive',
+                relationship: 0,
+                relationshipLevel: 'Desconocido',
+                location: 'hospital',
+                availability: 'always',
+                stats: { hp: 420, chakra: 340, attack: 52, defense: 30, accuracy: 22, genjutsu: 16 },
+                dialogues: {
+                    first_meeting: ['Si vas a pelear, aprende a cuidarte.'],
+                    neutral: ['La disciplina salva vidas.'],
+                    friendly: ['Te puedo enseñar a dosificar tu chakra.'],
+                    best_friend: ['Estoy orgullosa de tu progreso.'],
+                    rival: ['No me subestimes.'],
+                    enemy: ['No ayudaré a alguien así.']
+                },
+                interactions: ['talk', 'mission', 'training', 'gift', 'friendly_battle'],
+                missions: [
+                    { name: '🧪 Hierbas del hospital', rank: 'D', description: 'Recolecta hierbas para el hospital sin dañarlas.', enemies: [{ type: 'genin', index: 2, count: 1 }], ryo: 80, exp: 35, turns: 1, npcId: 'sakura', relationshipGain: 10 },
+                    { name: '🩹 Guardias del suministro', rank: 'C', description: 'Protege medicinas durante un traslado.', enemies: [{ type: 'genin', index: 0, count: 2 }], ryo: 180, exp: 80, turns: 2, npcId: 'sakura', relationshipGain: 10 }
+                ],
+                trainings: [
+                    { name: 'Entrenamiento médico', price: 350, description: '+20 HP máx y cura ligera', effect: { maxHp: 20 } }
+                ],
+                gifts: ['🍙 Bento', '💊 Píldora de Chakra'],
+                rewards: { betweenHealBonus: 0.05 }
+            },
+            kakashi: {
+                id: 'kakashi',
+                name: 'Kakashi Hatake',
+                icon: '📘',
+                village: 'konoha',
+                rank: 'Ex-Hokage',
+                level: 19,
+                personality: 'calm',
+                relationship: 0,
+                relationshipLevel: 'Desconocido',
+                location: 'training_field',
+                availability: 'always',
+                stats: { hp: 450, chakra: 360, attack: 54, defense: 33, accuracy: 24, genjutsu: 15 },
+                dialogues: {
+                    first_meeting: ['Yo... llegué tarde.'],
+                    neutral: ['La estrategia decide más que la fuerza.'],
+                    friendly: ['Puedo corregir tu postura.'],
+                    best_friend: ['Bien. Estás listo para liderar.'],
+                    rival: ['Veamos qué tan rápido aprendes.'],
+                    enemy: ['No puedo permitirlo.']
+                },
+                interactions: ['talk', 'mission', 'training', 'gift', 'friendly_battle'],
+                missions: [
+                    { name: '📕 Recuperar Icha Icha', rank: 'D', description: 'Perdió su libro. No preguntes dónde.', enemies: [{ type: 'genin', index: 1, count: 1 }], ryo: 120, exp: 40, turns: 1, npcId: 'kakashi', relationshipGain: 10 },
+                    { name: '🧠 Simulación de combate', rank: 'B', description: 'Entrenamiento real contra un oponente serio.', enemies: [{ type: 'chunin', index: 2, count: 3 }], ryo: 700, exp: 220, turns: 3, npcId: 'kakashi', relationshipGain: 10 }
+                ],
+                trainings: [
+                    { name: 'Práctica de lectura de movimientos', price: 600, description: '+2 a todos los stats', effect: { all: 2 } }
+                ],
+                gifts: ['💊 Píldora de Chakra'],
+                rewards: { critBonus: 2 }
+            },
+            rocklee: {
+                id: 'rocklee',
+                name: 'Rock Lee',
+                icon: '🥋',
+                village: 'konoha',
+                rank: 'Jōnin',
+                level: 16,
+                personality: 'energetic',
+                relationship: 0,
+                relationshipLevel: 'Desconocido',
+                location: 'training_field',
+                availability: 'always',
+                stats: { hp: 460, chakra: 140, attack: 58, defense: 30, accuracy: 22, genjutsu: 6 },
+                dialogues: {
+                    first_meeting: ['¡La juventud arde!'],
+                    neutral: ['Mil golpes hoy, mil golpes mañana.'],
+                    friendly: ['¡Aumentemos tu resistencia!'],
+                    best_friend: ['¡Eres mi orgullo!'],
+                    rival: ['¡Quiero ver tu determinación!'],
+                    enemy: ['No me obligues a pelear en serio.']
+                },
+                interactions: ['talk', 'mission', 'training', 'gift', 'friendly_battle'],
+                missions: [
+                    { name: '🏃 Carrera de resistencia', rank: 'D', description: 'Completa una ruta sin detenerte.', enemies: [{ type: 'genin', index: 2, count: 1 }], ryo: 70, exp: 35, turns: 1, npcId: 'rocklee', relationshipGain: 10 },
+                    { name: '🥋 Sparring intenso', rank: 'C', description: 'Sesión de taijutsu con Lee.', enemies: [{ type: 'genin', index: 0, count: 2 }], ryo: 160, exp: 80, turns: 2, npcId: 'rocklee', relationshipGain: 10 }
+                ],
+                trainings: [
+                    { name: 'Rutina de Taijutsu', price: 300, description: '+3 Taijutsu', effect: { taijutsu: 3 } }
+                ],
+                gifts: ['🍙 Bento', '💊 Píldora Militar'],
+                rewards: { taijutsuBonus: 2 }
+            },
+            gaara: {
+                id: 'gaara',
+                name: 'Gaara',
+                icon: '🏜️',
+                village: 'suna',
+                rank: 'Kazekage',
+                level: 20,
+                personality: 'calm',
+                relationship: 0,
+                relationshipLevel: 'Desconocido',
+                location: 'suna',
+                availability: 'random',
+                stats: { hp: 540, chakra: 360, attack: 54, defense: 40, accuracy: 20, genjutsu: 12 },
+                dialogues: {
+                    first_meeting: ['No todos nacen con paz.'],
+                    neutral: ['El control vence al caos.'],
+                    friendly: ['Puedo enseñarte defensa.'],
+                    best_friend: ['Tu presencia trae calma.'],
+                    rival: ['Veamos tu voluntad.'],
+                    enemy: ['No toleraré amenazas.']
+                },
+                interactions: ['talk', 'mission', 'training', 'gift', 'friendly_battle'],
+                missions: [
+                    { name: '📨 Proteger embajador de Suna', rank: 'C', description: 'Escolta a un visitante importante.', enemies: [{ type: 'genin', index: 1, count: 2 }], ryo: 260, exp: 90, turns: 2, npcId: 'gaara', relationshipGain: 10 },
+                    { name: '🏜️ Calmar disturbios', rank: 'B', description: 'Amenazas internas ponen en riesgo al pueblo.', enemies: [{ type: 'chunin', index: 0, count: 3 }], ryo: 700, exp: 220, turns: 3, npcId: 'gaara', relationshipGain: 10 }
+                ],
+                trainings: [
+                    { name: 'Defensa de arena', price: 700, description: '+2 Defensa (taijutsu)', effect: { taijutsu: 2 } }
+                ],
+                gifts: ['💊 Píldora de Chakra'],
+                rewards: { defenseBonus: 2 }
+            },
+            killerb: {
+                id: 'killerb',
+                name: 'Killer B',
+                icon: '🎤',
+                village: 'kumo',
+                rank: 'Jinchūriki',
+                level: 19,
+                personality: 'energetic',
+                relationship: 0,
+                relationshipLevel: 'Desconocido',
+                location: 'kumo',
+                availability: 'random',
+                stats: { hp: 560, chakra: 320, attack: 60, defense: 36, accuracy: 21, genjutsu: 8 },
+                dialogues: {
+                    first_meeting: ['¡Yo yo! ¿Listo para el ritmo?'],
+                    neutral: ['Entrena y rima, así se domina.'],
+                    friendly: ['Te mostraré un combo.'],
+                    best_friend: ['¡Mi hermano de batalla!'],
+                    rival: ['No te quedes atrás.'],
+                    enemy: ['No me fuerces a transformarme.']
+                },
+                interactions: ['talk', 'mission', 'training', 'gift', 'friendly_battle'],
+                missions: [
+                    { name: '🎶 Control de chakra (ritmo)', rank: 'C', description: 'Práctica de control y potencia.', enemies: [{ type: 'genin', index: 2, count: 2 }], ryo: 240, exp: 95, turns: 2, npcId: 'killerb', relationshipGain: 10 },
+                    { name: '⚔️ Sparring con espadas', rank: 'B', description: 'Duelo serio con B.', enemies: [{ type: 'chunin', index: 2, count: 3 }], ryo: 800, exp: 240, turns: 3, npcId: 'killerb', relationshipGain: 10 }
+                ],
+                trainings: [
+                    { name: 'Combo de 8 espadas', price: 650, description: '+3 Taijutsu', effect: { taijutsu: 3 } }
+                ],
+                gifts: ['🍙 Bento', '💊 Píldora Militar'],
+                rewards: { taijutsuBonus: 2 }
+            },
+            jiraiya: {
+                id: 'jiraiya',
+                name: 'Jiraiya',
+                icon: '🐸',
+                village: 'vagabundo',
+                rank: 'Sannin',
+                level: 20,
+                personality: 'mischievous',
+                relationship: 0,
+                relationshipLevel: 'Desconocido',
+                location: 'olas',
+                availability: 'event',
+                stats: { hp: 520, chakra: 420, attack: 56, defense: 34, accuracy: 21, genjutsu: 14 },
+                dialogues: {
+                    first_meeting: ['Heh... ¿un aprendiz?'],
+                    neutral: ['La experiencia vale más que mil golpes.'],
+                    friendly: ['Te enseñaré algo, pero no es gratis.'],
+                    best_friend: ['No me decepciones.'],
+                    rival: ['Te falta calle.'],
+                    enemy: ['Esto termina aquí.']
+                },
+                interactions: ['talk', 'mission', 'training', 'gift', 'friendly_battle'],
+                missions: [
+                    { name: '📚 Buscar información', rank: 'C', description: 'Reúne datos sobre un objetivo.', enemies: [{ type: 'genin', index: 1, count: 2 }], ryo: 260, exp: 110, turns: 2, npcId: 'jiraiya', relationshipGain: 10 },
+                    { name: '🐸 Prueba de invocación', rank: 'B', description: 'Sobrevive a una prueba exigente.', enemies: [{ type: 'chunin', index: 0, count: 3 }], ryo: 900, exp: 260, turns: 3, npcId: 'jiraiya', relationshipGain: 10 }
+                ],
+                trainings: [
+                    { name: 'Control sabio', price: 900, description: '+4 Ninjutsu, +2 Chakra regen', effect: { ninjutsu: 4 } }
+                ],
+                gifts: ['💊 Píldora de Chakra'],
+                rewards: { chakraRegenBonus: 2 }
+            },
+            tsunade: {
+                id: 'tsunade',
+                name: 'Tsunade',
+                icon: '🐌',
+                village: 'konoha',
+                rank: 'Sannin',
+                level: 20,
+                personality: 'strict',
+                relationship: 0,
+                relationshipLevel: 'Desconocido',
+                location: 'hokage_office',
+                availability: 'event',
+                stats: { hp: 600, chakra: 320, attack: 62, defense: 38, accuracy: 20, genjutsu: 12 },
+                dialogues: {
+                    first_meeting: ['No hagas perder mi tiempo.'],
+                    neutral: ['Aprende a sobrevivir.'],
+                    friendly: ['Puedo reforzar tu cuerpo.'],
+                    best_friend: ['Tienes madera de líder.'],
+                    rival: ['¿Eso es todo?'],
+                    enemy: ['Te aplastaré.']
+                },
+                interactions: ['talk', 'mission', 'training', 'gift', 'friendly_battle'],
+                missions: [
+                    { name: '🏥 Guardia del hospital', rank: 'C', description: 'Protege al personal médico.', enemies: [{ type: 'genin', index: 0, count: 3 }], ryo: 260, exp: 100, turns: 2, npcId: 'tsunade', relationshipGain: 10 },
+                    { name: '💪 Romper rocas', rank: 'B', description: 'Entrenamiento brutal de fuerza.', enemies: [{ type: 'chunin', index: 2, count: 2 }], ryo: 900, exp: 260, turns: 3, npcId: 'tsunade', relationshipGain: 10 }
+                ],
+                trainings: [
+                    { name: 'Fuerza monstruosa', price: 900, description: '+40 HP máx, +2 Taijutsu', effect: { maxHp: 40, taijutsu: 2 } }
+                ],
+                gifts: ['🍙 Bento', '💊 Píldora Militar'],
+                rewards: { maxHpBonus: 20 }
+            },
+            orochimaru: {
+                id: 'orochimaru',
+                name: 'Orochimaru',
+                icon: '🐍',
+                village: 'sound',
+                rank: 'Sannin',
+                level: 20,
+                personality: 'ambiguous',
+                relationship: 0,
+                relationshipLevel: 'Desconocido',
+                location: 'valle',
+                availability: 'event',
+                stats: { hp: 520, chakra: 460, attack: 58, defense: 33, accuracy: 22, genjutsu: 18 },
+                dialogues: {
+                    first_meeting: ['Qué interesante...'],
+                    neutral: ['El conocimiento es poder.'],
+                    friendly: ['Puedo ofrecerte mejoras.'],
+                    best_friend: ['No desperdicies tu potencial.'],
+                    rival: ['¿Podrás superarte?'],
+                    enemy: ['Tu cuerpo me servirá igual.']
+                },
+                interactions: ['talk', 'mission', 'training', 'gift', 'friendly_battle'],
+                missions: [
+                    { name: '🧪 Recuperar muestra', rank: 'B', description: 'Trae un frasco sellado. No lo abras.', enemies: [{ type: 'chunin', index: 1, count: 3 }], ryo: 1200, exp: 320, turns: 3, npcId: 'orochimaru', relationshipGain: 10 },
+                    { name: '🐍 Probar técnica', rank: 'A', description: 'Prueba una técnica peligrosa y sobrevive.', enemies: [{ type: 'jonin', index: 1, count: 2 }], ryo: 2500, exp: 500, turns: 4, npcId: 'orochimaru', relationshipGain: 10 }
+                ],
+                trainings: [
+                    { name: 'Experimento oscuro', price: 2500, description: '+60 Chakra máx', effect: { maxChakra: 60 } }
+                ],
+                gifts: ['💊 Píldora de Chakra'],
+                rewards: { unlockDarkTraining: true }
+            },
+            itachi: {
+                id: 'itachi',
+                name: 'Itachi Uchiha',
+                icon: '🌑',
+                village: 'event',
+                rank: 'Aparición',
+                level: 20,
+                personality: 'stoic',
+                relationship: 0,
+                relationshipLevel: 'Desconocido',
+                location: 'bosque',
+                availability: 'event',
+                stats: { hp: 470, chakra: 420, attack: 58, defense: 34, accuracy: 23, genjutsu: 22 },
+                dialogues: {
+                    first_meeting: ['La verdad llega tarde.'],
+                    neutral: ['Observa antes de actuar.'],
+                    friendly: ['Tu mirada es firme.'],
+                    best_friend: ['No pierdas tu camino.'],
+                    rival: ['Entiende el dolor.'],
+                    enemy: ['No hay vuelta atrás.']
+                },
+                interactions: ['talk', 'friendly_battle'],
+                missions: [],
+                trainings: [],
+                gifts: [],
+                rewards: {}
+            },
+            hinata: {
+                id: 'hinata',
+                name: 'Hinata Hyuga',
+                icon: '💜',
+                village: 'konoha',
+                rank: 'Chūnin',
+                level: 14,
+                personality: 'shy',
+                relationship: 0,
+                relationshipLevel: 'Desconocido',
+                location: 'konoha',
+                availability: 'always',
+                stats: { hp: 360, chakra: 240, attack: 45, defense: 28, accuracy: 20, genjutsu: 12 },
+                dialogues: {
+                    first_meeting: ['H-hola...'],
+                    neutral: ['Puedo ayudarte a entrenar.'],
+                    friendly: ['Estoy feliz de verte.'],
+                    best_friend: ['Gracias por creer en mí.'],
+                    rival: ['No perderé.'],
+                    enemy: ['No puedo hablar contigo.']
+                },
+                interactions: ['talk', 'mission', 'training', 'gift', 'friendly_battle'],
+                missions: [
+                    { name: '👁️ Práctica de Byakugan', rank: 'D', description: 'Entrena percepción y precisión.', enemies: [{ type: 'genin', index: 0, count: 1 }], ryo: 90, exp: 40, turns: 1, npcId: 'hinata', relationshipGain: 10 },
+                    { name: '🛡️ Patrulla silenciosa', rank: 'C', description: 'Evita un incidente en el barrio Hyuga.', enemies: [{ type: 'genin', index: 1, count: 2 }], ryo: 190, exp: 80, turns: 2, npcId: 'hinata', relationshipGain: 10 }
+                ],
+                trainings: [
+                    { name: 'Precisión suave', price: 250, description: '+2 Taijutsu, +1 Crítico', effect: { taijutsu: 2 } }
+                ],
+                gifts: ['🍜 Ramen Ichiraku'],
+                rewards: { evasionBonus: 0.05 }
+            },
+            shikamaru: {
+                id: 'shikamaru',
+                name: 'Shikamaru Nara',
+                icon: '🧠',
+                village: 'konoha',
+                rank: 'Consejero',
+                level: 18,
+                personality: 'lazy',
+                relationship: 0,
+                relationshipLevel: 'Desconocido',
+                location: 'konoha',
+                availability: 'always',
+                stats: { hp: 390, chakra: 320, attack: 46, defense: 30, accuracy: 22, genjutsu: 16 },
+                dialogues: {
+                    first_meeting: ['Qué problemático...'],
+                    neutral: ['Piensa dos turnos por adelantado.'],
+                    friendly: ['Te paso un plan rápido.'],
+                    best_friend: ['Confío en tus decisiones.'],
+                    rival: ['Veamos quién lee mejor el tablero.'],
+                    enemy: ['No voy a dudar.']
+                },
+                interactions: ['talk', 'mission', 'training', 'gift', 'friendly_battle'],
+                missions: [
+                    { name: '🗺️ Planear patrulla', rank: 'D', description: 'Diseña un recorrido de seguridad.', enemies: [{ type: 'genin', index: 0, count: 1 }], ryo: 110, exp: 45, turns: 1, npcId: 'shikamaru', relationshipGain: 10 },
+                    { name: '🕵️ Interceptar espías', rank: 'C', description: 'Evita fuga de información.', enemies: [{ type: 'genin', index: 2, count: 2 }], ryo: 220, exp: 90, turns: 2, npcId: 'shikamaru', relationshipGain: 10 }
+                ],
+                trainings: [
+                    { name: 'Estrategia', price: 400, description: '+2 Genjutsu (mente), +1 Ninjutsu', effect: { genjutsu: 2, ninjutsu: 1 } }
+                ],
+                gifts: ['🍙 Bento'],
+                rewards: { missionExpBonus: 0.05 }
+            },
+            temari: {
+                id: 'temari',
+                name: 'Temari',
+                icon: '🌪️',
+                village: 'suna',
+                rank: 'Jōnin',
+                level: 16,
+                personality: 'strict',
+                relationship: 0,
+                relationshipLevel: 'Desconocido',
+                location: 'suna',
+                availability: 'random',
+                stats: { hp: 420, chakra: 260, attack: 50, defense: 28, accuracy: 21, genjutsu: 12 },
+                dialogues: {
+                    first_meeting: ['No seas lento.'],
+                    neutral: ['El viento corta sin avisar.'],
+                    friendly: ['Te enseñaré a mantener distancia.'],
+                    best_friend: ['Bien. Eres confiable.'],
+                    rival: ['No me hagas repetirte.'],
+                    enemy: ['Te derribaré.']
+                },
+                interactions: ['talk', 'mission', 'training', 'gift', 'friendly_battle'],
+                missions: [
+                    { name: '💨 Patrulla de frontera', rank: 'C', description: 'Vigila rutas de comercio.', enemies: [{ type: 'genin', index: 1, count: 2 }], ryo: 260, exp: 95, turns: 2, npcId: 'temari', relationshipGain: 10 },
+                    { name: '🌪️ Cortar suministro', rank: 'B', description: 'Detén una banda en el desierto.', enemies: [{ type: 'chunin', index: 3, count: 2 }], ryo: 800, exp: 240, turns: 3, npcId: 'temari', relationshipGain: 10 }
+                ],
+                trainings: [
+                    { name: 'Técnicas de distancia', price: 500, description: '+2 Ninjutsu', effect: { ninjutsu: 2 } }
+                ],
+                gifts: ['💊 Píldora de Chakra'],
+                rewards: { ninjutsuBonus: 1 }
+            },
+            neji: {
+                id: 'neji',
+                name: 'Neji Hyuga',
+                icon: '🧿',
+                village: 'konoha',
+                rank: 'Jōnin',
+                level: 17,
+                personality: 'stoic',
+                relationship: 0,
+                relationshipLevel: 'Desconocido',
+                location: 'konoha',
+                availability: 'always',
+                stats: { hp: 430, chakra: 260, attack: 52, defense: 32, accuracy: 23, genjutsu: 12 },
+                dialogues: {
+                    first_meeting: ['El destino no es absoluto.'],
+                    neutral: ['La precisión es todo.'],
+                    friendly: ['Puedo corregir tu guardia.'],
+                    best_friend: ['Has crecido de verdad.'],
+                    rival: ['Te haré esforzarte.'],
+                    enemy: ['No retrocederé.']
+                },
+                interactions: ['talk', 'mission', 'training', 'gift', 'friendly_battle'],
+                missions: [
+                    { name: '👁️ Vigilancia Hyuga', rank: 'C', description: 'Protege un evento del clan.', enemies: [{ type: 'genin', index: 2, count: 2 }], ryo: 260, exp: 95, turns: 2, npcId: 'neji', relationshipGain: 10 },
+                    { name: '🧿 Técnica del vacío', rank: 'B', description: 'Sesión dura de taijutsu preciso.', enemies: [{ type: 'chunin', index: 2, count: 2 }], ryo: 900, exp: 260, turns: 3, npcId: 'neji', relationshipGain: 10 }
+                ],
+                trainings: [
+                    { name: 'Golpes de puntos', price: 550, description: '+2 Taijutsu, +2 Crítico', effect: { taijutsu: 2 } }
+                ],
+                gifts: ['🍙 Bento'],
+                rewards: { critBonus: 2 }
+            }
+        },
+
         // Clima
         weatherOptionsBySeason: {
             primavera: ['soleado', 'soleado', 'nublado', 'lluvia'],
@@ -142,6 +622,27 @@ export const BASE_GAME = {
                 hp: 100, chakra: 140, taijutsu: 12, ninjutsu: 19, genjutsu: 11,
                 element: 'fire'
             },
+            kaguya: {
+                name: 'Kaguya',
+                icon: '🦴',
+                description: 'Huesos vivientes',
+                hp: 125, chakra: 105, taijutsu: 20, ninjutsu: 10, genjutsu: 8,
+                element: 'earth'
+            },
+            yuki: {
+                name: 'Yuki',
+                icon: '❄️',
+                description: 'Hielo letal',
+                hp: 95, chakra: 130, taijutsu: 10, ninjutsu: 18, genjutsu: 12,
+                element: 'water'
+            },
+            hozuki: {
+                name: 'Hōzuki',
+                icon: '💧',
+                description: 'Cuerpo líquido',
+                hp: 110, chakra: 120, taijutsu: 13, ninjutsu: 16, genjutsu: 10,
+                element: 'water'
+            },
             rock_lee: {
                 name: 'Sin Clan (Lee)',
                 icon: '👊',
@@ -149,6 +650,34 @@ export const BASE_GAME = {
                 hp: 130, chakra: 50, taijutsu: 25, ninjutsu: 5, genjutsu: 5,
                 element: null
             }
+        },
+
+        // Reglas de Kekkei Genkai por clan
+        // type:
+        // - guaranteed: 100% asignado
+        // - chance: probabilidad sobre 100
+        // - none: nunca obtiene
+        clanKekkeiRules: {
+            // Garantizados
+            uchiha: { type: 'guaranteed', kekkei: 'Sharingan' },
+            hyuga: { type: 'guaranteed', kekkei: 'Byakugan' },
+            kaguya: { type: 'guaranteed', kekkei: 'Shikotsumyaku' },
+            yuki: { type: 'guaranteed', kekkei: 'Hyoton' },
+            hozuki: { type: 'guaranteed', kekkei: 'Suika no Jutsu' },
+
+            // Posibles (baja probabilidad)
+            senju: { type: 'chance', kekkei: 'Mokuton', chance: 5 },
+            uzumaki: { type: 'chance', kekkei: 'Modo Sabio', chance: 3 },
+            sarutobi: { type: 'chance', kekkei: 'Scorch Release', chance: 2 },
+            hatake: { type: 'chance', kekkei: 'Rinnegan', chance: 0.5 },
+
+            // Nunca (sin posibilidad)
+            nara: { type: 'none' },
+            akimichi: { type: 'none' },
+            aburame: { type: 'none' },
+            inuzuka: { type: 'none' },
+            yamanaka: { type: 'none' },
+            rock_lee: { type: 'none' }
         },
 
         kekkeiGenkaiList: [
@@ -159,7 +688,8 @@ export const BASE_GAME = {
                     { level: 1, name: '1 Aspa', exp: 0, bonus: { genjutsu: 3, critChance: 5 } },
                     { level: 2, name: '2 Aspas', exp: 100, bonus: { genjutsu: 5, critChance: 10 } },
                     { level: 3, name: '3 Aspas', exp: 300, bonus: { genjutsu: 8, critChance: 15 } },
-                    { level: 4, name: 'Mangekyō', exp: 600, bonus: { genjutsu: 12, critChance: 20, ninjutsu: 5 } }
+                    { level: 4, name: 'Mangekyō', exp: 600, bonus: { genjutsu: 12, critChance: 20, ninjutsu: 5 } },
+                    { level: 5, name: 'Eternal Mangekyō', exp: 1000, bonus: { genjutsu: 16, critChance: 28, ninjutsu: 10 } }
                 ]
             },
             { 
@@ -170,6 +700,32 @@ export const BASE_GAME = {
                     { level: 2, name: 'Intermedio', exp: 100, bonus: { taijutsu: 6, critChance: 15 } },
                     { level: 3, name: 'Avanzado', exp: 300, bonus: { taijutsu: 10, critChance: 22 } },
                     { level: 4, name: 'Tenseigan', exp: 700, bonus: { taijutsu: 15, critChance: 30, chakraRegen: 10 } }
+                ]
+            },
+            {
+                name: 'Shikotsumyaku',
+                chance: 0,
+                levels: [
+                    { level: 1, name: 'Básico', exp: 0, bonus: { taijutsu: 4, maxHp: 20 } },
+                    { level: 2, name: 'Avanzado', exp: 250, bonus: { taijutsu: 8, maxHp: 45, critChance: 6 } },
+                    { level: 3, name: 'Perfecto', exp: 650, bonus: { taijutsu: 12, maxHp: 80, critChance: 12 } }
+                ]
+            },
+            {
+                name: 'Hyoton',
+                chance: 0,
+                levels: [
+                    { level: 1, name: 'Básico', exp: 0, bonus: { ninjutsu: 5, critChance: 4 } },
+                    { level: 2, name: 'Avanzado', exp: 350, bonus: { ninjutsu: 10, critChance: 10, maxChakra: 30 } }
+                ]
+            },
+            {
+                name: 'Suika no Jutsu',
+                chance: 0,
+                levels: [
+                    { level: 1, name: 'Hidratación', exp: 0, bonus: { maxHp: 15, chakraRegen: 2 } },
+                    { level: 2, name: 'Licuefacción', exp: 220, bonus: { maxHp: 35, chakraRegen: 6, critChance: 5 } },
+                    { level: 3, name: 'Maestría', exp: 600, bonus: { maxHp: 65, chakraRegen: 10, critChance: 10 } }
                 ]
             },
             { 
@@ -187,6 +743,14 @@ export const BASE_GAME = {
                     { level: 1, name: 'Básico', exp: 0, bonus: { ninjutsu: 5, chakraRegen: 3 } },
                     { level: 2, name: 'Avanzado', exp: 150, bonus: { ninjutsu: 10, chakraRegen: 7 } },
                     { level: 3, name: 'Perfecto', exp: 400, bonus: { ninjutsu: 15, chakraRegen: 12, maxChakra: 50 } }
+                ]
+            },
+            {
+                name: 'Scorch Release',
+                chance: 2,
+                levels: [
+                    { level: 1, name: 'Despertar', exp: 0, bonus: { ninjutsu: 6, critChance: 6 } },
+                    { level: 2, name: 'Dominio', exp: 420, bonus: { ninjutsu: 12, critChance: 14, maxChakra: 40 } }
                 ]
             },
             { 

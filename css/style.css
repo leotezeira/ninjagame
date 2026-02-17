@@ -533,6 +533,61 @@
         display: block;
     }
 
+    .text-input {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 140, 0, 0.45);
+        background: rgba(0, 0, 0, 0.35);
+        color: var(--text);
+        box-shadow: 0 10px 22px rgba(0,0,0,0.25);
+    }
+
+    .text-input:focus {
+        outline: none;
+        border-color: rgba(255, 140, 0, 0.85);
+        box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.22);
+    }
+
+    #exam-widget {
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 215, 0, 0.40);
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin: 0 0 16px;
+        box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+    }
+
+    .npc-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+        margin-top: 10px;
+    }
+
+    .npc-card {
+        background: linear-gradient(135deg, rgba(45, 53, 97, 0.85) 0%, rgba(31, 37, 68, 0.85) 100%);
+        border: 1px solid rgba(74, 85, 131, 0.60);
+        border-radius: 12px;
+        padding: 12px;
+        cursor: pointer;
+        box-shadow: 0 10px 22px rgba(0,0,0,0.30);
+        transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .npc-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(255, 140, 0, 0.70);
+    }
+
+    .npc-modal {
+        margin-top: 14px;
+        padding: 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(74, 85, 131, 0.55);
+        background: rgba(0, 0, 0, 0.30);
+    }
+
     .victory {
         text-align: center;
         padding: 30px;
