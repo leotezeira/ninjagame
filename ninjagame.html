@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍥 Ninja RPG - Estilo Naruto</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-0: #0f1020;
+            --bg-1: #1a1a2e;
+            --bg-2: #0f3460;
+            --panel: rgba(0, 0, 0, 0.72);
+            --panel-2: rgba(0, 0, 0, 0.55);
+            --stroke: #4a5583;
+            --accent: #ff8c00;
+            --accent-2: #ff6b00;
+            --gold: #ffd700;
+            --text: #f0f0f0;
+            --muted: rgba(240, 240, 240, 0.75);
+            --shadow: rgba(0, 0, 0, 0.45);
+        }
+
+        html {
+            color-scheme: dark;
+            -webkit-text-size-adjust: 100%;
+        }
+
+    body {
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        background:
+            radial-gradient(1200px 600px at 50% -20%, rgba(255, 140, 0, 0.18), transparent 60%),
+            radial-gradient(900px 500px at 10% 10%, rgba(52, 152, 219, 0.14), transparent 55%),
+            radial-gradient(800px 500px at 90% 20%, rgba(241, 196, 15, 0.08), transparent 55%),
+            linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%);
+        color: var(--text);
+        min-height: 100vh;
+        padding: 14px;
+        line-height: 1.45;
+        letter-spacing: 0.2px;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::selection {
+        background: rgba(255, 140, 0, 0.35);
+    }
+
+    .game-container {
+        max-width: 920px;
+        margin: 0 auto;
+        background: var(--panel);
+        border-radius: 16px;
+        padding: 22px;
+        box-shadow:
+            0 18px 60px rgba(0, 0, 0, 0.55),
+            0 10px 40px rgba(255, 140, 0, 0.22);
+        border: 2px solid rgba(255, 140, 0, 0.65);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(8px);
+    }
+
+    .game-container::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background:
+            linear-gradient(180deg, rgba(255, 140, 0, 0.08), transparent 30%),
+            radial-gradient(900px 260px at 50% 0%, rgba(255, 140, 0, 0.12), transparent 70%),
+            repeating-linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.03) 0px,
+                rgba(255, 255, 255, 0.03) 2px,
+                transparent 2px,
+                transparent 10px
+            );
+        opacity: 0.85;
+    }
+
+    .game-container > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    h1 {
+        text-align: center;
+        color: var(--accent);
+        font-size: 2.35em;
+        margin-bottom: 18px;
+        text-shadow: 0 0 14px rgba(255, 140, 0, 0.35);
+        letter-spacing: 1.5px;
+    }
+
+    h2, h3, h4 {
+        letter-spacing: 0.4px;
+    }
+
+    p {
+        color: var(--muted);
+    }
+
+    .screen {
+        display: none;
+    }
+
+    .screen.active {
+        display: block;
+        animation: fadeIn 0.5s;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .screen.active {
+            animation: none;
+        }
+
+        .log-entry {
+            animation: none;
+        }
+
+        .kekkei-genkai-notification {
+            animation: none;
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .clan-select {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .clan-card {
+        background: linear-gradient(135deg, rgba(45, 53, 97, 0.95) 0%, rgba(31, 37, 68, 0.95) 100%);
+        border: 2px solid rgba(74, 85, 131, 0.95);
+        border-radius: 10px;
+        padding: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+    }
+
+    .clan-card:hover {
+        transform: scale(1.05);
+        border-color: #ff8c00;
+        box-shadow: 0 5px 20px rgba(255, 140, 0, 0.4);
+    }
+
+    .clan-card:active {
+        transform: scale(1.02);
+    }
+
+    .clan-card h3 {
+        color: #ff8c00;
+        margin-bottom: 10px;
+        font-size: 1.3em;
+    }
+
+    .clan-stats {
+        text-align: left;
+        margin-top: 10px;
+        font-size: 0.85em;
+    }
+
+    .stat {
+        margin: 3px 0;
+        padding: 5px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 5px;
+        border: 1px solid rgba(74, 85, 131, 0.35);
+    }
+
+    .btn {
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+        color: #fff;
+        border: none;
+        padding: 12px 25px;
+        font-size: 1em;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin: 8px 5px;
+        box-shadow:
+            0 10px 18px rgba(0, 0, 0, 0.35),
+            0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+        letter-spacing: 0.3px;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(255, 140, 0, 0.5);
+    }
+
+    .btn:active {
+        transform: translateY(0);
+        filter: brightness(0.98);
+    }
+
+    .btn:focus-visible,
+    .tab-btn:focus-visible,
+    .jutsu-btn:focus-visible,
+    .clan-card:focus-visible,
+    .mission-card:focus-visible,
+    .jutsu-card:focus-visible {
+        outline: 3px solid rgba(255, 140, 0, 0.35);
+        outline-offset: 2px;
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-small {
+        padding: 8px 15px;
+        font-size: 0.9em;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    }
+
+    .player-info {
+        background: var(--panel-2);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(255, 140, 0, 0.55);
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .info-item {
+        background: rgba(74, 85, 131, 0.22);
+        padding: 10px;
+        border-radius: 5px;
+        text-align: center;
+        border: 1px solid rgba(74, 85, 131, 0.38);
+    }
+
+    .health-bar, .chakra-bar {
+        width: 100%;
+        height: 25px;
+        background: #333;
+        border-radius: 15px;
+        overflow: hidden;
+        margin: 8px 0;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35) inset;
+    }
+
+    .health-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
+        transition: width 0.5s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 0.9em;
+        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+    }
+
+    .chakra-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #3498db 0%, #2980b9 100%);
+        transition: width 0.5s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 0.9em;
+        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+    }
+
+    .combat-area {
+        background: rgba(20, 20, 40, 0.72);
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        border: 1px solid rgba(255, 140, 0, 0.55);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .enemy-info {
+        background: rgba(139, 0, 0, 0.3);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(139, 0, 0, 0.85);
+    }
+
+    .combat-log {
+        background: rgba(0, 0, 0, 0.6);
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+        max-height: 250px;
+        overflow-y: auto;
+        border: 1px solid #4a5583;
+        font-size: 0.9em;
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35) inset;
+    }
+
+    .combat-log::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .combat-log::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 10px;
+    }
+
+    .combat-log::-webkit-scrollbar-thumb {
+        background: rgba(255, 140, 0, 0.35);
+        border-radius: 10px;
+        border: 2px solid rgba(0, 0, 0, 0.25);
+    }
+
+    .combat-log::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 140, 0, 0.5);
+    }
+
+    .log-entry {
+        padding: 6px;
+        margin: 4px 0;
+        border-radius: 5px;
+        animation: slideIn 0.3s;
+    }
+
+    @keyframes slideIn {
+        from { transform: translateX(-20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    .log-attack { background: rgba(231, 76, 60, 0.3); border-left: 3px solid #e74c3c; }
+    .log-damage { background: rgba(192, 57, 43, 0.3); border-left: 3px solid #c0392b; }
+    .log-heal { background: rgba(46, 204, 113, 0.3); border-left: 3px solid #2ecc71; }
+    .log-miss { background: rgba(149, 165, 166, 0.3); border-left: 3px solid #95a5a6; }
+    .log-special { background: rgba(255, 140, 0, 0.3); border-left: 3px solid #ff8c00; }
+
+    .dice-roll {
+        display: inline-block;
+        background: #ff8c00;
+        color: #fff;
+        padding: 2px 6px;
+        border-radius: 5px;
+        font-weight: bold;
+        margin: 0 3px;
+    }
+
+    .story-text {
+        background: rgba(0, 0, 0, 0.4);
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        line-height: 1.8;
+        font-size: 1.05em;
+        border-left: 4px solid #ff8c00;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+    }
+
+    .story-text h2 {
+        letter-spacing: 0.6px;
+        text-shadow: 0 0 14px rgba(255, 140, 0, 0.25);
+    }
+
+    .mission-list, .jutsu-academy-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .mission-card, .jutsu-card {
+        background: rgba(74, 85, 131, 0.22);
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #ff8c00;
+        cursor: pointer;
+        transition: all 0.3s;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        border-right: 1px solid rgba(255, 255, 255, 0.04);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+    }
+
+    .mission-card:hover, .jutsu-card:hover {
+        background: rgba(74, 85, 131, 0.38);
+        transform: translateX(6px);
+    }
+
+    .mission-card h4, .jutsu-card h4 {
+        color: #ff8c00;
+        margin-bottom: 8px;
+    }
+
+    .shop-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .shop-item {
+        background: rgba(74, 85, 131, 0.22);
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid rgba(74, 85, 131, 0.6);
+        box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
+        transition: transform 0.2s, background 0.2s, border-color 0.2s;
+    }
+
+    .shop-item:hover {
+        transform: translateY(-2px);
+        background: rgba(74, 85, 131, 0.32);
+        border-color: rgba(255, 140, 0, 0.45);
+    }
+
+    .shop-item h4 {
+        color: #ff8c00;
+        margin-bottom: 8px;
+    }
+
+    .shop-item .price {
+        color: var(--gold);
+        font-weight: bold;
+        margin: 8px 0;
+    }
+
+    .jutsu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .jutsu-btn {
+        background: rgba(52, 152, 219, 0.3);
+        border: 2px solid #3498db;
+        padding: 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: left;
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
+    }
+
+    .jutsu-btn:hover:not(:disabled) {
+        background: rgba(52, 152, 219, 0.5);
+        transform: scale(1.05);
+    }
+
+    .jutsu-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    .jutsu-btn h4 {
+        color: #3498db;
+        margin-bottom: 5px;
+    }
+
+    .kekkei-genkai-notification {
+        background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+        color: #000;
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        margin: 20px 0;
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.22);
+        border: 1px solid rgba(74, 85, 131, 0.45);
+        border-radius: 12px;
+    }
+
+    .tab-btn {
+        background: rgba(74, 85, 131, 0.5);
+        border: 2px solid #4a5583;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        color: #fff;
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+        user-select: none;
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+        border-color: rgba(255, 140, 0, 0.95);
+        box-shadow: 0 10px 22px rgba(255, 140, 0, 0.25);
+    }
+
+    .tab-btn:hover:not(.active) {
+        transform: translateY(-1px);
+        background: rgba(74, 85, 131, 0.65);
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .victory {
+        text-align: center;
+        padding: 30px;
+        background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+        border-radius: 10px;
+        color: #000;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+    }
+
+    .defeat {
+        text-align: center;
+        padding: 30px;
+        background: linear-gradient(135deg, #8b0000 0%, #c0392b 100%);
+        border-radius: 10px;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+    }
+
+    .kekkei-level {
+        background: rgba(255, 215, 0, 0.2);
+        border: 2px solid #ffd700;
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 10px;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 20px;
+        background: #333;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 8px 0;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35) inset;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #ffd700 0%, #ff8c00 100%);
+        transition: width 0.5s;
+    }
+
+    @media (max-width: 600px) {
+        .game-container {
+            padding: 15px;
+        }
+        
+        h1 {
+            font-size: 1.8em;
+        }
+
+        .tabs {
+            padding: 8px;
+        }
+
+        .tab-btn {
+            flex: 1 1 auto;
+        }
+        
+        .clan-select {
+            grid-template-columns: 1fr;
+        }
+
+        .shop-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .element-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 5px;
+        font-size: 0.85em;
+        font-weight: bold;
+        margin: 3px;
+    }
+
+    .element-fire { background: #e74c3c; color: white; }
+    .element-water { background: #3498db; color: white; }
+    .element-wind { background: #95a5a6; color: white; }
+    .element-earth { background: #795548; color: white; }
+    .element-lightning { background: #f1c40f; color: black; }
+
+    .learned-jutsu {
+        background: rgba(46, 204, 113, 0.3);
+        border: 2px solid #2ecc71;
+        padding: 10px;
+        border-radius: 8px;
+        margin: 5px 0;
+    }
+
+    /* Mejor consistencia visual en contenido generado (stats/inventario) */
+    #stats-display .player-info {
+        margin-top: 15px;
+    }
+
+    #stats-display h3 {
+        color: var(--accent);
+        margin-bottom: 10px;
+        text-shadow: 0 0 12px rgba(255, 140, 0, 0.25);
+    }
+
+    #combat-items-list .mission-card,
+    #combat-items-list .jutsu-card,
+    #combat-items-list .shop-item {
+        margin: 8px 0;
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="game-container">
+        <h1>🍥 NINJA RPG 🍥</h1>
+
+```
+    <!-- Pantalla de Inicio con Load -->
+    <div id="start-screen" class="screen active">
+        <div class="story-text">
+            <h2 style="color: #ff8c00; text-align: center; margin-bottom: 15px;">Bienvenido a la Aldea Oculta</h2>
+            <p>En un mundo donde el poder del chakra fluye a través de todo ser vivo, los ninjas son los guerreros más poderosos.</p>
+            <p>Nacerás en uno de los clanes más prestigiosos de Konoha. Tu destino está por comenzar...</p>
+            <p style="margin-top: 15px; color: #ffd700;">⚡ Los Kekkei Genkai son extremadamente raros...</p>
+        </div>
+        <div style="text-align: center;">
+            <button class="btn" onclick="game.showClanSelect()">Nueva Partida</button>
+            <button class="btn btn-secondary" onclick="game.loadGame()" id="load-btn">Cargar Partida</button>
+        </div>
+    </div>
+
+    <!-- Selección de Clan -->
+    <div id="clan-screen" class="screen">
+        <h2 style="text-align: center; color: #ff8c00; margin-bottom: 20px;">Elige Tu Clan</h2>
+        <div class="clan-select" id="clan-select"></div>
+    </div>
+
+    <!-- Sorteo de Kekkei Genkai -->
+    <div id="kekkei-screen" class="screen">
+        <div class="kekkei-genkai-notification" id="kekkei-result">
+            <h2>🌟 Realizando Sorteo de Kekkei Genkai... 🌟</h2>
+        </div>
+        <div style="text-align: center;">
+            <button class="btn" onclick="game.finishCharacterCreation()">Continuar</button>
+        </div>
+    </div>
+
+    <!-- Pantalla Principal (Aldea) -->
+    <div id="village-screen" class="screen">
+        <div class="player-info">
+            <h2 id="player-name-village" style="color: #ff8c00;">Ninja</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <div class="health-bar">
+                        <div class="health-fill" id="village-health-bar">HP: 100/100</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="chakra-bar">
+                        <div class="chakra-fill" id="village-chakra-bar">Chakra: 100/100</div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-grid">
+                <div class="info-item">🥷 Rango: <span id="player-rank">Genin</span></div>
+                <div class="info-item">⭐ Nivel: <span id="player-level-village">1</span></div>
+                <div class="info-item">💰 Ryo: <span id="player-ryo">100</span></div>
+                <div class="info-item">✨ EXP: <span id="player-exp-village">0/100</span></div>
+            </div>
+            <div id="kekkei-display" style="margin-top: 10px;"></div>
+            <div id="element-display" style="margin-top: 5px; text-align: center;"></div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 15px;">
+            <button class="btn btn-small btn-secondary" onclick="game.saveGame()">💾 Guardar Partida</button>
+            <button class="btn btn-small" onclick="game.restInVillage()">😴 Descansar (Recuperar todo)</button>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="game.showTab('missions')">📜 Misiones</button>
+            <button class="tab-btn" onclick="game.showTab('academy')">🎓 Academia</button>
+            <button class="tab-btn" onclick="game.showTab('shop')">🏪 Tienda</button>
+            <button class="tab-btn" onclick="game.showTab('training')">💪 Entrenamiento</button>
+            <button class="tab-btn" onclick="game.showTab('stats')">📊 Stats</button>
+        </div>
+
+        <div id="missions-tab" class="tab-content active">
+            <h3 style="color: #ff8c00;">Misiones Disponibles</h3>
+            <div class="mission-list" id="mission-list"></div>
+        </div>
+
+        <div id="academy-tab" class="tab-content">
+            <h3 style="color: #ff8c00;">🎓 Academia Ninja</h3>
+            <p style="margin: 10px 0;">Aprende nuevos jutsus pagando con Ryo. Los jutsus más poderosos requieren un rango ninja más alto.</p>
+            
+            <div class="tabs" style="margin-top: 20px;">
+                <button class="tab-btn active" onclick="game.showJutsuRank('genin')">Genin</button>
+                <button class="tab-btn" onclick="game.showJutsuRank('chunin')">Chunin</button>
+                <button class="tab-btn" onclick="game.showJutsuRank('jonin')">Jonin</button>
+                <button class="tab-btn" onclick="game.showJutsuRank('master')">Maestros</button>
+            </div>
+            
+            <div class="jutsu-academy-list" id="academy-jutsu-list"></div>
+        </div>
+
+        <div id="shop-tab" class="tab-content">
+            <h3 style="color: #ff8c00;">Tienda de la Aldea</h3>
+            <div class="shop-grid" id="shop-list"></div>
+        </div>
+
+        <div id="training-tab" class="tab-content">
+            <h3 style="color: #ff8c00;">Centro de Entrenamiento</h3>
+            <div class="shop-grid" id="training-list"></div>
+        </div>
+
+        <div id="stats-tab" class="tab-content">
+            <h3 style="color: #ff8c00;">Tus Estadísticas</h3>
+            <div id="stats-display"></div>
+        </div>
+    </div>
+
+    <!-- Combate -->
+    <div id="combat-screen" class="screen">
+        <div class="player-info">
+            <h3 id="combat-player-name">Tu Ninja</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <div class="health-bar">
+                        <div class="health-fill" id="combat-player-health-bar">HP: 100/100</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="chakra-bar">
+                        <div class="chakra-fill" id="combat-player-chakra-bar">Chakra: 100/100</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="combat-area">
+            <div class="enemy-info">
+                <h3 id="enemy-name">Enemigo</h3>
+                <div class="health-bar">
+                    <div class="health-fill" id="enemy-health-bar" style="background: linear-gradient(90deg, #8b0000 0%, #660000 100%);">HP: 50/50</div>
+                </div>
+                <p id="enemy-stats"></p>
+            </div>
+
+            <div class="combat-log" id="combat-log"></div>
+
+            <div style="text-align: center; margin-top: 15px;">
+                <button class="btn btn-small" onclick="game.basicAttack()" id="attack-btn">⚔️ Taijutsu</button>
+                <button class="btn btn-small" onclick="game.toggleJutsuMenu()" id="jutsu-menu-btn">🌀 Ninjutsu</button>
+                <button class="btn btn-small" onclick="game.useGenjutsu()" id="genjutsu-btn">👁️ Genjutsu</button>
+                <button class="btn btn-small" onclick="game.defend()" id="defend-btn">🛡️ Defender</button>
+                <button class="btn btn-small" onclick="game.useKawarimi()" id="kawarimi-btn">💨 Kawarimi</button>
+                <button class="btn btn-small" onclick="game.showInventoryInCombat()" id="item-btn">🎒 Items</button>
+            </div>
+
+            <div id="jutsu-selection" style="display: none; margin-top: 15px;">
+                <h4 style="color: #3498db;">Selecciona un Jutsu:</h4>
+                <div class="jutsu-grid" id="jutsu-list"></div>
+            </div>
+
+            <div id="combat-inventory" style="display: none; margin-top: 15px;">
+                <h4 style="color: #2ecc71;">Items Disponibles:</h4>
+                <div id="combat-items-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Victoria de Misión -->
+    <div id="mission-victory-screen" class="screen">
+        <div class="victory">
+            <h2>🎉 ¡MISIÓN COMPLETADA! 🎉</h2>
+            <p id="mission-victory-text"></p>
+            <div id="kekkei-exp-gain" style="margin-top: 15px;"></div>
+            <button class="btn" onclick="game.returnToVillage()">Regresar a la Aldea</button>
+        </div>
+    </div>
+
+    <!-- Derrota -->
+    <div id="defeat-screen" class="screen">
+        <div class="defeat">
+            <h2>💀 HAS CAÍDO EN BATALLA 💀</h2>
+            <p>El camino del ninja es difícil...</p>
+            <p style="margin-top: 15px;">Tu personaje ha muerto. Debes crear uno nuevo.</p>
+            <button class="btn" onclick="game.deleteCharacterAndRestart()">Crear Nuevo Personaje</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const game = {
+        player: null,
+        currentEnemy: null,
+        currentMission: null,
+        enemyQueue: [],
+        currentWave: 0,
+        totalWaves: 0,
+        combatTurn: 'player',
+        kawairimiUsed: false,
+        defendActive: false,
+        
+        clans: {
+            uchiha: {
+                name: 'Uchiha',
+                icon: '🔥',
+                description: 'Clan del fuego',
+                hp: 100, chakra: 120, taijutsu: 12, ninjutsu: 18, genjutsu: 15,
+                element: 'fire'
+            },
+            uzumaki: {
+                name: 'Uzumaki',
+                icon: '🌀',
+                description: 'Vitalidad extrema',
+                hp: 140, chakra: 150, taijutsu: 15, ninjutsu: 14, genjutsu: 8,
+                element: 'wind'
+            },
+            hyuga: {
+                name: 'Hyuga',
+                icon: '👁️',
+                description: 'Visión perfecta',
+                hp: 110, chakra: 100, taijutsu: 20, ninjutsu: 10, genjutsu: 12,
+                element: 'water'
+            },
+            nara: {
+                name: 'Nara',
+                icon: '🦌',
+                description: 'Estrategas',
+                hp: 90, chakra: 110, taijutsu: 10, ninjutsu: 15, genjutsu: 18,
+                element: 'earth'
+            },
+            akimichi: {
+                name: 'Akimichi',
+                icon: '🍖',
+                description: 'Fuerza colosal',
+                hp: 150, chakra: 90, taijutsu: 18, ninjutsu: 12, genjutsu: 8,
+                element: 'earth'
+            },
+            aburame: {
+                name: 'Aburame',
+                icon: '🐛',
+                description: 'Control de insectos',
+                hp: 95, chakra: 115, taijutsu: 11, ninjutsu: 16, genjutsu: 14,
+                element: 'earth'
+            },
+            inuzuka: {
+                name: 'Inuzuka',
+                icon: '🐺',
+                description: 'Vínculo bestial',
+                hp: 115, chakra: 95, taijutsu: 17, ninjutsu: 11, genjutsu: 10,
+                element: 'earth'
+            },
+            yamanaka: {
+                name: 'Yamanaka',
+                icon: '🌸',
+                description: 'Control mental',
+                hp: 85, chakra: 125, taijutsu: 9, ninjutsu: 13, genjutsu: 20,
+                element: 'water'
+            },
+            hatake: {
+                name: 'Hatake',
+                icon: '⚡',
+                description: 'Copistas',
+                hp: 105, chakra: 130, taijutsu: 14, ninjutsu: 17, genjutsu: 13,
+                element: 'lightning'
+            },
+            senju: {
+                name: 'Senju',
+                icon: '🌳',
+                description: 'Equilibrio perfecto',
+                hp: 120, chakra: 120, taijutsu: 15, ninjutsu: 15, genjutsu: 15,
+                element: 'earth'
+            },
+            sarutobi: {
+                name: 'Sarutobi',
+                icon: '🔮',
+                description: 'Maestros elementales',
+                hp: 100, chakra: 140, taijutsu: 12, ninjutsu: 19, genjutsu: 11,
+                element: 'fire'
+            },
+            rock_lee: {
+                name: 'Sin Clan (Lee)',
+                icon: '👊',
+                description: 'Puro Taijutsu',
+                hp: 130, chakra: 50, taijutsu: 25, ninjutsu: 5, genjutsu: 5,
+                element: null
+            }
+        },
+
+        kekkeiGenkaiList: [
+            { 
+                name: 'Sharingan', 
+                chance: 3, 
+                levels: [
+                    { level: 1, name: '1 Aspa', exp: 0, bonus: { genjutsu: 3, critChance: 5 } },
+                    { level: 2, name: '2 Aspas', exp: 100, bonus: { genjutsu: 5, critChance: 10 } },
+                    { level: 3, name: '3 Aspas', exp: 300, bonus: { genjutsu: 8, critChance: 15 } },
+                    { level: 4, name: 'Mangekyō', exp: 600, bonus: { genjutsu: 12, critChance: 20, ninjutsu: 5 } }
+                ]
+            },
+            { 
+                name: 'Byakugan', 
+                chance: 3, 
+                levels: [
+                    { level: 1, name: 'Básico', exp: 0, bonus: { taijutsu: 3, critChance: 8 } },
+                    { level: 2, name: 'Intermedio', exp: 100, bonus: { taijutsu: 6, critChance: 15 } },
+                    { level: 3, name: 'Avanzado', exp: 300, bonus: { taijutsu: 10, critChance: 22 } },
+                    { level: 4, name: 'Tenseigan', exp: 700, bonus: { taijutsu: 15, critChance: 30, chakraRegen: 10 } }
+                ]
+            },
+            { 
+                name: 'Rinnegan', 
+                chance: 0.5, 
+                levels: [
+                    { level: 1, name: '6 Caminos', exp: 0, bonus: { all: 10, critChance: 25 } },
+                    { level: 2, name: 'Rinne-Sharingan', exp: 500, bonus: { all: 20, critChance: 40 } }
+                ]
+            },
+            { 
+                name: 'Modo Sabio', 
+                chance: 2, 
+                levels: [
+                    { level: 1, name: 'Básico', exp: 0, bonus: { ninjutsu: 5, chakraRegen: 3 } },
+                    { level: 2, name: 'Avanzado', exp: 150, bonus: { ninjutsu: 10, chakraRegen: 7 } },
+                    { level: 3, name: 'Perfecto', exp: 400, bonus: { ninjutsu: 15, chakraRegen: 12, maxChakra: 50 } }
+                ]
+            },
+            { 
+                name: 'Mokuton', 
+                chance: 1.5, 
+                levels: [
+                    { level: 1, name: 'Básico', exp: 0, bonus: { ninjutsu: 4, maxHp: 15 } },
+                    { level: 2, name: 'Hashirama', exp: 200, bonus: { ninjutsu: 8, maxHp: 40 } }
+                ]
+            }
+        ],
+
+        elements: {
+            fire: { name: 'Fuego (Katon)', icon: '🔥', bonus: 'Daño quemadura' },
+            water: { name: 'Agua (Suiton)', icon: '💧', bonus: '+Defensa' },
+            wind: { name: 'Viento (Futon)', icon: '💨', bonus: '+Velocidad' },
+            earth: { name: 'Tierra (Doton)', icon: '🪨', bonus: '+HP' },
+            lightning: { name: 'Rayo (Raiton)', icon: '⚡', bonus: '+Crítico' }
+        },
+
+        academyJutsus: {
+            genin: [
+                { name: 'Katon: Pequeña Llama', rank: 'D', price: 100, chakra: 15, damage: 20, element: 'fire', description: 'Jutsu básico de fuego' },
+                { name: 'Suiton: Bala de Agua', rank: 'D', price: 100, chakra: 15, damage: 18, element: 'water', description: 'Dispara agua' },
+                { name: 'Futon: Ventisca', rank: 'D', price: 100, chakra: 15, damage: 22, element: 'wind', description: 'Ráfaga de viento' },
+                { name: 'Doton: Pared de Tierra', rank: 'D', price: 100, chakra: 20, damage: 0, effect: 'defense', element: 'earth', description: '+Defensa temporal' },
+                { name: 'Raiton: Chispa', rank: 'D', price: 100, chakra: 15, damage: 19, element: 'lightning', description: 'Descarga eléctrica' },
+                { name: 'Kage Bunshin', rank: 'C', price: 300, chakra: 40, damage: 0, effect: 'clone', description: 'Crea un clon' },
+                { name: 'Shunshin', rank: 'C', price: 250, chakra: 30, damage: 0, effect: 'speed', description: 'Aumenta velocidad' }
+            ],
+            chunin: [
+                { name: 'Katon: Gran Bola de Fuego', rank: 'C', price: 500, chakra: 35, damage: 45, element: 'fire', description: 'Bola de fuego poderosa' },
+                { name: 'Suiton: Dragón de Agua', rank: 'B', price: 800, chakra: 50, damage: 60, element: 'water', description: 'Dragón de agua' },
+                { name: 'Futon: Rasengan', rank: 'B', price: 1000, chakra: 60, damage: 70, element: 'wind', description: 'Esfera de chakra' },
+                { name: 'Doton: Prisión de Tierra', rank: 'B', price: 700, chakra: 45, damage: 40, effect: 'stun', element: 'earth', description: 'Atrapa al enemigo' },
+                { name: 'Raiton: Chidori', rank: 'B', price: 1200, chakra: 55, damage: 75, element: 'lightning', description: 'Mil pájaros' },
+                { name: 'Invocación: Animal', rank: 'B', price: 900, chakra: 50, damage: 50, effect: 'summon', description: 'Invoca un aliado' }
+            ],
+            jonin: [
+                { name: 'Katon: Majestuosa Destrucción', rank: 'A', price: 2000, chakra: 80, damage: 100, element: 'fire', description: 'Mar de llamas' },
+                { name: 'Suiton: Gran Cascada', rank: 'A', price: 2200, chakra: 85, damage: 110, element: 'water', description: 'Tsunami devastador' },
+                { name: 'Futon: Rasen-Shuriken', rank: 'A', price: 2500, chakra: 90, damage: 120, element: 'wind', description: 'Rasengan definitivo' },
+                { name: 'Raiton: Kirin', rank: 'A', price: 2800, chakra: 95, damage: 130, element: 'lightning', description: 'Bestia de rayos' },
+                { name: 'Shinra Tensei', rank: 'S', price: 5000, chakra: 120, damage: 150, description: 'Rechaza todo' }
+            ],
+            master: [
+                { name: 'Edo Tensei', rank: 'S', price: 10000, chakra: 150, damage: 0, effect: 'revive', description: 'Maestro: Resurrección prohibida' },
+                { name: 'Kamui', rank: 'S', price: 8000, chakra: 100, damage: 80, effect: 'teleport', description: 'Maestro: Espacio-tiempo' },
+                { name: 'Tsukuyomi', rank: 'S', price: 7000, chakra: 90, damage: 0, effect: 'mega_genjutsu', description: 'Maestro: Genjutsu supremo' },
+                { name: 'Amaterasu', rank: 'S', price: 6000, chakra: 85, damage: 90, effect: 'burn_permanent', description: 'Maestro: Llamas eternas' }
+            ]
+        },
+
+        shopItems: {
+            consumables: [
+                { name: '🍜 Ramen Ichiraku', price: 50, effect: { hp: 30 }, description: 'Recupera 30 HP' },
+                { name: '🍙 Bento', price: 80, effect: { hp: 50 }, description: 'Recupera 50 HP' },
+                { name: '💊 Píldora de Chakra', price: 100, effect: { chakra: 50 }, description: 'Recupera 50 Chakra' },
+                { name: '💊 Píldora Militar', price: 150, effect: { hp: 80, chakra: 30 }, description: 'Recupera HP y Chakra' },
+                { name: '💊 Píldora 3 Colores', price: 300, effect: { buff: true }, description: '+5 stats por 3 turnos' }
+            ],
+            weapons: [
+                { name: '🗡️ Kunai Básico', price: 100, effect: { taijutsu: 2 }, description: '+2 Taijutsu' },
+                { name: '🗡️ Kunai Explosivo', price: 250, effect: { taijutsu: 4 }, description: '+4 Taijutsu' },
+                { name: '⚔️ Espada Ninja', price: 500, effect: { taijutsu: 6 }, description: '+6 Taijutsu' },
+                { name: '⚔️ Katana Chakra', price: 1000, effect: { taijutsu: 8, chakraCost: -10 }, description: '+8 Tai, -10% costo chakra' },
+                { name: '🔱 Kubikiribōchō', price: 3000, effect: { taijutsu: 15, lifesteal: true }, description: '+15 Tai, drena HP' }
+            ],
+            armor: [
+                { name: '🛡️ Chaleco Genin', price: 200, effect: { maxHp: 10 }, description: '+10 HP máx' },
+                { name: '🛡️ Chaleco Chunin', price: 500, effect: { maxHp: 20, defense: 5 }, description: '+20 HP, +5% defensa' },
+                { name: '🛡️ Armadura ANBU', price: 1200, effect: { maxHp: 40, defense: 10 }, description: '+40 HP, +10% defensa' },
+                { name: '🛡️ Manto Kage', price: 2500, effect: { maxHp: 60, defense: 15 }, description: '+60 HP, +15% defensa' }
+            ]
+        },
+
+        training: [
+            { name: '💪 Entrenamiento Taijutsu', price: 400, effect: { taijutsu: 3 }, description: '+3 Taijutsu permanente' },
+            { name: '🧘 Entrenamiento Ninjutsu', price: 400, effect: { ninjutsu: 3 }, description: '+3 Ninjutsu permanente' },
+            { name: '🌀 Entrenamiento Genjutsu', price: 400, effect: { genjutsu: 3 }, description: '+3 Genjutsu permanente' },
+            { name: '⚡ Aumentar Chakra', price: 350, effect: { maxChakra: 20 }, description: '+20 Chakra máximo' },
+            { name: '❤️ Aumentar HP', price: 350, effect: { maxHp: 15 }, description: '+15 HP máximo' }
+        ],
+
+        enemies: {
+            genin: [
+                { name: 'Bandido', hp: 50, chakra: 20, attack: 12, defense: 6, accuracy: 5, exp: 25, ryo: 50 },
+                { name: 'Ninja Renegado Genin', hp: 80, chakra: 40, attack: 15, defense: 8, accuracy: 7, exp: 30, ryo: 75 },
+                { name: 'Lobo Salvaje', hp: 60, chakra: 10, attack: 14, defense: 5, accuracy: 8, exp: 28, ryo: 60 }
+            ],
+            chunin: [
+                { name: 'Ninja de la Niebla', hp: 140, chakra: 80, attack: 20, defense: 12, accuracy: 10, exp: 50, ryo: 150 },
+                { name: 'Ninja de la Arena', hp: 130, chakra: 90, attack: 22, defense: 11, accuracy: 11, exp: 55, ryo: 160 },
+                { name: 'Escuadrón Enemigo (Líder)', hp: 160, chakra: 100, attack: 24, defense: 14, accuracy: 12, exp: 60, ryo: 180 },
+                { name: 'Ninja de la Roca', hp: 180, chakra: 70, attack: 26, defense: 16, accuracy: 10, exp: 65, ryo: 200 }
+            ],
+            jonin: [
+                { name: 'Jonin Élite', hp: 220, chakra: 120, attack: 28, defense: 18, accuracy: 14, exp: 80, ryo: 300 },
+                { name: 'Jinchuriki Menor', hp: 260, chakra: 150, attack: 32, defense: 20, accuracy: 15, exp: 100, ryo: 400 },
+                { name: 'ANBU Renegado', hp: 240, chakra: 140, attack: 30, defense: 22, accuracy: 16, exp: 90, ryo: 350 }
+            ],
+            akatsuki: [
+                { name: 'Hidan', hp: 350, chakra: 180, attack: 38, defense: 25, accuracy: 18, exp: 150, ryo: 800 },
+                { name: 'Kakuzu', hp: 400, chakra: 170, attack: 40, defense: 28, accuracy: 19, exp: 160, ryo: 850 },
+                { name: 'Sasori', hp: 320, chakra: 200, attack: 36, defense: 24, accuracy: 20, exp: 155, ryo: 820 },
+                { name: 'Deidara', hp: 340, chakra: 220, attack: 42, defense: 22, accuracy: 17, exp: 165, ryo: 880 },
+                { name: 'Orochimaru', hp: 450, chakra: 250, attack: 45, defense: 30, accuracy: 21, exp: 200, ryo: 1000 }
+            ],
+            boss: [
+                { name: 'Pain (Tendō)', hp: 600, chakra: 300, attack: 50, defense: 35, accuracy: 23, exp: 300, ryo: 2000 },
+                { name: 'Madara Uchiha', hp: 800, chakra: 400, attack: 60, defense: 40, accuracy: 25, exp: 500, ryo: 5000 },
+                { name: 'Kaguya Ōtsutsuki', hp: 1000, chakra: 500, attack: 70, defense: 45, accuracy: 28, exp: 800, ryo: 10000 }
+            ]
+        },
+
+        missions: {
+            genin: [
+                { name: 'Capturar al Gato Perdido', rank: 'D', description: 'El gato del Daimyo escapó...', enemies: [{ type: 'genin', index: 0, count: 1 }], ryo: 50, exp: 25 },
+                { name: 'Limpiar el Río', rank: 'D', description: 'Bandidos ensucian el río.', enemies: [{ type: 'genin', index: 0, count: 2 }], ryo: 100, exp: 40 },
+                { name: 'Escoltar Comerciante', rank: 'C', description: 'Protege al comerciante. Grupo de bandidos.', enemies: [{ type: 'genin', index: 0, count: 2 }, { type: 'genin', index: 1, count: 1 }], ryo: 250, exp: 60 },
+                { name: 'Recuperar Pergamino', rank: 'C', description: 'Ninja renegado y sus guardias.', enemies: [{ type: 'genin', index: 1, count: 1 }, { type: 'genin', index: 2, count: 1 }], ryo: 350, exp: 70 }
+            ],
+            chunin: [
+                { name: 'Patrulla Fronteriza', rank: 'B', description: 'Escuadrón enemigo detectado.', enemies: [{ type: 'chunin', index: 0, count: 2 }], ryo: 500, exp: 80 },
+                { name: 'Defender Aldea Aliada', rank: 'B', description: 'Múltiples ninjas atacan.', enemies: [{ type: 'chunin', index: 0, count: 1 }, { type: 'chunin', index: 1, count: 2 }], ryo: 700, exp: 120 },
+                { name: 'Infiltración', rank: 'B', description: 'Base enemiga fuertemente custodiada.', enemies: [{ type: 'chunin', index: 1, count: 1 }, { type: 'chunin', index: 3, count: 1 }], ryo: 800, exp: 130 },
+                { name: 'Rescate de Rehén', rank: 'A', description: 'Equipo élite guarda al prisionero.', enemies: [{ type: 'chunin', index: 2, count: 1 }, { type: 'jonin', index: 0, count: 1 }], ryo: 1000, exp: 150 }
+            ],
+            jonin: [
+                { name: 'Escuadrón de Élite', rank: 'A', description: 'Grupo de Jonin renegados.', enemies: [{ type: 'jonin', index: 0, count: 2 }], ryo: 1500, exp: 180 },
+                { name: 'Proteger al Daimyo', rank: 'A', description: 'Oleada de asesinos de élite.', enemies: [{ type: 'jonin', index: 1, count: 1 }, { type: 'jonin', index: 2, count: 1 }], ryo: 1800, exp: 210 },
+                { name: 'Enfrentar Akatsuki', rank: 'A', description: 'Miembro de Akatsuki con refuerzos.', enemies: [{ type: 'akatsuki', index: 0, count: 1 }, { type: 'jonin', index: 0, count: 1 }], ryo: 2000, exp: 250 },
+                { name: 'Destruir Base de Orochimaru', rank: 'S', description: 'Orochimaru y sus guardianes.', enemies: [{ type: 'akatsuki', index: 4, count: 1 }, { type: 'jonin', index: 2, count: 2 }], ryo: 2500, exp: 300 }
+            ],
+            kage: [
+                { name: 'Detener a Akatsuki', rank: 'S', description: 'Dos miembros de Akatsuki juntos!', enemies: [{ type: 'akatsuki', index: 1, count: 1 }, { type: 'akatsuki', index: 3, count: 1 }], ryo: 4000, exp: 400 },
+                { name: 'Invasión de Pain', rank: 'S', description: 'Pain y varios cuerpos!', enemies: [{ type: 'boss', index: 0, count: 1 }, { type: 'akatsuki', index: 0, count: 2 }], ryo: 6000, exp: 500 },
+                { name: 'Enfrentar a Madara', rank: 'S', description: 'Madara Uchiha. Batalla suprema.', enemies: [{ type: 'boss', index: 1, count: 1 }], ryo: 8000, exp: 600 },
+                { name: 'Guerra Ninja Final', rank: 'S', description: 'Kaguya Ōtsutsuki. El fin de todo.', enemies: [{ type: 'boss', index: 2, count: 1 }], ryo: 15000, exp: 1000 }
+            ]
+        },
+
+        rollDice(sides = 20) {
+            return Math.floor(Math.random() * sides) + 1;
+        },
+
+        showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        },
+
+        showClanSelect() {
+            const container = document.getElementById('clan-select');
+            container.innerHTML = '';
+            
+            Object.keys(this.clans).forEach(clanKey => {
+                const clan = this.clans[clanKey];
+                const card = document.createElement('div');
+                card.className = 'clan-card';
+                card.onclick = () => this.selectClan(clanKey);
+                
+                card.innerHTML = `
+                    <h3>${clan.icon} ${clan.name}</h3>
+                    <p>${clan.description}</p>
+                    <div class="clan-stats">
+                        <div class="stat">❤️ HP: ${clan.hp}</div>
+                        <div class="stat">💙 Chakra: ${clan.chakra}</div>
+                        <div class="stat">👊 Taijutsu: ${clan.taijutsu}</div>
+                        <div class="stat">🌀 Ninjutsu: ${clan.ninjutsu}</div>
+                        <div class="stat">👁️ Genjutsu: ${clan.genjutsu}</div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            this.showScreen('clan-screen');
+        },
+
+        selectClan(clanKey) {
+            const clan = this.clans[clanKey];
+            this.player = {
+                clan: clan.name,
+                clanKey: clanKey,
+                maxHp: clan.hp,
+                hp: clan.hp,
+                maxChakra: clan.chakra,
+                chakra: clan.chakra,
+                taijutsu: clan.taijutsu,
+                ninjutsu: clan.ninjutsu,
+                genjutsu: clan.genjutsu,
+                level: 1,
+                exp: 0,
+                expToNext: 100,
+                ryo: 500,
+                rank: 'Genin',
+                element: clan.element,
+                inventory: [],
+                learnedJutsus: [],
+                kekkeiGenkai: null,
+                kekkeiLevel: 0,
+                kekkeiExp: 0,
+                permanentBonuses: {},
+                combatsWon: 0
+            };
+            
+            this.doKekkeiGenkaiRoll();
+        },
+
+        doKekkeiGenkaiRoll() {
+            this.showScreen('kekkei-screen');
+            
+            setTimeout(() => {
+                const roll = Math.random() * 100;
+                let wonKekkei = null;
+                
+                for (let kg of this.kekkeiGenkaiList) {
+                    if (roll <= kg.chance) {
+                        wonKekkei = kg;
+                        break;
+                    }
+                }
+                
+                const resultDiv = document.getElementById('kekkei-result');
+                
+                if (wonKekkei) {
+                    this.player.kekkeiGenkai = wonKekkei;
+                    this.player.kekkeiLevel = 1;
+                    this.player.kekkeiExp = 0;
+                    this.applyKekkeiGenkaiBonuses();
+                    
+                    resultDiv.innerHTML = `
+                        <h2>🌟 ¡KEKKEI GENKAI DESBLOQUEADO! 🌟</h2>
+                        <h1 style="font-size: 2.5em; margin: 20px 0;">${wonKekkei.name}</h1>
+                        <p style="font-size: 1.2em;">${wonKekkei.levels[0].name}</p>
+                        <p style="margin-top: 15px; color: #000;">¡Eres uno de los POCOS elegidos! (${kg.chance}% de probabilidad)</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <h2>Sorteo de Kekkei Genkai</h2>
+                        <p style="font-size: 1.2em; margin: 20px 0;">No fuiste bendecido con un Kekkei Genkai...</p>
+                        <p>Los Kekkei Genkai son extremadamente raros. Tu determinación te hará fuerte.</p>
+                    `;
+                    resultDiv.style.background = 'linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%)';
+                }
+            }, 1000);
+        },
+
+        applyKekkeiGenkaiBonuses() {
+            if (!this.player.kekkeiGenkai) return;
+            
+            const currentLevel = this.player.kekkeiGenkai.levels[this.player.kekkeiLevel - 1];
+            const bonus = currentLevel.bonus;
+            
+            if (bonus.all) {
+                this.player.taijutsu += bonus.all;
+                this.player.ninjutsu += bonus.all;
+                this.player.genjutsu += bonus.all;
+            }
+            if (bonus.taijutsu) this.player.taijutsu += bonus.taijutsu;
+            if (bonus.ninjutsu) this.player.ninjutsu += bonus.ninjutsu;
+            if (bonus.genjutsu) this.player.genjutsu += bonus.genjutsu;
+            if (bonus.maxHp) {
+                this.player.maxHp += bonus.maxHp;
+                this.player.hp = this.player.maxHp;
+            }
+            if (bonus.maxChakra) {
+                this.player.maxChakra += bonus.maxChakra;
+                this.player.chakra = this.player.maxChakra;
+            }
+            
+            this.player.critChance = bonus.critChance || 0;
+            this.player.chakraRegen = bonus.chakraRegen || 0;
+        },
+
+        finishCharacterCreation() {
+            this.showScreen('village-screen');
+            this.updateVillageUI();
+            this.showMissions();
+            this.saveGame();
+        },
+
+        updateVillageUI() {
+            document.getElementById('player-name-village').textContent = `${this.player.clan} Ninja`;
+            document.getElementById('player-rank').textContent = this.player.rank;
+            document.getElementById('player-level-village').textContent = this.player.level;
+            document.getElementById('player-ryo').textContent = this.player.ryo;
+            document.getElementById('player-exp-village').textContent = `${this.player.exp}/${this.player.expToNext}`;
+            
+            this.updateBar('village-health-bar', this.player.hp, this.player.maxHp, 'HP');
+            this.updateBar('village-chakra-bar', this.player.chakra, this.player.maxChakra, 'Chakra');
+            
+            const kekkeiDisplay = document.getElementById('kekkei-display');
+            if (this.player.kekkeiGenkai) {
+                const currentLevel = this.player.kekkeiGenkai.levels[this.player.kekkeiLevel - 1];
+                const nextLevel = this.player.kekkeiGenkai.levels[this.player.kekkeiLevel];
+                
+                let html = `<div class="kekkei-level">
+                    <div style="text-align: center;">
+                        <span style="background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; padding: 5px 15px; border-radius: 8px; font-weight: bold;">
+                            ⚡ ${this.player.kekkeiGenkai.name} - ${currentLevel.name}
+                        </span>
+                    </div>`;
+                
+                if (nextLevel) {
+                    const expNeeded = nextLevel.exp - this.player.kekkeiExp;
+                    const progress = (this.player.kekkeiExp / nextLevel.exp) * 100;
+                    html += `
+                        <p style="margin-top: 10px; text-align: center; font-size: 0.9em;">
+                            EXP Kekkei: ${this.player.kekkeiExp} / ${nextLevel.exp}
+                        </p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress}%"></div>
+                        </div>
+                        <p style="text-align: center; font-size: 0.85em; color: #ffd700;">
+                            Próximo: ${nextLevel.name} (${expNeeded} EXP)
+                        </p>`;
+                } else {
+                    html += `<p style="margin-top: 10px; text-align: center; color: #ffd700;">¡NIVEL MÁXIMO!</p>`;
+                }
+                
+                html += `</div>`;
+                kekkeiDisplay.innerHTML = html;
+            } else {
+                kekkeiDisplay.innerHTML = '';
+            }
+            
+            const elementDisplay = document.getElementById('element-display');
+            if (this.player.element) {
+                const elem = this.elements[this.player.element];
+                elementDisplay.innerHTML = `<span class="element-badge element-${this.player.element}">${elem.icon} ${elem.name}</span>`;
+            }
+        },
+
+        updateBar(elementId, current, max, label) {
+            const bar = document.getElementById(elementId);
+            const percentage = (current / max) * 100;
+            bar.style.width = percentage + '%';
+            bar.textContent = `${label}: ${Math.max(0, Math.floor(current))}/${max}`;
+        },
+
+        showTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            if (tabName === 'missions') this.showMissions();
+            else if (tabName === 'academy') this.showAcademy('genin');
+            else if (tabName === 'shop') this.showShop();
+            else if (tabName === 'training') this.showTraining();
+            else if (tabName === 'stats') this.showStats();
+        },
+
+        showMissions() {
+            const missionList = document.getElementById('mission-list');
+            missionList.innerHTML = '';
+            
+            let availableMissions = [];
+            
+            if (this.player.rank === 'Genin') {
+                availableMissions = this.missions.genin;
+            } else if (this.player.rank === 'Chunin') {
+                availableMissions = this.missions.chunin;
+            } else if (this.player.rank === 'Jonin') {
+                availableMissions = this.missions.jonin;
+            } else if (this.player.rank === 'ANBU' || this.player.rank === 'Kage') {
+                availableMissions = this.missions.kage;
+            }
+            
+            availableMissions.forEach(mission => {
+                const card = document.createElement('div');
+                card.className = 'mission-card';
+                card.onclick = () => this.startMission(mission);
+                
+                card.innerHTML = `
+                    <h4>📜 ${mission.name} [Rango ${mission.rank}]</h4>
+                    <p>${mission.description}</p>
+                    <p style="color: #ffd700; margin-top: 8px;">Recompensa: ${mission.ryo} Ryo | ${mission.exp} EXP</p>
+                `;
+                
+                missionList.appendChild(card);
+            });
+        },
+
+        showAcademy(rank) {
+            const jutsuList = document.getElementById('academy-jutsu-list');
+            jutsuList.innerHTML = '';
+            
+            const jutsus = this.academyJutsus[rank] || [];
+            
+            jutsus.forEach(jutsu => {
+                const isLearned = this.player.learnedJutsus.some(j => j.name === jutsu.name);
+                
+                const card = document.createElement('div');
+                card.className = isLearned ? 'learned-jutsu' : 'jutsu-card';
+                
+                if (!isLearned) {
+                    card.onclick = () => this.learnJutsu(jutsu);
+                }
+                
+                card.innerHTML = `
+                    <h4>${isLearned ? '✅' : '📖'} ${jutsu.name} [${jutsu.rank}]</h4>
+                    <p>${jutsu.description}</p>
+                    <p style="margin-top: 5px;">💙 ${jutsu.chakra} Chakra | ${jutsu.damage > 0 ? `⚔️ ${jutsu.damage} daño` : '🌀 Efecto especial'}</p>
+                    <p style="color: ${isLearned ? '#2ecc71' : '#ffd700'}; margin-top: 8px;">
+                        ${isLearned ? 'APRENDIDO' : `💰 ${jutsu.price} Ryo`}
+                    </p>
+                `;
+                
+                jutsuList.appendChild(card);
+            });
+        },
+
+        showJutsuRank(rank) {
+            this.showAcademy(rank);
+        },
+
+        learnJutsu(jutsu) {
+            if (this.player.ryo < jutsu.price) {
+                alert('¡No tienes suficiente Ryo!');
+                return;
+            }
+            
+            const alreadyLearned = this.player.learnedJutsus.some(j => j.name === jutsu.name);
+            if (alreadyLearned) {
+                alert('Ya aprendiste este jutsu!');
+                return;
+            }
+            
+            this.player.ryo -= jutsu.price;
+            this.player.learnedJutsus.push(jutsu);
+            
+            alert(`¡Has aprendido ${jutsu.name}!`);
+            this.updateVillageUI();
+            this.showAcademy(document.querySelector('.tab-btn.active').textContent.toLowerCase().trim());
+            this.saveGame();
+        },
+
+        showShop() {
+            const shopList = document.getElementById('shop-list');
+            shopList.innerHTML = '<h4 style="grid-column: 1/-1; color: #ff8c00;">Consumibles</h4>';
+            
+            this.shopItems.consumables.forEach(item => {
+                const card = this.createShopCard(item);
+                shopList.appendChild(card);
+            });
+            
+            shopList.innerHTML += '<h4 style="grid-column: 1/-1; color: #ff8c00; margin-top: 20px;">Armas</h4>';
+            this.shopItems.weapons.forEach(item => {
+                const card = this.createShopCard(item);
+                shopList.appendChild(card);
+            });
+            
+            shopList.innerHTML += '<h4 style="grid-column: 1/-1; color: #ff8c00; margin-top: 20px;">Armaduras</h4>';
+            this.shopItems.armor.forEach(item => {
+                const card = this.createShopCard(item);
+                shopList.appendChild(card);
+            });
+        },
+
+        createShopCard(item) {
+            const card = document.createElement('div');
+            card.className = 'shop-item';
+            
+            card.innerHTML = `
+                <h4>${item.name}</h4>
+                <p>${item.description}</p>
+                <p class="price">💰 ${item.price} Ryo</p>
+                <button class="btn btn-small" onclick='game.buyItem(${JSON.stringify(item).replace(/'/g, "\\'")})'>Comprar</button>
+            `;
+            
+            return card;
+        },
+
+        buyItem(item) {
+            if (this.player.ryo < item.price) {
+                alert('¡No tienes suficiente Ryo!');
+                return;
+            }
+            
+            this.player.ryo -= item.price;
+            
+            if (item.effect.hp || item.effect.chakra || item.effect.buff) {
+                this.player.inventory.push({ name: item.name, effect: item.effect });
+                alert(`¡Compraste ${item.name}! Ahora está en tu inventario.`);
+            } else {
+                if (item.effect.taijutsu) this.player.taijutsu += item.effect.taijutsu;
+                if (item.effect.maxHp) {
+                    this.player.maxHp += item.effect.maxHp;
+                    this.player.hp += item.effect.maxHp;
+                }
+                alert(`¡Compraste ${item.name}! Tus stats han mejorado.`);
+            }
+            
+            this.updateVillageUI();
+            this.saveGame();
+        },
+
+        showTraining() {
+            const trainingList = document.getElementById('training-list');
+            trainingList.innerHTML = '';
+            
+            this.training.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'shop-item';
+                
+                card.innerHTML = `
+                    <h4>${item.name}</h4>
+                    <p>${item.description}</p>
+                    <p class="price">💰 ${item.price} Ryo</p>
+                    <button class="btn btn-small" onclick='game.doTraining(${JSON.stringify(item).replace(/'/g, "\\'")})'>Entrenar</button>
+                `;
+                
+                trainingList.appendChild(card);
+            });
+        },
+
+        doTraining(item) {
+            if (this.player.ryo < item.price) {
+                alert('¡No tienes suficiente Ryo!');
+                return;
+            }
+            
+            this.player.ryo -= item.price;
+            
+            if (item.effect.taijutsu) this.player.taijutsu += item.effect.taijutsu;
+            if (item.effect.ninjutsu) this.player.ninjutsu += item.effect.ninjutsu;
+            if (item.effect.genjutsu) this.player.genjutsu += item.effect.genjutsu;
+            if (item.effect.maxChakra) {
+                this.player.maxChakra += item.effect.maxChakra;
+                this.player.chakra += item.effect.maxChakra;
+            }
+            if (item.effect.maxHp) {
+                this.player.maxHp += item.effect.maxHp;
+                this.player.hp += item.effect.maxHp;
+            }
+            
+            alert(`¡Entrenamiento completado! ${item.name}`);
+            this.updateVillageUI();
+            this.saveGame();
+        },
+
+        showStats() {
+            const statsDisplay = document.getElementById('stats-display');
+            statsDisplay.innerHTML = `
+                <div class="player-info">
+                    <h3 style="color: #ff8c00;">${this.player.clan} Ninja</h3>
+                    <div class="info-grid">
+                        <div class="info-item">❤️ HP: ${Math.floor(this.player.hp)}/${this.player.maxHp}</div>
+                        <div class="info-item">💙 Chakra: ${Math.floor(this.player.chakra)}/${this.player.maxChakra}</div>
+                        <div class="info-item">👊 Taijutsu: ${this.player.taijutsu}</div>
+                        <div class="info-item">🌀 Ninjutsu: ${this.player.ninjutsu}</div>
+                        <div class="info-item">👁️ Genjutsu: ${this.player.genjutsu}</div>
+                        <div class="info-item">⭐ Nivel: ${this.player.level}</div>
+                        <div class="info-item">🥷 Rango: ${this.player.rank}</div>
+                        <div class="info-item">💰 Ryo: ${this.player.ryo}</div>
+                        <div class="info-item">🏆 Combates: ${this.player.combatsWon}</div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <h4 style="color: #ff8c00;">📚 Jutsus Aprendidos (${this.player.learnedJutsus.length})</h4>
+                        ${this.player.learnedJutsus.length === 0 ? '<p>Ninguno - Ve a la Academia</p>' : 
+                            this.player.learnedJutsus.map(jutsu => `<div class="stat">${jutsu.name} [${jutsu.rank}]</div>`).join('')}
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <h4 style="color: #ff8c00;">🎒 Inventario (${this.player.inventory.length})</h4>
+                        ${this.player.inventory.length === 0 ? '<p>Vacío</p>' : 
+                            this.player.inventory.map(item => `<div class="stat">${item.name}</div>`).join('')}
+                    </div>
+                </div>
+            `;
+        },
+
+        restInVillage() {
+            this.player.hp = this.player.maxHp;
+            this.player.chakra = this.player.maxChakra;
+            alert('Has descansado completamente. HP y Chakra restaurados.');
+            this.updateVillageUI();
+            this.saveGame();
+        },
+
+        saveGame() {
+            try {
+                localStorage.setItem('ninjaRPGSave', JSON.stringify(this.player));
+                console.log('Partida guardada');
+            } catch(e) {
+                console.error('Error guardando:', e);
+            }
+        },
+
+        loadGame() {
+            try {
+                const save = localStorage.getItem('ninjaRPGSave');
+                if (!save) {
+                    alert('No hay partida guardada');
+                    return;
+                }
+                
+                this.player = JSON.parse(save);
+                this.showScreen('village-screen');
+                this.updateVillageUI();
+                this.showMissions();
+                alert('¡Partida cargada!');
+            } catch(e) {
+                console.error('Error cargando:', e);
+                alert('Error al cargar la partida');
+            }
+        },
+
+        deleteCharacterAndRestart() {
+            localStorage.removeItem('ninjaRPGSave');
+            location.reload();
+        },
+
+        startMission(mission) {
+            this.currentMission = mission;
+            this.enemyQueue = [];
+            
+            // Crear cola de enemigos basado en la misión
+            mission.enemies.forEach(enemyGroup => {
+                for (let i = 0; i < enemyGroup.count; i++) {
+                    const enemyTemplate = this.enemies[enemyGroup.type][enemyGroup.index];
+                    this.enemyQueue.push({ ...enemyTemplate, maxHp: enemyTemplate.hp, maxChakra: enemyTemplate.chakra });
+                }
+            });
+            
+            this.totalWaves = this.enemyQueue.length;
+            this.currentWave = 1;
+            
+            // Iniciar con el primer enemigo
+            this.currentEnemy = this.enemyQueue.shift();
+            this.startCombat();
+        },
+
+        startCombat() {
+            this.showScreen('combat-screen');
+            this.combatLog = [];
+            document.getElementById('combat-log').innerHTML = '';
+            this.kawairimiUsed = false;
+            this.defendActive = false;
+            
+            document.getElementById('combat-player-name').textContent = this.player.clan + ' Ninja';
+            document.getElementById('enemy-name').textContent = this.currentEnemy.name + 
+                (this.totalWaves > 1 ? ` (${this.currentWave}/${this.totalWaves})` : '');
+            document.getElementById('enemy-stats').textContent = 
+                `⚔️ Ataque: ${this.currentEnemy.attack} | 🛡️ Defensa: ${this.currentEnemy.defense} | 🎯 Precisión: +${this.currentEnemy.accuracy}`;
+            
+            this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
+            this.updateBar('combat-player-chakra-bar', this.player.chakra, this.player.maxChakra, 'Chakra');
+            this.updateBar('enemy-health-bar', this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+            
+            if (this.currentWave === 1) {
+                this.addCombatLog(`¡Misión iniciada! ${this.totalWaves > 1 ? this.totalWaves + ' enemigos detectados!' : 'Un enemigo aparece!'}`, 'log-special');
+            }
+            this.addCombatLog(`¡${this.currentEnemy.name} aparece!`, 'log-attack');
+            
+            this.combatTurn = 'player';
+            this.enableCombatButtons();
+        },
+
+        addCombatLog(message, className = '') {
+            const log = document.getElementById('combat-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${className}`;
+            entry.innerHTML = message;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        },
+
+        enableCombatButtons() {
+            document.getElementById('attack-btn').disabled = false;
+            document.getElementById('jutsu-menu-btn').disabled = false;
+            document.getElementById('genjutsu-btn').disabled = false;
+            document.getElementById('defend-btn').disabled = false;
+            document.getElementById('kawarimi-btn').disabled = this.kawairimiUsed;
+            document.getElementById('item-btn').disabled = false;
+        },
+
+        disableCombatButtons() {
+            document.getElementById('attack-btn').disabled = true;
+            document.getElementById('jutsu-menu-btn').disabled = true;
+            document.getElementById('genjutsu-btn').disabled = true;
+            document.getElementById('defend-btn').disabled = true;
+            document.getElementById('kawarimi-btn').disabled = true;
+            document.getElementById('item-btn').disabled = true;
+        },
+
+        basicAttack() {
+            if (this.combatTurn !== 'player') return;
+            
+            this.disableCombatButtons();
+            document.getElementById('jutsu-selection').style.display = 'none';
+            document.getElementById('combat-inventory').style.display = 'none';
+
+            const attackRoll = this.rollDice(20);
+            const isCrit = attackRoll === 20 || (this.rollDice(100) <= (this.player.critChance || 0));
+            const totalAttack = attackRoll + this.player.taijutsu;
+            const enemyDefense = 10 + this.currentEnemy.defense;
+
+            this.addCombatLog(`Atacas con Taijutsu: <span class="dice-roll">${attackRoll}</span> + ${this.player.taijutsu} = ${totalAttack}`, 'log-attack');
+
+            if (totalAttack >= enemyDefense || isCrit) {
+                const damageRoll = this.rollDice(8);
+                let damage = Math.max(1, damageRoll + Math.floor(this.player.taijutsu / 2));
+                
+                if (isCrit) {
+                    damage *= 2;
+                    this.addCombatLog('¡CRÍTICO! Daño duplicado', 'log-special');
+                }
+                
+                this.currentEnemy.hp -= damage;
+                this.addCombatLog(`¡Impacto! Infliges ${damage} de daño.`, 'log-damage');
+                this.updateBar('enemy-health-bar', this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                
+                if (this.currentEnemy.hp <= 0) {
+                    this.winCombat();
+                    return;
+                }
+            } else {
+                this.addCombatLog('¡Fallaste el ataque!', 'log-miss');
+            }
+
+            setTimeout(() => this.enemyTurn(), 1500);
+        },
+
+        toggleJutsuMenu() {
+            const menu = document.getElementById('jutsu-selection');
+            const inventory = document.getElementById('combat-inventory');
+            inventory.style.display = 'none';
+            
+            if (menu.style.display === 'none') {
+                menu.style.display = 'block';
+                this.loadJutsuList();
+            } else {
+                menu.style.display = 'none';
+            }
+        },
+
+        loadJutsuList() {
+            const jutsuList = document.getElementById('jutsu-list');
+            jutsuList.innerHTML = '';
+            
+            if (this.player.learnedJutsus.length === 0) {
+                jutsuList.innerHTML = '<p>No has aprendido jutsus. Ve a la Academia.</p>';
+                return;
+            }
+            
+            this.player.learnedJutsus.forEach(jutsu => {
+                const btn = document.createElement('button');
+                btn.className = 'jutsu-btn';
+                btn.disabled = this.player.chakra < jutsu.chakra;
+                btn.onclick = () => this.useJutsu(jutsu);
+                
+                btn.innerHTML = `
+                    <h4>${jutsu.name}</h4>
+                    <p style="font-size: 0.85em;">${jutsu.description}</p>
+                    <p style="color: #3498db; margin-top: 5px;">💙 ${jutsu.chakra} Chakra</p>
+                    ${jutsu.damage > 0 ? `<p style="color: #e74c3c;">⚔️ ${jutsu.damage} daño</p>` : ''}
+                `;
+                
+                jutsuList.appendChild(btn);
+            });
+        },
+
+        useJutsu(jutsu) {
+            if (this.player.chakra < jutsu.chakra) return;
+            
+            this.player.chakra -= jutsu.chakra;
+            this.updateBar('combat-player-chakra-bar', this.player.chakra, this.player.maxChakra, 'Chakra');
+            
+            this.disableCombatButtons();
+            document.getElementById('jutsu-selection').style.display = 'none';
+            
+            this.addCombatLog(`Usas ${jutsu.name}!`, 'log-special');
+            
+            if (jutsu.damage > 0) {
+                const damage = jutsu.damage + Math.floor(this.player.ninjutsu / 2);
+                this.currentEnemy.hp -= damage;
+                this.addCombatLog(`¡Infliges ${damage} de daño!`, 'log-damage');
+                this.updateBar('enemy-health-bar', this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                
+                if (this.currentEnemy.hp <= 0) {
+                    this.winCombat();
+                    return;
+                }
+            }
+            
+            setTimeout(() => this.enemyTurn(), 1500);
+        },
+
+        useGenjutsu() {
+            if (this.combatTurn !== 'player') return;
+            
+            if (this.player.chakra < 30) {
+                alert('No tienes suficiente chakra!');
+                return;
+            }
+            
+            this.player.chakra -= 30;
+            this.updateBar('combat-player-chakra-bar', this.player.chakra, this.player.maxChakra, 'Chakra');
+            
+            this.disableCombatButtons();
+            document.getElementById('jutsu-selection').style.display = 'none';
+            document.getElementById('combat-inventory').style.display = 'none';
+
+            const genjutsuRoll = this.rollDice(20) + this.player.genjutsu;
+            const enemyResist = this.rollDice(20) + (this.currentEnemy.genjutsu || 5);
+            
+            this.addCombatLog(`Lanzas Genjutsu: <span class="dice-roll">${genjutsuRoll}</span> vs ${enemyResist}`, 'log-special');
+            
+            if (genjutsuRoll > enemyResist) {
+                this.addCombatLog('¡El enemigo está aturdido! Pierde su turno.', 'log-special');
+                setTimeout(() => {
+                    this.combatTurn = 'player';
+                    this.enableCombatButtons();
+                }, 1500);
+            } else {
+                this.addCombatLog('¡El enemigo resistió el Genjutsu!', 'log-miss');
+                setTimeout(() => this.enemyTurn(), 1500);
+            }
+        },
+
+        defend() {
+            if (this.combatTurn !== 'player') return;
+            
+            this.disableCombatButtons();
+            document.getElementById('jutsu-selection').style.display = 'none';
+            document.getElementById('combat-inventory').style.display = 'none';
+            
+            this.defendActive = true;
+            const chakraRegen = 20 + (this.player.chakraRegen || 0);
+            this.player.chakra = Math.min(this.player.chakra + chakraRegen, this.player.maxChakra);
+            
+            this.addCombatLog(`Te defiendes y recuperas ${chakraRegen} chakra.`, 'log-heal');
+            this.updateBar('combat-player-chakra-bar', this.player.chakra, this.player.maxChakra, 'Chakra');
+            
+            setTimeout(() => this.enemyTurn(), 1500);
+        },
+
+        useKawarimi() {
+            if (this.kawairimiUsed) {
+                alert('Ya usaste Kawarimi en este combate!');
+                return;
+            }
+            
+            this.kawairimiUsed = true;
+            this.addCombatLog('¡Preparas Kawarimi! Evitarás el próximo ataque.', 'log-special');
+            document.getElementById('kawarimi-btn').disabled = true;
+        },
+
+        showInventoryInCombat() {
+            const menu = document.getElementById('combat-inventory');
+            const jutsuMenu = document.getElementById('jutsu-selection');
+            jutsuMenu.style.display = 'none';
+            
+            if (menu.style.display === 'none') {
+                menu.style.display = 'block';
+                this.loadCombatInventory();
+            } else {
+                menu.style.display = 'none';
+            }
+        },
+
+        loadCombatInventory() {
+            const itemsList = document.getElementById('combat-items-list');
+            itemsList.innerHTML = '';
+            
+            if (this.player.inventory.length === 0) {
+                itemsList.innerHTML = '<p>No tienes items.</p>';
+                return;
+            }
+            
+            this.player.inventory.forEach((item, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-small';
+                btn.style.width = '100%';
+                btn.style.marginBottom = '5px';
+                btn.onclick = () => this.useItemInCombat(index);
+                btn.textContent = item.name;
+                itemsList.appendChild(btn);
+            });
+        },
+
+        useItemInCombat(index) {
+            const item = this.player.inventory[index];
+            
+            if (item.effect.hp) {
+                this.player.hp = Math.min(this.player.hp + item.effect.hp, this.player.maxHp);
+                this.addCombatLog(`Usas ${item.name} y recuperas ${item.effect.hp} HP.`, 'log-heal');
+                this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
+            }
+            
+            if (item.effect.chakra) {
+                this.player.chakra = Math.min(this.player.chakra + item.effect.chakra, this.player.maxChakra);
+                this.addCombatLog(`Recuperas ${item.effect.chakra} Chakra.`, 'log-heal');
+                this.updateBar('combat-player-chakra-bar', this.player.chakra, this.player.maxChakra, 'Chakra');
+            }
+            
+            this.player.inventory.splice(index, 1);
+            document.getElementById('combat-inventory').style.display = 'none';
+            
+            this.disableCombatButtons();
+            setTimeout(() => this.enemyTurn(), 1500);
+        },
+
+        enemyTurn() {
+            this.combatTurn = 'enemy';
+            this.addCombatLog(`${this.currentEnemy.name} ataca...`, 'log-attack');
+
+            const attackRoll = this.rollDice(20);
+            const totalAttack = attackRoll + this.currentEnemy.attack + (this.currentEnemy.accuracy || 0);
+            let playerDefense = 10 + Math.floor(this.player.taijutsu / 2);
+            
+            if (this.defendActive) {
+                playerDefense += 5;
+                this.defendActive = false;
+            }
+
+            setTimeout(() => {
+                if (this.kawairimiUsed && !this.player.kawairimiActivated) {
+                    this.addCombatLog('¡Usas Kawarimi! Te sustituyes y evitas el ataque.', 'log-special');
+                    this.player.kawairimiActivated = true;
+                    
+                    this.combatTurn = 'player';
+                    this.enableCombatButtons();
+                    return;
+                }
+                
+                this.addCombatLog(`Enemigo tira: <span class="dice-roll">${attackRoll}</span> + ${this.currentEnemy.attack} + ${this.currentEnemy.accuracy} = ${totalAttack} vs Defensa ${playerDefense}`, 'log-attack');
+
+                if (totalAttack >= playerDefense) {
+                    const baseDamage = this.rollDice(8) + this.rollDice(6);
+                    const damage = Math.max(1, baseDamage + Math.floor(this.currentEnemy.attack / 1.5));
+                    this.player.hp -= damage;
+                    this.addCombatLog(`¡Te golpean duramente! Recibes ${damage} de daño.`, 'log-damage');
+                    this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
+
+                    if (this.player.hp <= 0) {
+                        this.defeat();
+                        return;
+                    }
+                } else {
+                    this.addCombatLog('¡Esquivas el ataque!', 'log-miss');
+                }
+
+                this.combatTurn = 'player';
+                this.enableCombatButtons();
+            }, 1000);
+        },
+
+        winCombat() {
+            this.addCombatLog(`¡${this.currentEnemy.name} ha sido derrotado!`, 'log-heal');
+            
+            // Ganar recompensas parciales por cada enemigo
+            const expPerEnemy = Math.floor(this.currentMission.exp / this.totalWaves);
+            const ryoPerEnemy = Math.floor(this.currentMission.ryo / this.totalWaves);
+            
+            this.player.exp += expPerEnemy;
+            this.player.ryo += ryoPerEnemy;
+            this.player.combatsWon++;
+            
+            this.addCombatLog(`+${expPerEnemy} EXP | +${ryoPerEnemy} Ryo`, 'log-special');
+            
+            // Verificar si hay más enemigos
+            if (this.enemyQueue.length > 0) {
+                this.addCombatLog('¡El siguiente enemigo se acerca!', 'log-special');
+                
+                setTimeout(() => {
+                    this.currentWave++;
+                    this.currentEnemy = this.enemyQueue.shift();
+                    this.kawairimiUsed = false; // Reiniciar Kawarimi para nuevo enemigo
+                    this.player.kawairimiActivated = false;
+                    this.startCombat();
+                }, 2000);
+                return;
+            }
+            
+            // Todos los enemigos derrotados - misión completa
+            let kekkeiExpGain = 0;
+            if (this.player.kekkeiGenkai) {
+                kekkeiExpGain = Math.floor(this.currentMission.exp / 2);
+                this.player.kekkeiExp += kekkeiExpGain;
+                
+                const nextLevel = this.player.kekkeiGenkai.levels[this.player.kekkeiLevel];
+                if (nextLevel && this.player.kekkeiExp >= nextLevel.exp) {
+                    this.levelUpKekkei();
+                }
+            }
+            
+            if (this.player.exp >= this.player.expToNext) {
+                this.levelUp();
+            }
+            
+            let victoryText = `¡Misión "${this.currentMission.name}" completada!<br>
+                Has derrotado a ${this.totalWaves} enemigo(s).<br><br>
+                Total: +${this.currentMission.exp} EXP<br>
+                Total: +${this.currentMission.ryo} Ryo`;
+            
+            document.getElementById('mission-victory-text').innerHTML = victoryText;
+            
+            const kekkeiExpDiv = document.getElementById('kekkei-exp-gain');
+            if (this.player.kekkeiGenkai && kekkeiExpGain > 0) {
+                kekkeiExpDiv.innerHTML = `<p style="color: #ffd700;">⚡ +${kekkeiExpGain} EXP de Kekkei Genkai</p>`;
+            } else {
+                kekkeiExpDiv.innerHTML = '';
+            }
+            
+            this.saveGame();
+            
+            setTimeout(() => {
+                this.showScreen('mission-victory-screen');
+            }, 2000);
+        },
+
+        levelUp() {
+            this.player.level++;
+            this.player.exp = 0;
+            this.player.expToNext = Math.floor(this.player.expToNext * 1.5);
+            
+            this.player.maxHp += 15;
+            this.player.hp = this.player.maxHp;
+            this.player.maxChakra += 20;
+            this.player.chakra = this.player.maxChakra;
+            this.player.taijutsu += 2;
+            this.player.ninjutsu += 2;
+            this.player.genjutsu += 2;
+            
+            if (this.player.level === 4 && this.player.rank === 'Genin') {
+                this.player.rank = 'Chunin';
+                alert('¡PROMOCIÓN! Ahora eres Chunin. ¡Nuevas misiones disponibles!');
+            } else if (this.player.level === 7 && this.player.rank === 'Chunin') {
+                this.player.rank = 'Jonin';
+                alert('¡PROMOCIÓN! Ahora eres Jonin. ¡Misiones de alto rango desbloqueadas!');
+            } else if (this.player.level === 10 && this.player.rank === 'Jonin') {
+                this.player.rank = 'ANBU';
+                alert('¡PROMOCIÓN! Te has unido a ANBU. ¡Misiones S-Rank disponibles!');
+            } else {
+                alert(`¡NIVEL ${this.player.level}! Todos tus stats han aumentado.`);
+            }
+        },
+
+        levelUpKekkei() {
+            const nextLevel = this.player.kekkeiGenkai.levels[this.player.kekkeiLevel];
+            
+            if (!nextLevel) return;
+            
+            this.player.kekkeiLevel++;
+            
+            // Aplicar bonuses del nuevo nivel
+            const newLevelData = this.player.kekkeiGenkai.levels[this.player.kekkeiLevel - 1];
+            const prevLevelData = this.player.kekkeiGenkai.levels[this.player.kekkeiLevel - 2];
+            
+            // Calcular diferencia de bonuses
+            if (newLevelData.bonus.all) {
+                const diff = newLevelData.bonus.all - (prevLevelData?.bonus.all || 0);
+                this.player.taijutsu += diff;
+                this.player.ninjutsu += diff;
+                this.player.genjutsu += diff;
+            }
+            
+            if (newLevelData.bonus.taijutsu) {
+                const diff = newLevelData.bonus.taijutsu - (prevLevelData?.bonus.taijutsu || 0);
+                this.player.taijutsu += diff;
+            }
+            if (newLevelData.bonus.ninjutsu) {
+                const diff = newLevelData.bonus.ninjutsu - (prevLevelData?.bonus.ninjutsu || 0);
+                this.player.ninjutsu += diff;
+            }
+            if (newLevelData.bonus.genjutsu) {
+                const diff = newLevelData.bonus.genjutsu - (prevLevelData?.bonus.genjutsu || 0);
+                this.player.genjutsu += diff;
+            }
+            
+            this.player.critChance = newLevelData.bonus.critChance || 0;
+            this.player.chakraRegen = newLevelData.bonus.chakraRegen || 0;
+            
+            alert(`🌟 ¡${this.player.kekkeiGenkai.name} ha evolucionado!\n\nNuevo nivel: ${newLevelData.name}\n\n¡Tus poderes han aumentado!`);
+        },
+
+        returnToVillage() {
+            this.showScreen('village-screen');
+            this.updateVillageUI();
+            this.showMissions();
+        },
+
+        defeat() {
+            this.showScreen('defeat-screen');
+        }
+    };
+
+    // Check if there's a saved game on load
+    window.onload = function() {
+        const hasSave = localStorage.getItem('ninjaRPGSave');
+        if (!hasSave) {
+            document.getElementById('load-btn').style.display = 'none';
+        }
+    };
+</script>
+```
+
+</body>
+</html>
