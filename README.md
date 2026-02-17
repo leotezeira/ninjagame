@@ -1,11 +1,20 @@
 # ninjagame
 Juego Ninja (HTML estático).
 
+## Estructura
+- [ninjagame.html](ninjagame.html): UI (pantallas) + links a assets.
+- [css/style.css](css/style.css): estilos.
+- [js/main.js](js/main.js): bootstrap (expone `window.game`).
+- [js/systems/game.js](js/systems/game.js): lógica/sistemas del juego.
+- [js/content/data.js](js/content/data.js): contenido/datos (clanes, jutsus, misiones, enemigos, etc.).
+
 ## Ejecutar local
 - Opción simple: abrir `ninjagame.html` en el navegador.
 - Opción recomendada (evita problemas de rutas/CORS):
 	- `python3 -m http.server 8000`
 	- abrir `http://localhost:8000/` (redirige a `ninjagame.html`)
+
+Nota: como el JS usa módulos (`<script type="module">`), es importante abrirlo vía HTTP (no `file://`).
 
 ## Deploy en Vercel
 Este repo incluye `index.html` (redirige a `ninjagame.html`) y `vercel.json` (rewrite de `/` a `ninjagame.html`).
