@@ -5846,48 +5846,52 @@ export function createGame() {
                 }
             }
             
-            let victoryText = `¡Misión "${this.currentMission.name}" completada!<br>
-                Has derrotado a ${this.totalWaves} enemigo(s).<br><br>
-                Total: +${this.currentMission.exp} EXP<br>
-                Total: +${this.currentMission.ryo} Ryo`;
-            
-            document.getElementById('mission-victory-text').innerHTML = victoryText;
-            
-            const kekkeiExpDiv = document.getElementById('kekkei-exp-gain');
-            if (this.player.kekkeiGenkai && kekkeiExpGain > 0) {
-                kekkeiExpDiv.innerHTML = `<p style="color: #ffd700;">⚡ +${kekkeiExpGain} EXP de Kekkei Genkai</p>`;
-            } else {
-                kekkeiExpDiv.innerHTML = '';
-            }
+            // Guardar valores antes del setTimeout para evitar problemas de timing
+            const missionName = this.currentMission.name;
+            const totalWaves = this.totalWaves;
+            const missionExp = this.currentMission.exp;
+            const missionRyo = this.currentMission.ryo;
+            const hasKekkei = this.player.kekkeiGenkai;
 
             // Verificar desbloqueos de jutsus después de combate
             this.checkJutsuUnlocks(this.player);
             
             this.saveGame();
             
+            console.log('🎉 Victory - mostrando modal en 2 segundos...');
+            
             setTimeout(() => {
-                // Mostrar modal de victoria en lugar de pantalla completa
+                console.log('⏰ setTimeout ejecutado, mostrando modal de victoria');
+                
+                // Mostrar modal de victoria
                 const victoryModal = document.getElementById('combat-victory-modal');
                 const victoryTextEl = document.getElementById('combat-victory-text');
                 const victoryRewardsEl = document.getElementById('combat-victory-rewards');
                 const kekkeiExpDiv = document.getElementById('combat-kekkei-exp-gain');
                 
+                console.log('🔍 Elementos encontrados:', {
+                    victoryModal: !!victoryModal,
+                    victoryTextEl: !!victoryTextEl,
+                    victoryRewardsEl: !!victoryRewardsEl,
+                    kekkeiExpDiv: !!kekkeiExpDiv
+                });
+                
                 if (victoryTextEl) {
-                    victoryTextEl.innerHTML = `¡Misión "${this.currentMission.name}" completada!<br>
-                        Has derrotado a ${this.totalWaves} enemigo(s).`;
+                    victoryTextEl.innerHTML = `¡Misión "${missionName}" completada!<br>
+                        Has derrotado a ${totalWaves} enemigo(s).`;
                 }
                 
                 if (victoryRewardsEl) {
                     victoryRewardsEl.innerHTML = `
                         <div style="color: #00ff88; font-size: 1.1em;">
-                            <p>✨ +${this.currentMission.exp} EXP</p>
-                            <p>💰 +${this.currentMission.ryo} Ryo</p>
+                            <p>✨ +${missionExp} EXP</p>
+                            <p>💰 +${missionRyo} Ryo</p>
                         </div>
                     `;
                 }
                 
                 if (kekkeiExpDiv) {
-                    if (this.player.kekkeiGenkai && kekkeiExpGain > 0) {
+                    if (hasKekkei && kekkeiExpGain > 0) {
                         kekkeiExpDiv.innerHTML = `<p style="color: #ffd700;">⚡ +${kekkeiExpGain} EXP de Kekkei Genkai</p>`;
                     } else {
                         kekkeiExpDiv.innerHTML = '';
@@ -5895,7 +5899,10 @@ export function createGame() {
                 }
                 
                 if (victoryModal) {
+                    console.log('✅ Mostrando modal de victoria');
                     victoryModal.style.display = 'flex';
+                } else {
+                    console.error('❌ Modal de victoria no encontrado');
                 }
             }, 2000);
         },
@@ -6016,6 +6023,8 @@ export function createGame() {
         },
 
         defeat() {
+            console.log('💀 Defeat called');
+            
             if (this.currentMission?.isExamFight) {
                 this.handleExamFightDefeat();
                 return;
@@ -6025,16 +6034,29 @@ export function createGame() {
                 try { localStorage.removeItem('ninjaRPGSave'); } catch (e) { /* ignore */ }
             }
             
-            // Mostrar modal de derrota en lugar de pantalla completa
+            // Guardar nombre de misión antes de acceder en el modal
+            const missionName = this.currentMission ? this.currentMission.name : 'Desconocida';
+            
+            console.log('🔍 Buscando modal de derrota...');
+            
+            // Mostrar modal de derrota
             const defeatModal = document.getElementById('combat-defeat-modal');
             const defeatTextEl = document.getElementById('combat-defeat-text');
             
-            if (defeatTextEl && this.currentMission) {
-                defeatTextEl.innerHTML = `Has caído en batalla durante la misión "${this.currentMission.name}".<br><br>El camino del ninja es difícil...`;
+            console.log('🔍 Elementos encontrados:', {
+                defeatModal: !!defeatModal,
+                defeatTextEl: !!defeatTextEl
+            });
+            
+            if (defeatTextEl) {
+                defeatTextEl.innerHTML = `Has caído en batalla durante la misión "${missionName}".<br><br>El camino del ninja es difícil...`;
             }
             
             if (defeatModal) {
+                console.log('✅ Mostrando modal de derrota');
                 defeatModal.style.display = 'flex';
+            } else {
+                console.error('❌ Modal de derrota no encontrado');
             }
         },
     };
