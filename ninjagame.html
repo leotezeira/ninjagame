@@ -51,6 +51,15 @@
         <div class="clan-select" id="clan-select"></div>
     </div>
 
+    <!-- Selección de Aldea -->
+    <div id="village-select-screen" class="screen">
+        <div style="text-align: center; margin-bottom: 28px;">
+            <div style="font-size: 3em; opacity: 0.15; margin-bottom: 8px;">🏘️</div>
+            <h2 style="color: #ff8c00; margin: 0; font-size: 1.3em;">Elige Tu Aldea Natal</h2>
+        </div>
+        <div class="village-select" id="village-select"></div>
+    </div>
+
     <!-- Sorteo de Kekkei Genkai -->
     <div id="kekkei-screen" class="screen">
         <div class="kekkei-genkai-notification" id="kekkei-result">
@@ -61,11 +70,33 @@
         </div>
     </div>
 
+    <!-- Pantalla de Briefing de Misión -->
+    <div id="mission-briefing-screen" class="screen">
+        <div class="mission-briefing-overlay">
+            <div class="mission-briefing-content">
+                <h2 id="briefing-title">Misión</h2>
+                <div class="briefing-narrator">
+                    <p id="briefing-narrator-text"></p>
+                </div>
+                <div class="briefing-details">
+                    <div class="briefing-stat"><span>🎖️ Rango:</span> <span id="briefing-rank">D</span></div>
+                    <div class="briefing-stat"><span>💰 Recompensa:</span> <span id="briefing-ryo">0</span> ryos</div>
+                    <div class="briefing-stat"><span>✨ Experiencia:</span> <span id="briefing-exp">0</span> exp</div>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn" onclick="game.acceptMissionFromBriefing()">✅ Aceptar Misión</button>
+                    <button class="btn btn-secondary" onclick="game.cancelMissionBriefing()">❌ Rechazar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Pantalla Principal (Aldea) -->
     <div id="village-screen" class="screen">
         <div class="player-info">
             <h2 id="player-name-village">Ninja</h2>
             <div class="player-info-clan" id="player-clan-village"></div>
+            <div id="village-info"></div>
             
             <div class="player-bars">
                 <div class="bar-container">

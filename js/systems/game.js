@@ -137,6 +137,92 @@ export function createGame() {
             return light ? color.light : color.dark;
         },
 
+        showVillageSelect() {
+            const container = document.getElementById('village-select');
+            container.innerHTML = '';
+            
+            Object.keys(this.villages).forEach(villageKey => {
+                const village = this.villages[villageKey];
+                const card = document.createElement('div');
+                card.className = 'clan-card';
+                card.onclick = () => this.selectVillage(villageKey);
+                
+                card.innerHTML = `
+                    <div class="clan-card-header" style="background: linear-gradient(135deg, ${village.color}, ${village.color}88)">
+                        <h3 style="margin: 0;">${village.icon} ${village.name}</h3>
+                        <p style="margin: 8px 0 0 0; font-size: 0.85em; font-style: italic;">${village.kage}</p>
+                    </div>
+                    <div class="clan-card-body">
+                        <p style="margin: 12px 0; font-size: 0.95em; color: var(--muted);">${village.description}</p>
+                        <div style="margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
+                            <div style="font-size: 0.85em; color: #ffd700;">📋 Tipos de misión:</div>
+                            <div style="font-size: 0.9em; margin-top: 4px;">${village.missionTypes.join(', ')}</div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            this.showScreen('village-select-screen');
+        },
+
+        selectVillage(villageKey) {
+            if (!this.player) return;
+            
+            const village = this.villages[villageKey];
+            this.player.village = villageKey;
+            this.player.location = villageKey;
+            
+            // Ajustar reputación inicial según aldea
+            // Alta en la propia (~70), media en aliadas, baja en rivales, negativa en enemigas
+            this.player.reputation = {
+                konoha: 0,
+                suna: 0,
+                kiri: 0,
+                iwa: 0,
+                kumo: 0,
+                ame: 0,
+                bosque: 0,
+                olas: 0,
+                valle: 0,
+                nieve: 0
+            };
+            
+            // Reputación inicial en la aldea natal
+            this.player.reputation[villageKey] = 70;
+            
+            // Aliadas: media reputación
+            if (village.allies && Array.isArray(village.allies)) {
+                village.allies.forEach(ally => {
+                    this.player.reputation[ally] = 40;
+                });
+            }
+            
+            // Enemigas: baja/negativa reputación
+            if (village.enemies && Array.isArray(village.enemies)) {
+                village.enemies.forEach(enemy => {
+                    this.player.reputation[enemy] = -30;
+                });
+            }
+            
+            // Rivales (no aliadas, no enemigas): neutral
+            if (village.rivalVillages && Array.isArray(village.rivalVillages)) {
+                village.rivalVillages.forEach(rival => {
+                    this.player.reputation[rival] = 10;
+                });
+            }
+            
+            // Proceder con sorteo de Kekkei
+            const outcome = this.rollKekkeiGenkai(this.player.clanKey);
+            if (outcome.mode === 'skip') {
+                this.finishCharacterCreation();
+                return;
+            }
+
+            this.doKekkeiGenkaiRoll(outcome);
+        },
+
         selectClan(clanKey) {
             const clan = this.clans[clanKey];
             this.player = {
@@ -168,6 +254,7 @@ export function createGame() {
 
                 // Mundo / calendario
                 location: 'konoha',
+                village: 'konoha', // será actualizado al seleccionar aldea
                 day: 1,
                 month: 1,
                 year: 1024,
@@ -210,16 +297,14 @@ export function createGame() {
                 // Exámenes
                 examState: null,
                 examCooldowns: { chunin: 0, jonin: 0 },
-                lastExamNoticeAbsDay: -1
+                lastExamNoticeAbsDay: -1,
+
+                // Gastos y finanzas
+                lastWeekProcessedForExpenses: 0
             };
 
-            const outcome = this.rollKekkeiGenkai(clanKey);
-            if (outcome.mode === 'skip') {
-                this.finishCharacterCreation();
-                return;
-            }
-
-            this.doKekkeiGenkaiRoll(outcome);
+            // Mostrar pantalla de selección de aldea
+            this.showVillageSelect();
         },
 
         findKekkeiByName(name) {
@@ -361,6 +446,7 @@ export function createGame() {
             this.updateVillageUI();
             this.showMissions();
             this.saveGame();
+            this.startRealTimeTick();
         },
 
         updateVillageUI() {
@@ -370,6 +456,22 @@ export function createGame() {
             if (clanDisplay && this.player.clanKey) {
                 const clan = this.clans[this.player.clanKey];
                 clanDisplay.textContent = `${clan.icon} ${clan.name}`;
+            }
+            
+            // Mostrar información de la aldea
+            if (this.player.village) {
+                const village = this.villages[this.player.village];
+                if (village) {
+                    const villageInfo = document.getElementById('village-info');
+                    if (villageInfo) {
+                        villageInfo.innerHTML = `
+                            <div style="margin-top: 8px; padding: 12px; background: rgba(255,140,0,0.1); border-left: 3px solid ${village.color}; border-radius: 4px;">
+                                <div style="font-size: 0.9em; color: #ffd700; font-weight: bold;">${village.icon} ${village.name}</div>
+                                <div style="font-size: 0.8em; color: var(--muted); margin-top: 4px;">Kage: ${village.kage}</div>
+                            </div>
+                        `;
+                    }
+                }
             }
             
             document.getElementById('player-rank').textContent = this.player.rank;
@@ -444,6 +546,7 @@ export function createGame() {
             const defaults = {
                 name: '',
                 location: 'konoha',
+                village: 'konoha',
                 day: 1,
                 month: 1,
                 year: 1024,
@@ -483,6 +586,9 @@ export function createGame() {
                 examState: null, // { active, type, phase, data }
                 examCooldowns: { chunin: 0, jonin: 0 }, // absolute day until can retry
                 lastExamNoticeAbsDay: -1,
+
+                // Gastos y finanzas
+                lastWeekProcessedForExpenses: 0,
 
                 // Renegado / deserción
                 isRenegade: false,
@@ -524,7 +630,7 @@ export function createGame() {
 
             // Normalizar
             this.player.fatigue = this.clamp(this.player.fatigue, 0, 100);
-            this.player.timeOfDay = this.clamp(this.player.timeOfDay, 0, 3);
+            // timeOfDay se calcula en tiempo real, no se normaliza desde save
             this.player.weekday = this.clamp(this.player.weekday, 0, 6);
             this.player.day = this.clamp(this.player.day, 1, this.daysPerMonth);
             this.player.month = this.clamp(this.player.month, 1, this.monthsPerYear);
@@ -571,6 +677,14 @@ export function createGame() {
                 this.player.location = this.player.hideoutLocation || 'bosque';
             }
 
+            // Sistema de tiempo real: limpiar timeOfDay guardado (se calcula en tiempo real)
+            delete this.player.timeOfDay;
+            
+            // Limpiar sleepState corrupto
+            if (this.player.sleepState && typeof this.player.sleepState.startedAt !== 'number') {
+                delete this.player.sleepState;
+            }
+
             this.updateSeasonAndWeather(false);
         },
 
@@ -598,8 +712,24 @@ export function createGame() {
             }
         },
 
+        getRealTimeState() {
+            const now = Date.now();
+            // Turno global absoluto desde epoch
+            const absoluteTurn = Math.floor(now / this.REAL_TURN_MS);
+            // Turno del día (0-3)
+            const turnOfDay = absoluteTurn % this.turnsPerDay;
+            // Día absoluto
+            const absoluteDay = Math.floor(now / this.REAL_DAY_MS);
+
+            return { now, absoluteTurn, turnOfDay, absoluteDay };
+        },
+
+        getTimeOfDay() {
+            return this.getRealTimeState().turnOfDay;
+        },
+
         getTimeOfDayLabel() {
-            return this.timeOfDayNames[this.player.timeOfDay] || 'MAÑANA';
+            return this.timeOfDayNames[this.getTimeOfDay()] || 'MAÑANA';
         },
 
         getSeasonLabel() {
@@ -701,17 +831,19 @@ export function createGame() {
             this.tickUrgentMission(turns);
 
             for (let i = 0; i < turns; i++) {
-                // Avanza turno del día
-                this.player.timeOfDay = (this.player.timeOfDay + 1) % this.turnsPerDay;
+                // ⚠️ NO MODIFICAR timeOfDay aquí - se calcula en tiempo real via getRealTimeState()
+                // const currentTimeOfDay = this.getTimeOfDay();
 
                 // Regeneración pasiva muy leve por turno (afectada por tarde)
                 const baseRegen = Math.max(1, Math.floor(this.player.maxChakra * 0.02));
-                const regenMultiplier = this.player.timeOfDay === 1 ? 0.9 : 1; // tarde
+                // Usar tiempo real para determinar si es tarde (timeOfDay === 1)
+                const isAfternoon = this.getTimeOfDay() === 1;
+                const regenMultiplier = isAfternoon ? 0.9 : 1;
                 const regen = Math.floor(baseRegen * regenMultiplier);
                 this.player.chakra = Math.min(this.player.maxChakra, this.player.chakra + regen);
 
                 // Cambio de día
-                if (this.player.timeOfDay === 0) {
+                if (this.getTimeOfDay() === 0) {
                     this.player.day += 1;
                     this.player.weekday = (this.player.weekday + 1) % 7;
 
@@ -745,6 +877,167 @@ export function createGame() {
             return el && el.classList.contains('active');
         },
 
+        startRealTimeTick() {
+            if (this._realTimeTicker) clearInterval(this._realTimeTicker);
+            this._realTimeTicker = setInterval(() => {
+                this.onRealTimeTick();
+            }, 10000); // cada 10 segundos
+        },
+
+        onRealTimeTick() {
+            if (!this.player) return;
+
+            // Actualizar HUD de tiempo
+            this.updateWorldHUD();
+
+            // Procesar gastos semanales automáticos
+            this.processWeeklyExpenses();
+
+            // Procesar sueño si está activo
+            if (this.player.sleepState) {
+                this.processSleepRegen();
+            }
+        },
+
+        updateWorldHUD() {
+            // Actualizar display de tiempo en el HUD
+            const timeEl = document.getElementById('hud-time');
+            if (timeEl) {
+                timeEl.textContent = this.getTimeOfDayLabel();
+            }
+        },
+
+        startSleep() {
+            if (!this.player) return;
+            if (this.player.sleepState) return; // ya durmiendo
+
+            const now = Date.now();
+            this.player.sleepState = {
+                startedAt: now,
+                hpAtStart: this.player.hp,
+                chakraAtStart: this.player.chakra,
+                maxDurationMs: this.REAL_TURN_MS * 2, // 10 minutos = 2 turnos
+            };
+            this.saveGame();
+            
+            // Mostrar UI de "durmiendo..."
+            alert('💤 ¡A descansar! Te despertarás en 10 minutos o cuando recuperes energía.');
+        },
+
+        processSleepRegen() {
+            const s = this.player.sleepState;
+            if (!s) return;
+
+            const elapsed = Date.now() - s.startedAt;          // ms transcurridos
+            const pct = Math.min(elapsed / s.maxDurationMs, 1); // 0.0 → 1.0
+
+            // Recuperación: 100% en 10 min → 10% por minuto
+            const regenPct = pct;
+
+            this.player.hp = Math.min(
+                this.player.maxHp,
+                s.hpAtStart + Math.floor(this.player.maxHp * regenPct)
+            );
+            this.player.chakra = Math.min(
+                this.player.maxChakra,
+                s.chakraAtStart + Math.floor(this.player.maxChakra * regenPct)
+            );
+
+            this.updateVillageUI();
+
+            // Cancelar automáticamente si HP y Chakra están llenos
+            const fullHp = this.player.hp >= this.player.maxHp;
+            const fullChakra = this.player.chakra >= this.player.maxChakra;
+            if (fullHp && fullChakra) {
+                this.endSleep('auto');
+                return;
+            }
+
+            // Cancelar si se cumplieron los 2 turnos (10 min)
+            if (elapsed >= s.maxDurationMs) {
+                this.endSleep('complete');
+            }
+        },
+
+        endSleep(reason = 'manual') {
+            if (!this.player.sleepState) return;
+
+            // Aplicar regen final
+            this.processSleepRegen();
+
+            delete this.player.sleepState;
+            this.saveGame();
+
+            const msg = reason === 'auto'
+                ? '✅ Te despertaste al recuperar energía.'
+                : reason === 'complete'
+                    ? '💤 Descansaste completamente (2 turnos).'
+                    : '⏰ Descanso cancelado.';
+
+            alert(msg);
+            this.updateVillageUI();
+        },
+
+        getSleepTimeRemaining() {
+            if (!this.player?.sleepState) return null;
+            const elapsed = Date.now() - this.player.sleepState.startedAt;
+            const remaining = Math.max(0, this.player.sleepState.maxDurationMs - elapsed);
+            const secs = Math.ceil(remaining / 1000);
+            const min = Math.floor(secs / 60);
+            const sec = secs % 60;
+            return `${min}:${sec.toString().padStart(2, '0')}`;
+        },
+
+        processWeeklyExpenses() {
+            if (!this.player) return;
+
+            // Calcular la semana actual (basada en días reales)
+            const { absoluteDay } = this.getRealTimeState();
+            const currentWeek = Math.floor(absoluteDay / 7);
+
+            // Inicializar si no existe
+            if (typeof this.player.lastWeekProcessedForExpenses !== 'number') {
+                this.player.lastWeekProcessedForExpenses = currentWeek;
+            }
+
+            // Si no cambió de semana, no procesar
+            if (currentWeek === this.player.lastWeekProcessedForExpenses) {
+                return;
+            }
+
+            // Cambió de semana, procesar gastos
+            this.player.lastWeekProcessedForExpenses = currentWeek;
+
+            const weeklyExpense = this.WEEKLY_TOTAL; // 80 ryos
+            const weeklyRent = this.WEEKLY_RENT;    // 60 ryos
+            const weeklyFood = this.WEEKLY_FOOD;    // 20 ryos
+
+            if (this.player.ryo >= weeklyExpense) {
+                // Hay dinero suficiente, descontar normalmente
+                this.player.ryo -= weeklyExpense;
+                
+                // Mostrar notificación al jugador (opcional)
+                if (this.isVillageScreenActive()) {
+                    alert(`💰 Gastos semanales: -${weeklyRent} ryos (alquiler) -${weeklyFood} ryos (comida) = -${weeklyExpense} ryos total`);
+                }
+            } else {
+                // No hay dinero suficiente
+                const deficit = weeklyExpense - this.player.ryo;
+                this.player.ryo = 0;
+                
+                // Aumentar fatiga por no poder pagar
+                const fatigaIncrease = Math.min(20, Math.floor(deficit / 5)); // 1 fatiga por cada 5 ryos de déficit, máx 20
+                this.addFatigue(fatigaIncrease);
+                
+                // Mostrar alerta crítica
+                if (this.isVillageScreenActive()) {
+                    alert(`⚠️ ¡No hay suficientes fondos! Te faltan ${deficit} ryos. Tu fatiga aumentó ${fatigaIncrease} puntos.`);
+                }
+            }
+
+            this.saveGame();
+        },
+
         applyDailyUpkeep() {
             if (!Array.isArray(this.player.team) || this.player.team.length === 0) return;
             let totalCost = 0;
@@ -767,7 +1060,7 @@ export function createGame() {
         checkRecurringEvents() {
             if (!this.player) return;
             // Solo mostramos popups en el inicio de cada mañana para no spamear
-            if (this.player.timeOfDay !== 0) return;
+            if (this.getTimeOfDay() !== 0) return;
 
             const todayEvents = this.recurringEvents.filter(e => {
                 try { return e.when(this.player); } catch { return false; }
@@ -801,7 +1094,7 @@ export function createGame() {
             }
 
             // Inicio de mes: invasión 10%
-            if (this.player.day === 1 && this.player.timeOfDay === 0) {
+            if (this.player.day === 1 && this.getTimeOfDay() === 0) {
                 if (Math.random() < 0.10 && this.player.location === 'konoha') {
                     this.spawnUrgentMission('🏯 Invasión de la aldea', 3);
                 }
@@ -1393,7 +1686,7 @@ export function createGame() {
                 alert('Este contacto del Mercado Negro solo está en Konoha.');
                 return;
             }
-            if (this.player.timeOfDay === 3) {
+            if (this.getTimeOfDay() === 3) {
                 alert('Es madrugada. No es seguro comerciar ahora.');
                 return;
             }
@@ -3246,26 +3539,136 @@ export function createGame() {
                 availableMissions = this.missions.kage;
             }
 
-            availableMissions.forEach(mission => {
-                const card = document.createElement('div');
-                card.className = 'mission-card';
-                card.onclick = () => this.startMission(mission);
+            // Agrupar misiones por rango
+            const missionsByRank = this.groupMissionsByRank(availableMissions);
 
-                const rank = (mission.rank || '').toUpperCase();
-                const turnCostByRank = { D: 1, C: 2, B: 3, A: 4, S: 4 };
-                const turns = mission.turns ?? (turnCostByRank[rank] ?? 2);
+            // Definir orden de rangos
+            const rankOrder = ['D', 'C', 'B', 'A', 'S', 'U', 'F'];
+            
+            // Renderizar acordeones para cada rango disponible
+            rankOrder.forEach(rank => {
+                const missionsInRank = missionsByRank[rank] || [];
+                if (missionsInRank.length === 0) return; // saltar rangos sin misiones
 
-                const team = this.getTeamBonuses();
-                const nightRyoMult = this.player.timeOfDay === 2 ? 1.2 : 1;
-                const estRyo = Math.floor(mission.ryo * (team.missionRyoMult || 1) * nightRyoMult);
-                const estExp = Math.floor(mission.exp * (team.missionExpMult || 1));
+                // Contenedor del acordeón
+                const rankContainer = document.createElement('div');
+                rankContainer.className = 'mission-rank-accordion';
+                rankContainer.style.marginBottom = '12px';
+                rankContainer.style.border = '1px solid rgba(255,140,0,0.2)';
+                rankContainer.style.borderRadius = '6px';
+                rankContainer.style.overflow = 'hidden';
+
+                // Botón de acordeón (header)
+                const header = document.createElement('button');
+                header.style.width = '100%';
+                header.style.padding = '12px 16px';
+                header.style.background = `rgba(255,140,0,0.1)`;
+                header.style.border = 'none';
+                header.style.borderBottom = '1px solid rgba(255,140,0,0.2)';
+                header.style.cursor = 'pointer';
+                header.style.display = 'flex';
+                header.style.justifyContent = 'space-between';
+                header.style.alignItems = 'center';
+                header.style.fontSize = '1em';
+                header.style.fontWeight = 'bold';
+                header.style.color = '#ff8c00';
+                header.style.transition = '0.2s';
                 
-                card.innerHTML = `
-                    <h4>📜 ${mission.name} [Rango ${mission.rank}]</h4>
-                    <p>${mission.description}</p>
-                    <p style="color: #ffd700; margin-top: 8px;">Recompensa: ${estRyo} Ryo | ${estExp} EXP</p>
-                    <p style="opacity: 0.85; margin-top: 6px;">⏱️ Tiempo: ${turns} turno(s)</p>
+                // Ícono de rango y cantidad
+                const rankLabel = `${this.getRankEmoji(rank)} Rango ${rank}`;
+                const countLabel = `(${missionsInRank.length} misión${missionsInRank.length !== 1 ? 'es' : ''})`;
+                
+                header.innerHTML = `
+                    <span>${rankLabel} ${countLabel}</span>
+                    <span class="accordion-arrow" style="display: inline-block; transition: transform 0.3s;">▼</span>
                 `;
+
+                // Contenedor de contenido
+                const content = document.createElement('div');
+                content.className = 'mission-rank-content';
+                content.style.display = 'none';
+                content.style.padding = '12px 16px';
+                content.style.background = 'rgba(0,0,0,0.2)';
+                content.style.maxHeight = '1000px';
+                content.style.overflowY = 'auto';
+
+                // Agregar misiones dentro del contenido
+                const missionGrid = document.createElement('div');
+                missionGrid.style.display = 'grid';
+                missionGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
+                missionGrid.style.gap = '12px';
+
+                missionsInRank.forEach(mission => {
+                    const card = document.createElement('div');
+                    card.className = 'mission-card';
+                    card.onclick = () => this.startMission(mission);
+                    card.style.margin = '0';
+
+                    const rankMission = (mission.rank || '').toUpperCase();
+                    const turnCostByRank = { D: 1, C: 2, B: 3, A: 4, S: 4, U: 5, F: 6 };
+                    const turns = mission.turns ?? (turnCostByRank[rankMission] ?? 2);
+
+                    const team = this.getTeamBonuses();
+                    const nightRyoMult = this.getTimeOfDay() === 2 ? 1.2 : 1;
+                    const estRyo = Math.floor(mission.ryo * (team.missionRyoMult || 1) * nightRyoMult);
+                    const estExp = Math.floor(mission.exp * (team.missionExpMult || 1));
+                    
+                    card.innerHTML = `
+                        <h4>📜 ${mission.name}</h4>
+                        <p>${mission.description}</p>
+                        <p style="color: #ffd700; margin-top: 8px;">Recompensa: ${estRyo} Ryo | ${estExp} EXP</p>
+                        <p style="opacity: 0.85; margin-top: 6px;">⏱️ Tiempo: ${turns} turno(s)</p>
+                    `;
+                    missionGrid.appendChild(card);
+                });
+
+                content.appendChild(missionGrid);
+
+                // Toggle del acordeón
+                header.onclick = () => {
+                    const isExpanded = content.style.display !== 'none';
+                    content.style.display = isExpanded ? 'none' : 'block';
+                    
+                    const arrow = header.querySelector('.accordion-arrow');
+                    if (arrow) {
+                        arrow.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(-180deg)';
+                    }
+                };
+
+                rankContainer.appendChild(header);
+                rankContainer.appendChild(content);
+                missionList.appendChild(rankContainer);
+            });
+
+            if (Object.keys(missionsByRank).every(rank => (missionsByRank[rank] || []).length === 0)) {
+                missionList.innerHTML = '<div class="story-text">No hay misiones disponibles para tu nivel.</div>';
+            }
+        },
+
+        groupMissionsByRank(missions) {
+            const grouped = {};
+            missions.forEach(mission => {
+                const rank = (mission.rank || 'D').toUpperCase();
+                if (!grouped[rank]) {
+                    grouped[rank] = [];
+                }
+                grouped[rank].push(mission);
+            });
+            return grouped;
+        },
+
+        getRankEmoji(rank) {
+            const emojis = {
+                'D': '🟦',
+                'C': '🟩',
+                'B': '🟧',
+                'A': '🟥',
+                'S': '⭐',
+                'U': '💛',
+                'F': '💀'
+            };
+            return emojis[rank] || '📋';
+        },                `;
                 
                 missionList.appendChild(card);
             });
@@ -3281,7 +3684,7 @@ export function createGame() {
             const turns = mission.turns ?? (turnCostByRank[rank] ?? 2);
 
             const team = this.getTeamBonuses();
-            const nightRyoMult = this.player.timeOfDay === 2 ? 1.2 : 1;
+            const nightRyoMult = this.getTimeOfDay() === 2 ? 1.2 : 1;
             const estRyo = Math.floor(mission.ryo * (team.missionRyoMult || 1) * nightRyoMult);
             const estExp = Math.floor(mission.exp * (team.missionExpMult || 1));
 
@@ -3313,7 +3716,7 @@ export function createGame() {
                 jutsuList.innerHTML = '<div class="story-text">📍 La Academia Ninja solo está disponible en Konoha.</div>';
                 return;
             }
-            if (this.player.timeOfDay === 3) {
+            if (this.getTimeOfDay() === 3) {
                 jutsuList.innerHTML = '<div class="story-text">🌙 Es madrugada. La Academia está cerrada.</div>';
                 return;
             }
@@ -3603,7 +4006,7 @@ export function createGame() {
                 alert('La Academia solo está disponible en Konoha.');
                 return;
             }
-            if (this.player.timeOfDay === 3) {
+            if (this.getTimeOfDay() === 3) {
                 alert('Es madrugada. La Academia está cerrada.');
                 return;
             }
@@ -3650,7 +4053,7 @@ export function createGame() {
                 shopList.innerHTML = '<div class="story-text">📍 La Tienda de la Aldea solo está disponible en Konoha.</div>';
                 return;
             }
-            if (this.player.timeOfDay === 3) {
+            if (this.getTimeOfDay() === 3) {
                 shopList.innerHTML = '<div class="story-text">🌙 Es madrugada. La tienda está cerrada.</div>';
                 return;
             }
@@ -3704,7 +4107,7 @@ export function createGame() {
                 alert('La tienda solo está disponible en Konoha.');
                 return;
             }
-            if (this.player.timeOfDay === 3) {
+            if (this.getTimeOfDay() === 3) {
                 alert('Es madrugada. La tienda está cerrada.');
                 return;
             }
@@ -3743,7 +4146,7 @@ export function createGame() {
                 trainingList.innerHTML = '<div class="story-text">📍 El Centro de Entrenamiento solo está disponible en Konoha.</div>';
                 return;
             }
-            if (this.player.timeOfDay === 3) {
+            if (this.getTimeOfDay() === 3) {
                 trainingList.innerHTML = '<div class="story-text">🌙 Es madrugada. El centro de entrenamiento está cerrado.</div>';
                 return;
             }
@@ -3779,7 +4182,7 @@ export function createGame() {
                 alert('El entrenamiento solo está disponible en Konoha.');
                 return;
             }
-            if (this.player.timeOfDay === 3) {
+            if (this.getTimeOfDay() === 3) {
                 alert('Es madrugada. El centro de entrenamiento está cerrado.');
                 return;
             }
@@ -3882,6 +4285,7 @@ export function createGame() {
                 
                 this.player = JSON.parse(save);
                 this.migratePlayerSave();
+                this.startRealTimeTick();
                 if (this.player?.examState?.active) {
                     this.renderExamFromState();
                 } else {
@@ -3902,6 +4306,41 @@ export function createGame() {
         },
 
         startMission(mission) {
+            // Guardar la misión pendiente para mostrar el briefing
+            this.pendingMission = mission;
+            this.showMissionBriefing(mission);
+        },
+
+        showMissionBriefing(mission) {
+            const briefingScreen = document.getElementById('mission-briefing-screen');
+            const titleEl = document.getElementById('briefing-title');
+            const narratorEl = document.getElementById('briefing-narrator-text');
+            const rankEl = document.getElementById('briefing-rank');
+            const ryoEl = document.getElementById('briefing-ryo');
+            const expEl = document.getElementById('briefing-exp');
+
+            titleEl.textContent = mission.name;
+            narratorEl.textContent = mission.narrator || 'Se requiere completar esta misión. Prepárate para el combate.';
+            rankEl.textContent = mission.rank;
+            ryoEl.textContent = mission.ryo;
+            expEl.textContent = mission.exp;
+
+            this.showScreen('mission-briefing-screen');
+        },
+
+        acceptMissionFromBriefing() {
+            if (!this.pendingMission) return;
+            const mission = this.pendingMission;
+            this.pendingMission = null;
+            this._executeMission(mission);
+        },
+
+        cancelMissionBriefing() {
+            this.pendingMission = null;
+            this.showScreen('village-screen');
+        },
+
+        _executeMission(mission) {
             if (!this.player) return;
 
             // Fatiga por misión
@@ -3920,7 +4359,7 @@ export function createGame() {
             this.advanceTurns(turnCost, 'mission');
 
             // Bonus por misión nocturna
-            const isNight = this.player.timeOfDay === 2;
+            const isNight = this.getTimeOfDay() === 2;
             const nightRyoMult = isNight ? 1.2 : 1;
 
             // Bonus por equipo
@@ -3949,8 +4388,6 @@ export function createGame() {
             this.currentEnemy = this.enemyQueue.shift();
             this.startCombat();
         },
-
-        startCombat() {
             this.showScreen('combat-screen');
             this.combatLog = [];
             document.getElementById('combat-log').innerHTML = '';
