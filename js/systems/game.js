@@ -1915,6 +1915,19 @@ export function createGame() {
             };
         },
 
+            // -----------------------------
+            // defeat-screen: borrar personaje y reiniciar
+            // -----------------------------
+            deleteCharacterAndRestart() {
+                // Borrar save
+                try { localStorage.removeItem('ninjaRPGSave'); } catch(e) {}
+                // Limpiar estado
+                this.player = null;
+                this.currentMission = null;
+                this.currentEnemy = null;
+                // Volver a la pantalla de inicio
+                this.showScreen('auth-screen');
+            },
         startUrgentMission() {
             if (!this.player?.urgentMission) {
                 alert('No tienes misiones urgentes activas.');
