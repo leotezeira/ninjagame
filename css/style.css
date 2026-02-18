@@ -1729,17 +1729,13 @@
         left: 0;
         right: 0;
         display: none; /* Controlado por JS — visible solo en village-screen */
-        background: #111;
-        border-top: 2px solid #ff8c00;
+        background: linear-gradient(180deg, #1a1a1a 0%, #111 100%);
+        border-top: 2px solid var(--accent);
         z-index: 9999;
-        max-width: 600px;
-        margin: 0 auto;
         /* Clave: respeta la zona segura del navegador móvil */
         padding-bottom: env(safe-area-inset-bottom, 0px);
         /* Altura mínima garantizada */
         min-height: 60px;
-        /* Usa el viewport real, no el visual */
-        bottom: env(safe-area-inset-bottom, 0px);
     }
 
     .nav-btn {
@@ -1771,21 +1767,99 @@
         color: #ffd700;
     }
 
+    /* Layout completo para village-screen */
+    #village-screen {
+        position: fixed !important;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        max-width: none !important;
+        width: 100% !important;
+        height: 100vh;
+        height: 100dvh;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        background: var(--bg);
+        z-index: 100;
+    }
+
+    /* Header del juego */
+    #game-header {
+        flex-shrink: 0;
+        background: linear-gradient(180deg, #1a1a1a 0%, #111 100%);
+        border-bottom: 2px solid var(--accent);
+        padding: 8px 12px;
+        padding-top: calc(8px + env(safe-area-inset-top, 0px));
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+    }
+
+    #header-player-info {
+        display: flex;
+        gap: 12px;
+        font-size: 14px;
+        color: var(--text);
+    }
+
+    #header-ryo {
+        color: #ffd700;
+    }
+
+    #header-bars {
+        display: flex;
+        gap: 8px;
+        flex: 1;
+        max-width: 200px;
+    }
+
+    .mini-bar {
+        flex: 1;
+        height: 8px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .mini-bar > div {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .hp-bar > div {
+        background: linear-gradient(90deg, #ff4444, #ff6666);
+        width: 100%;
+    }
+
+    .chakra-bar-mini > div {
+        background: linear-gradient(90deg, #4488ff, #66aaff);
+        width: 100%;
+    }
+
+    /* Contenedor principal del juego */
+    #game-main {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+        background: var(--bg);
+    }
+
     /* Secciones de contenido */
     .section-content {
+        position: absolute;
+        inset: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 16px;
+        padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
         display: none;
-        padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
     }
 
     .section-content.active {
         display: block;
-    }
-
-    /* Ajustar village-screen para la nueva navegación */
-    #village-screen {
-        padding-bottom: 0;
-        overflow-y: auto;
-        max-height: 100vh;
     }
 
     /* Ajustes específicos de la sección home */

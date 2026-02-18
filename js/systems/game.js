@@ -3013,6 +3013,9 @@ export function createGame() {
             const activeBtn = document.querySelector(`#bottom-nav [data-tab="${name}"]`);
             if (activeBtn) activeBtn.classList.add('active');
 
+            // Actualizar header
+            this.updateHeader();
+
             // Acciones específicas por sección
             if (name === 'home') {
                 this.updateVillageUI();
@@ -3027,6 +3030,28 @@ export function createGame() {
                 this.updateShopRyoDisplay();
             } else if (name === 'statspage') {
                 this.showStats();
+            }
+        },
+
+        updateHeader() {
+            if (!this.player) return;
+            
+            const nameEl = document.getElementById('header-name');
+            const ryoEl = document.getElementById('header-ryo');
+            const hpFill = document.getElementById('header-hp-fill');
+            const chakraFill = document.getElementById('header-chakra-fill');
+            
+            if (nameEl) nameEl.textContent = `👤 ${this.player.name || 'Ninja'}`;
+            if (ryoEl) ryoEl.textContent = `💰 ${this.player.ryo || 0}`;
+            
+            if (hpFill) {
+                const hpPct = Math.min(100, Math.max(0, (this.player.hp / this.player.maxHp) * 100));
+                hpFill.style.width = hpPct + '%';
+            }
+            
+            if (chakraFill) {
+                const chakraPct = Math.min(100, Math.max(0, (this.player.chakra / this.player.maxChakra) * 100));
+                chakraFill.style.width = chakraPct + '%';
             }
         },
 

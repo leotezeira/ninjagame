@@ -97,7 +97,22 @@
 
     <!-- Pantalla Principal (Aldea) -->
     <div id="village-screen" class="screen">
-        <!-- 🏠 SECCIÓN INICIO -->
+        
+        <!-- HEADER fijo arriba -->
+        <header id="game-header">
+            <div id="header-player-info">
+                <span id="header-name">👤 Ninja</span>
+                <span id="header-ryo">💰 0</span>
+            </div>
+            <div id="header-bars">
+                <div class="mini-bar hp-bar"><div id="header-hp-fill"></div></div>
+                <div class="mini-bar chakra-bar-mini"><div id="header-chakra-fill"></div></div>
+            </div>
+        </header>
+
+        <!-- MAIN: contenedor de secciones -->
+        <main id="game-main">
+            <!-- 🏠 SECCIÓN INICIO -->
         <div id="section-home" class="section-content active">
             <div class="player-info">
                 <h2 id="player-name-village">Ninja</h2>
@@ -266,6 +281,7 @@
             <h3 style="color: #ff8c00; text-align: center; margin-bottom: 20px;">📊 Estadísticas & Configuración</h3>
             <div id="stats-display"></div>
         </div>
+        </main>
     </div>
 
     <!-- BARRA DE NAVEGACIÓN INFERIOR (siempre visible excepto en combate) -->
