@@ -1,10 +1,7 @@
-import { BASE_GAME } from '../content/data.js';
-import { SaveSystem } from './save.js';
 // IDs de barras de combate centralizados
 const BAR_ID_PLAYER_HP = 'combat-player-health-bar';
 const BAR_ID_PLAYER_CHAKRA = 'combat-player-chakra-bar';
 const BAR_ID_ENEMY_HP = 'enemy-health-bar';
-
 import { BASE_GAME } from '../content/data.js';
 import { SaveSystem } from './save.js';
 
