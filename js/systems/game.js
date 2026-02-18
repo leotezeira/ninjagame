@@ -4864,9 +4864,60 @@ export function createGame() {
 
         startMission(mission) {
             console.log('startMission called with:', mission);
-            // Guardar la misión pendiente para mostrar el briefing
+            
+            // Mostrar modal de confirmación
+            const modal = document.getElementById('mission-confirm-modal');
+            const titleEl = document.getElementById('mission-confirm-title');
+            const descEl = document.getElementById('mission-confirm-description');
+            const rankEl = document.getElementById('mission-confirm-rank');
+            const ryoEl = document.getElementById('mission-confirm-ryo');
+            const expEl = document.getElementById('mission-confirm-exp');
+            
+            if (!modal) {
+                console.error('mission-confirm-modal not found');
+                return;
+            }
+            
+            // Calcular recompensas estimadas
+            const team = this.getTeamBonuses();
+            const nightRyoMult = this.getTimeOfDay() === 2 ? 1.2 : 1;
+            const estRyo = Math.floor(mission.ryo * (team.missionRyoMult || 1) * nightRyoMult);
+            const estExp = Math.floor(mission.exp * (team.missionExpMult || 1));
+            
+            titleEl.textContent = `📜 ${mission.name}`;
+            descEl.textContent = mission.description || mission.narrator || 'Una misión te espera.';
+            rankEl.textContent = mission.rank || 'D';
+            ryoEl.textContent = `${estRyo} Ryo`;
+            expEl.textContent = `${estExp} EXP`;
+            
+            // Guardar misión pendiente
             this.pendingMission = mission;
-            this.showMissionBriefing(mission);
+            
+            // Mostrar modal
+            modal.style.display = 'flex';
+            console.log('Mission modal displayed');
+        },
+        
+        acceptMissionFromModal() {
+            console.log('Mission accepted from modal');
+            const modal = document.getElementById('mission-confirm-modal');
+            if (modal) modal.style.display = 'none';
+            
+            if (!this.pendingMission) {
+                console.warn('No pending mission');
+                return;
+            }
+            
+            const mission = this.pendingMission;
+            this.pendingMission = null;
+            this._executeMission(mission);
+        },
+        
+        rejectMissionFromModal() {
+            console.log('Mission rejected from modal');
+            const modal = document.getElementById('mission-confirm-modal');
+            if (modal) modal.style.display = 'none';
+            this.pendingMission = null;
         },
 
         showMissionBriefing(mission) {

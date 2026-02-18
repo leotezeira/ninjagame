@@ -1789,3 +1789,88 @@ body {
     align-items: center;
     gap: 4px;
 }
+
+/* ============================================
+   MISSION CONFIRM MODAL
+   ============================================ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: var(--bg-panel);
+    border: 2px solid var(--accent-primary);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(124, 58, 237, 0.4);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-content h3 {
+    color: var(--accent-primary);
+    text-align: center;
+    margin-bottom: 16px;
+    font-size: 1.3em;
+}
+
+.modal-content p {
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.mission-confirm-stats {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mission-confirm-stats .stat-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+.mission-confirm-stats .stat-item span:first-child {
+    color: var(--text-secondary);
+}
+
+.mission-confirm-stats .stat-item span:last-child {
+    color: var(--accent-gold);
+    font-weight: 600;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.modal-actions .btn {
+    flex: 1;
+    max-width: 200px;
+}
