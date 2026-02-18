@@ -5075,6 +5075,14 @@ export function createGame() {
             document.getElementById('jutsu-selection').style.display = 'none';
             document.getElementById('combat-inventory').style.display = 'none';
 
+            // Animación de ataque del jugador
+            const playerSprite = document.getElementById('combat-player-sprite');
+            if (playerSprite) {
+                playerSprite.classList.remove('attack-animation');
+                void playerSprite.offsetWidth;
+                playerSprite.classList.add('attack-animation');
+            }
+
             const stats = this.getEffectiveStats();
 
             const attackRoll = this.rollDice(20);
@@ -5082,7 +5090,7 @@ export function createGame() {
             const totalAttack = attackRoll + stats.taijutsu;
             const enemyDefense = 10 + this.currentEnemy.defense;
 
-            this.addCombatLog(`Atacas con Taijutsu: <span class="dice-roll">${attackRoll}</span> + ${stats.taijutsu} = ${totalAttack}`, 'log-attack');
+            this.addCombatLog(`Atacas con Taijutsu: <span class=\"dice-roll\">${attackRoll}</span> + ${stats.taijutsu} = ${totalAttack}`, 'log-attack');
 
             if (totalAttack >= enemyDefense || isCrit) {
                 const damageRoll = this.rollDice(8);
@@ -5094,6 +5102,13 @@ export function createGame() {
                 }
                 
                 this.currentEnemy.hp -= damage;
+                // Animación de daño al enemigo
+                const enemySprite = document.getElementById('enemy-sprite');
+                if (enemySprite) {
+                    enemySprite.classList.remove('damage-animation');
+                    void enemySprite.offsetWidth;
+                    enemySprite.classList.add('damage-animation');
+                }
                 this.addCombatLog(`¡Impacto! Infliges ${damage} de daño.`, 'log-damage');
                 this.updateBar('enemy-health-bar', this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
                 
@@ -5232,6 +5247,14 @@ export function createGame() {
             if (this.combatTurn !== 'player') return;
             if (this.checkFatigueFaint()) return;
             if (this.player.chakra < jutsu.chakra) return;
+
+            // Animación de jutsu del jugador
+            const playerSprite = document.getElementById('combat-player-sprite');
+            if (playerSprite) {
+                playerSprite.classList.remove('jutsu-animation');
+                void playerSprite.offsetWidth;
+                playerSprite.classList.add('jutsu-animation');
+            }
 
             const stats = this.getEffectiveStats();
             
@@ -5449,6 +5472,14 @@ export function createGame() {
         enemyTurn() {
             this.combatTurn = 'enemy';
 
+            // Animación de ataque del enemigo
+            const enemySprite = document.getElementById('enemy-sprite');
+            if (enemySprite) {
+                enemySprite.classList.remove('attack-animation');
+                void enemySprite.offsetWidth;
+                enemySprite.classList.add('attack-animation');
+            }
+
             if (this.currentEnemy && this.currentEnemy.controlledTurns > 0) {
                 this.currentEnemy.controlledTurns -= 1;
                 this.addCombatLog('🧠 El enemigo está controlado y pierde su turno.', 'log-special');
@@ -5608,6 +5639,13 @@ export function createGame() {
 
         winCombat() {
             this.addCombatLog(`¡${this.currentEnemy.name} ha sido derrotado!`, 'log-heal');
+            // Animación de victoria
+            const combatScreen = document.getElementById('combat-screen');
+            if (combatScreen) {
+                combatScreen.classList.remove('victory-animation');
+                void combatScreen.offsetWidth;
+                combatScreen.classList.add('victory-animation');
+            }
 
             // Fatiga por combate
             this.addFatigue(10);
@@ -5821,6 +5859,13 @@ export function createGame() {
             this.player.ninjutsu += 2;
             this.player.genjutsu += 2;
             
+            // Animación de subir de nivel
+            const sidebarLevel = document.getElementById('sidebar-level');
+            if (sidebarLevel) {
+                sidebarLevel.classList.remove('levelup-animation');
+                void sidebarLevel.offsetWidth;
+                sidebarLevel.classList.add('levelup-animation');
+            }
             // Verificar desbloqueos de jutsus cuando subes de nivel
             this.checkJutsuUnlocks(this.player);
             
@@ -5882,18 +5927,23 @@ export function createGame() {
 
         returnToVillageFromCombat() {
             console.log('🏠 Regresando a la aldea desde combate...');
-            
-            // Ocultar modales de victoria/derrota
-            const victoryModal = document.getElementById('combat-victory-modal');
-            const defeatModal = document.getElementById('combat-defeat-modal');
-            
-            if (victoryModal) {
-                victoryModal.style.display = 'none';
-            }
-            if (defeatModal) {
-                defeatModal.style.display = 'none';
-            }
-            
+            // Ocultar todos los modales de combate
+            [
+                'combat-victory-modal',
+                'combat-defeat-modal',
+                'combat-victory-text',
+                'combat-victory-rewards',
+                'combat-kekkei-exp-gain',
+                'combat-defeat-text'
+            ].forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.classList.contains('modal-overlay')) {
+                    el.style.display = 'none';
+                } else if (el) {
+                    el.innerHTML = '';
+                }
+            });
+
             // Limpiar variables de combate/misión
             this.currentMission = null;
             this.currentEnemy = null;
@@ -5901,11 +5951,10 @@ export function createGame() {
             this.combatLog = [];
             this.totalWaves = 0;
             this.currentWave = 0;
-            
+
             // Restaurar UI completa
             const header = document.getElementById('game-header');
             const bottomNav = document.getElementById('bottom-nav');
-            
             if (header) {
                 header.style.display = '';
                 header.classList.add('visible');
@@ -5913,9 +5962,23 @@ export function createGame() {
             if (bottomNav) {
                 bottomNav.style.display = '';
             }
-            
+
+            // Quitar animaciones de combate
+            const combatScreen = document.getElementById('combat-screen');
+            if (combatScreen) {
+                combatScreen.classList.remove('victory-animation', 'defeat-animation');
+            }
+            const playerSprite = document.getElementById('combat-player-sprite');
+            if (playerSprite) {
+                playerSprite.classList.remove('attack-animation', 'jutsu-animation');
+            }
+            const enemySprite = document.getElementById('enemy-sprite');
+            if (enemySprite) {
+                enemySprite.classList.remove('attack-animation', 'damage-animation');
+            }
+
             console.log('✅ UI restaurada, mostrando village screen');
-            
+
             // Volver a la aldea
             this.showScreen('village-screen');
             this.showSection('home');
@@ -5925,7 +5988,13 @@ export function createGame() {
 
         defeat() {
             console.log('💀 Defeat called');
-            
+            // Animación de derrota
+            const combatScreen = document.getElementById('combat-screen');
+            if (combatScreen) {
+                combatScreen.classList.remove('defeat-animation');
+                void combatScreen.offsetWidth;
+                combatScreen.classList.add('defeat-animation');
+            }
             if (this.currentMission?.isExamFight) {
                 this.handleExamFightDefeat();
                 return;
@@ -5934,25 +6003,19 @@ export function createGame() {
                 alert('⛓️ Has sido capturado por ANBU. Fin de tu camino renegado.');
                 try { localStorage.removeItem('ninjaRPGSave'); } catch (e) { /* ignore */ }
             }
-            
             // Guardar nombre de misión antes de acceder en el modal
             const missionName = this.currentMission ? this.currentMission.name : 'Desconocida';
-            
             console.log('🔍 Buscando modal de derrota...');
-            
             // Mostrar modal de derrota
             const defeatModal = document.getElementById('combat-defeat-modal');
             const defeatTextEl = document.getElementById('combat-defeat-text');
-            
             console.log('🔍 Elementos encontrados:', {
                 defeatModal: !!defeatModal,
                 defeatTextEl: !!defeatTextEl
             });
-            
             if (defeatTextEl) {
                 defeatTextEl.innerHTML = `Has caído en batalla durante la misión "${missionName}".<br><br>El camino del ninja es difícil...`;
             }
-            
             if (defeatModal) {
                 console.log('✅ Mostrando modal de derrota');
                 defeatModal.style.display = 'flex';
