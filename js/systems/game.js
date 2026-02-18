@@ -825,11 +825,6 @@ export function createGame() {
 
             // Sistema de tiempo real: limpiar timeOfDay guardado (se calcula en tiempo real)
             delete this.player.timeOfDay;
-            
-            // Limpiar sleepState corrupto
-            if (this.player.sleepState && typeof this.player.sleepState.startedAt !== 'number') {
-                delete this.player.sleepState;
-            }
 
             this.updateSeasonAndWeather(false);
         },
@@ -1075,10 +1070,8 @@ export function createGame() {
             // Procesar gastos semanales automáticos
             this.processWeeklyExpenses();
 
-            // Procesar sueño si está activo
-            if (this.player.sleepState) {
-                this.processSleepRegen();
-            }
+            // Procesar recuperación pasiva de HP y Chakra
+            this.processPassiveRecovery();
 
             if (this.isVillageScreenActive()) {
                 this.updateOnlinePlayers();
@@ -1093,158 +1086,36 @@ export function createGame() {
             }
         },
 
-        startSleep() {
+        processPassiveRecovery() {
             if (!this.player) return;
-            if (this.player.sleepState) return; // ya durmiendo
 
-            const now = Date.now();
-            const fatigueAtStart = this.player.fatigue || 0;
-            this.player.sleepState = {
-                startedAt: now,
-                hpAtStart: this.player.hp,
-                chakraAtStart: this.player.chakra,
-                fatigueAtStart: fatigueAtStart,
-                maxDurationMs: this.REAL_TURN_MS * 2, // 2 turnos = 10 minutos
-            };
-            this.saveGame();
-            
-            // Mostrar overlay de sueño
-            this.showSleepOverlay();
-        },
-
-        showSleepOverlay() {
-            const overlay = document.getElementById('sleep-status-overlay');
-            if (overlay) {
-                overlay.classList.remove('hidden');
-            }
-            this.updateSleepOverlay();
-        },
-
-        hideSleepOverlay() {
-            const overlay = document.getElementById('sleep-status-overlay');
-            if (overlay) {
-                overlay.classList.add('hidden');
-            }
-        },
-
-        updateSleepOverlay() {
-            if (!this.player?.sleepState) {
-                this.hideSleepOverlay();
+            // Inicializar timestamp de última recuperación
+            if (!this.player.lastRecoveryTime) {
+                this.player.lastRecoveryTime = Date.now();
                 return;
             }
 
-            const s = this.player.sleepState;
-            const elapsed = Date.now() - s.startedAt;
-            const pct = Math.min(elapsed / s.maxDurationMs, 1);
-            const remaining = Math.max(0, s.maxDurationMs - elapsed);
-            
-            // Tiempo restante
-            const secs = Math.ceil(remaining / 1000);
-            const min = Math.floor(secs / 60);
-            const sec = secs % 60;
-            const timeStr = `${min}:${sec.toString().padStart(2, '0')}`;
-            
-            // Actualizar elementos
-            const progressFill = document.getElementById('sleep-progress-fill');
-            const timeDisplay = document.getElementById('sleep-time-remaining');
-            const hpDisplay = document.getElementById('sleep-hp-display');
-            const chakraDisplay = document.getElementById('sleep-chakra-display');
-            
-            if (progressFill) progressFill.style.width = `${pct * 100}%`;
-            if (timeDisplay) timeDisplay.textContent = timeStr;
-            if (hpDisplay) hpDisplay.textContent = `${this.player.hp}/${this.player.maxHp}`;
-            if (chakraDisplay) chakraDisplay.textContent = `${this.player.chakra}/${this.player.maxChakra}`;
-        },
+            const elapsed = Date.now() - this.player.lastRecoveryTime;
+            const elapsedMinutes = elapsed / 60000; // Convertir a minutos
 
-        processSleepRegen() {
-            const s = this.player.sleepState;
-            if (!s) return;
+            // Recuperar 10% por minuto
+            if (elapsedMinutes >= 1) {
+                const recoveryPct = 0.10 * Math.floor(elapsedMinutes);
+                
+                this.player.hp = Math.min(
+                    this.player.maxHp,
+                    this.player.hp + Math.floor(this.player.maxHp * recoveryPct)
+                );
 
-            const elapsed = Date.now() - s.startedAt;          // ms transcurridos
-            const pct = Math.min(elapsed / s.maxDurationMs, 1); // 0.0 → 1.0
+                this.player.chakra = Math.min(
+                    this.player.maxChakra,
+                    this.player.chakra + Math.floor(this.player.maxChakra * recoveryPct)
+                );
 
-            // Recuperación: 100% en la duración completa
-            const regenPct = pct;
-
-            this.player.hp = Math.min(
-                this.player.maxHp,
-                s.hpAtStart + Math.floor(this.player.maxHp * regenPct)
-            );
-            this.player.chakra = Math.min(
-                this.player.maxChakra,
-                s.chakraAtStart + Math.floor(this.player.maxChakra * regenPct)
-            );
-            
-            // Reducir fatiga gradualmente durante el descanso (50%)
-            const fatigueReduction = Math.floor((s.fatigueAtStart * 0.5) * regenPct);
-            this.player.fatigue = Math.max(0, s.fatigueAtStart - fatigueReduction);
-
-            // Actualizar overlay
-            this.updateSleepOverlay();
-            this.updateVillageUI();
-
-            // Cancelar automáticamente si HP y Chakra están llenos
-            const fullHp = this.player.hp >= this.player.maxHp;
-            const fullChakra = this.player.chakra >= this.player.maxChakra;
-            if (fullHp && fullChakra) {
-                this.endSleep('auto');
-                return;
+                // Actualizar timestamp
+                this.player.lastRecoveryTime = Date.now();
+                this.saveGame();
             }
-
-            // Cancelar si se cumplió la duración
-            if (elapsed >= s.maxDurationMs) {
-                this.endSleep('complete');
-            }
-        },
-
-        wakeUp() {
-            this.endSleep('manual');
-        },
-
-        endSleep(reason = 'manual') {
-            if (!this.player.sleepState) return;
-
-            // Aplicar regen final
-            const s = this.player.sleepState;
-            const elapsed = Date.now() - s.startedAt;
-            const pct = Math.min(elapsed / s.maxDurationMs, 1);
-            const regenPct = pct;
-
-            this.player.hp = Math.min(
-                this.player.maxHp,
-                s.hpAtStart + Math.floor(this.player.maxHp * regenPct)
-            );
-            this.player.chakra = Math.min(
-                this.player.maxChakra,
-                s.chakraAtStart + Math.floor(this.player.maxChakra * regenPct)
-            );
-            const fatigueReduction = Math.floor((s.fatigueAtStart * 0.5) * regenPct);
-            this.player.fatigue = Math.max(0, s.fatigueAtStart - fatigueReduction);
-
-            delete this.player.sleepState;
-            this.saveGame();
-
-            // Ocultar overlay
-            this.hideSleepOverlay();
-
-            const msg = reason === 'auto'
-                ? '✅ Te despertaste al recuperar energía completa.'
-                : reason === 'complete'
-                    ? '💤 Descansaste completamente (2 turnos).'
-                    : '⏰ Despertaste antes de tiempo.';
-
-            alert(msg);
-            this.updateVillageUI();
-        },
-
-        getSleepTimeRemaining() {
-            if (!this.player?.sleepState) return null;
-            const elapsed = Date.now() - this.player.sleepState.startedAt;
-            const remaining = Math.max(0, this.player.sleepState.maxDurationMs - elapsed);
-            const secs = Math.ceil(remaining / 1000);
-            const min = Math.floor(secs / 60);
-            const sec = secs % 60;
-            return `${min}:${sec.toString().padStart(2, '0')}`;
         },
 
         processWeeklyExpenses() {
@@ -3910,16 +3781,6 @@ export function createGame() {
             this.saveGame();
         },
 
-        sleepInVillage() {
-            if (!this.player) return;
-            // Iniciar proceso de dormir usando el sistema de tiempo real
-            if (this.player.sleepState) {
-                alert('Ya estás descansando.');
-                return;
-            }
-            this.startSleep();
-        },
-
         showTab(tabName) {
             // Wrapper para onclick inline sin depender de `event`
             this.activateVillageTab(tabName);
@@ -4853,7 +4714,42 @@ export function createGame() {
                     <div style="margin-top: 20px;">
                         <h4 style="color: var(--accent-primary);">🎒 Inventario (${this.player.inventory.length})</h4>
                         ${this.player.inventory.length === 0 ? '<p>Vacío</p>' : 
-                            this.player.inventory.map(item => `<div class="stat">${item.name}</div>`).join('')}
+                            this.player.inventory.map((item, idx) => `
+                                <div class="stat" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                                    <span>${item.name}</span>
+                                    <button class="btn btn-small btn-secondary" onclick="game.useInventoryItem(${idx})">Usar</button>
+                                </div>
+                            `).join('')}
+                            useInventoryItem(index) {
+                                if (!Array.isArray(this.player.inventory) || index < 0 || index >= this.player.inventory.length) return;
+                                const item = this.player.inventory[index];
+                                let used = false;
+                                if (item.effect?.hp) {
+                                    this.player.hp = Math.min(this.player.maxHp, this.player.hp + item.effect.hp);
+                                    used = true;
+                                }
+                                if (item.effect?.chakra) {
+                                    this.player.chakra = Math.min(this.player.maxChakra, this.player.chakra + item.effect.chakra);
+                                    used = true;
+                                }
+                                if (item.effect?.fatigue) {
+                                    this.player.fatigue = Math.max(0, this.player.fatigue + item.effect.fatigue);
+                                    used = true;
+                                }
+                                if (item.effect?.curePoison) {
+                                    this.player.isPoisoned = false;
+                                    used = true;
+                                }
+                                // Puedes agregar más efectos aquí según el diseño de items
+                                if (used) {
+                                    this.player.inventory.splice(index, 1);
+                                    this.saveGame();
+                                    this.updateVillageUI();
+                                    alert('Item consumido.');
+                                } else {
+                                    alert('Este item no es consumible.');
+                                }
+                            },
                     </div>
                 </div>
             `;
