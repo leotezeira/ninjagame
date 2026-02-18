@@ -163,24 +163,22 @@ const handleLogin = async () => {
     }
 };
 
-window.addEventListener('load', () => {
-    try {
-        // no-op
-    } catch (e) {
-        // ignore
+
+// --- FLUJO DE INICIO Y AUTENTICACIÓN SOLO USERNAME ---
+async function startApp() {
+    await AuthSystem.init();
+    const user = AuthSystem.getUser();
+    if (!user) {
+        Router.navigate('/login');
+        return;
     }
-
-    initAuthSession();
-});
-
-if (authLoginBtn) authLoginBtn.addEventListener('click', handleLogin);
-if (authRegisterBtn) authRegisterBtn.addEventListener('click', handleRegister);
-
-window.addEventListener('beforeunload', () => {
-    if (game.authUser?.id) {
-        supabase.from('players')
-            .update({ is_online: false, last_seen: new Date().toISOString() })
-            .eq('id', game.authUser.id);
+    const profile = await AuthSystem.getProfile();
+    if (!profile) {
+        Router.navigate('/name'); // Ruta de creación de personaje
+        return;
     }
-});
+    Router.navigate('/inicio');
+}
+
+window.addEventListener('DOMContentLoaded', startApp);
 
