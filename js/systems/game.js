@@ -135,7 +135,7 @@ export function createGame() {
             };
             const color = colors[clanKey] || { light: 'rgba(74, 85, 131, 0.2)', dark: 'rgba(45, 53, 97, 0.2)' };
             return light ? color.light : color.dark;
-        }
+        },
 
         selectClan(clanKey) {
             const clan = this.clans[clanKey];
