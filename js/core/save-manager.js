@@ -30,6 +30,10 @@ export class SaveManager {
                 timestamp: new Date().toISOString(),
                 player: this.game.player || {},
                 currentMission: this.game.currentMission || null,
+                enemyQueue: Array.isArray(this.game.enemyQueue) ? this.game.enemyQueue : [],
+                currentEnemy: this.game.currentEnemy || null,
+                totalWaves: typeof this.game.totalWaves === 'number' ? this.game.totalWaves : 0,
+                currentWave: typeof this.game.currentWave === 'number' ? this.game.currentWave : 0,
                 settings: this.game.settings || {}
             };
 
@@ -60,10 +64,35 @@ export class SaveManager {
             }
 
             const saveData = JSON.parse(jsonString);
-            
+
             // Aplicar migraciones
             this.migratePlayerSave(saveData.player);
-            
+
+            // Restaurar estado de combate si hay misión activa y datos válidos
+            if (saveData.currentMission) {
+                const hasCombatState = Array.isArray(saveData.enemyQueue) && saveData.currentEnemy && typeof saveData.totalWaves === 'number' && typeof saveData.currentWave === 'number';
+                if (hasCombatState) {
+                    this.game.currentMission = saveData.currentMission;
+                    this.game.enemyQueue = saveData.enemyQueue;
+                    this.game.currentEnemy = saveData.currentEnemy;
+                    this.game.totalWaves = saveData.totalWaves;
+                    this.game.currentWave = saveData.currentWave;
+                } else {
+                    // Si falta algo, limpiar misión para evitar corrupción
+                    this.game.currentMission = null;
+                    this.game.enemyQueue = [];
+                    this.game.currentEnemy = null;
+                    this.game.totalWaves = 0;
+                    this.game.currentWave = 0;
+                }
+            } else {
+                this.game.currentMission = null;
+                this.game.enemyQueue = [];
+                this.game.currentEnemy = null;
+                this.game.totalWaves = 0;
+                this.game.currentWave = 0;
+            }
+
             console.log('📂 Game loaded successfully');
             return saveData;
         } catch (e) {
@@ -153,7 +182,8 @@ export class SaveManager {
             
             // Estado especial
             day: player.day ?? 1,
-            location: player.location || this.game.player?.village || 'konoha',
+            // Prioriza player.location, luego player.village, luego 'konoha'
+            location: player.location || player.village || 'konoha',
             isSleeping: player.isSleeping ?? false,
             sleepEnd: player.sleepEnd ?? null,
             
@@ -169,12 +199,7 @@ export class SaveManager {
 
         // Aplicar defaults al objeto
         Object.assign(player, defaults);
-
-        // Guardar datos aplicados en el game object
-        if (this.game) {
-            this.game.player = player;
-        }
-
+        // Ya no muta this.game.player aquí
         console.log('✅ Player save migrated');
         return player;
     }

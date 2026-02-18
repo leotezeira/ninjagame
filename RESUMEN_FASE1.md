@@ -8,9 +8,6 @@
 **Ubicación**: `c:\Users\Rodri\Desktop\leotezeira\ninjagame\js\core\screen-manager.js`
 
 **Responsabilidad**: Sistema ÚNICO de navegación
-- Elimina dualidad `showSection` vs `activateTab`
-- Centraliza lógica de pantallas y secciones
-- Maneja visibilidad de UI (header, bottom-nav, sidebar)
 
 **Métodos principales**:
 ```javascript
@@ -25,19 +22,12 @@ screenManager.getElement(id, context)        // Guard clause segura
 ```
 
 **IDs HTML que maneja**:
-- Pantallas: `auth-screen`, `name-screen`, `clan-screen`, `village-screen`, `combat-screen`, `mission-briefing-screen`, `mission-victory-screen`, `defeat-screen`, `exam-screen`
-- Navegación: `game-header`, `bottom-nav`, `sidebar`, `sidebar-overlay`
-- Secciones: `section-home`, `section-world`, `section-inventory`, `section-shop`, `section-statspage`
 
----
 
 #### ✅ `js/core/save-manager.js` (250 líneas)
 **Ubicación**: `c:\Users\Rodri\Desktop\leotezeira\ninjagame\js\core\save-manager.js`
 
 **Responsabilidad**: Persistencia y migración robusta
-- Garantiza QUE NINGUNA propiedad del player sea `undefined`
-- Carga/guarda en localStorage
-- Validación y sanitización
 
 **Métodos principales**:
 ```javascript
@@ -52,18 +42,7 @@ saveManager.getSaveInfo()                    // Metadata del save
 ```
 
 **Propiedades aseguradas**:
-- Identidad: `name`, `clanKey`, `village`, `rank`
-- Stats: `level`, `exp`, `hp`, `chakra`, `taijutsu`, `ninjutsu`, `genjutsu`
-- Economía: `ryo`
-- Kekkei Genkai: `kekkeiGenkai`, `kekkeiLevel`, `kekkeiExp`
-- Jutsus: `learnedJutsus`, `equippedJutsus`
-- Inventario: `items`, `equippedWeapon`
-- Misiones: `completedMissions`, `missionsCompletedByRank`, etc.
-- Relaciones: `relationships`, `reputation`
-- Estado: `isRenegade`, `karma`, `wantedLevel`, `day`, `location`
-- Y 10+ más (VER archivo para lista completa)
 
----
 
 ### 2. HTML Screens (Nuevas)
 
@@ -71,8 +50,6 @@ saveManager.getSaveInfo()                    // Metadata del save
 **Ubicación**: `c:\Users\Rodri\Desktop\leotezeira\ninjagame\html\screens\mission-briefing.html`
 
 **Pantalla NUEVA que faltaba**: Mission Briefing Screen
-- **Problema resuelto**: El juego fallaba al iniciar misiones (no existía esta pantalla)
-- **Contenido**:
   - Avatar del narrador (📜)
   - Texto narrativo de contexto
   - Título de misión
@@ -100,7 +77,6 @@ saveManager.getSaveInfo()                    // Metadata del save
 
 **Estilos incluidos** (z-index: 6000 para estar por encima)
 
----
 
 ### 3. CSS Modularizado
 
@@ -130,32 +106,18 @@ saveManager.getSaveInfo()                    // Metadata del save
 }
 ```
 
----
 
 #### ✅ `css/screens.css` (250 líneas)
 **Ubicación**: `c:\Users\Rodri\Desktop\leotezeira\ninjagame\css\screens.css`
 
 **Contiene**: Pantallas principales y animaciones
-- `.screen` base con animaciones
-- `screenFadeIn`, `screenSlideIn`, `modalSlideIn`
-- Layouts específicos por pantalla
-- `#auth-screen`, `#village-screen`, `#combat-screen`, etc.
-- Media queries responsive
 
----
 
 #### ✅ `css/components.css` (350 líneas)
 **Ubicación**: `c:\Users\Rodri\Desktop\leotezeira\ninjagame\css\components.css`
 
 **Contiene**: Componentes reutilizables
-- Botones: `.btn`, `.btn-secondary`, `.btn-small`, `.btn-large`
-- Cards: `.card`, `.card-header`, `.card-content`, `.card-footer`
-- Barras: `.health-bar`, `.chakra-bar`
-- Tabs: `.tab-btn`, `.tab-btn.active`
-- Inputs: `.text-input`, `select`
-- Componentes específicos: `.player-info`, `.stats-grid`, `.toggle`
 
----
 
 ### 4. Documentación
 
@@ -163,16 +125,7 @@ saveManager.getSaveInfo()                    // Metadata del save
 **Ubicación**: `c:\Users\Rodri\Desktop\leotezeira\ninjagame\ARQUITECTURA_MODULAR.md`
 
 **Contiene**:
-- Estado del proyecto (✅ completado, ⏳ pendiente)
-- Especificación detallada de cada módulo
-- Responsabilidades, dependencias, IDs HTML
-- Plan completo de migración (FASE 1 → 4)
-- Reglas estrictas para nuevos módulos
-- Template reutilizable para sistemas
-- Problemas resueltos vs problemas que faltaban
-- Guía de testing
 
----
 
 ## Problemas Resueltos ✅
 
@@ -187,7 +140,6 @@ saveManager.getSaveInfo()                    // Metadata del save
 | game.js 6000+ líneas | Plan divide en 10 sistemas | `ARQUITECTURA_MODULAR.md` |
 | Sin guard clauses | screenManager.getElement() | `screen-manager.js` |
 
----
 
 ## Próximos Pasos (FASE 2) ⏳
 
@@ -228,7 +180,6 @@ export const SistemaNombre = {
 };
 ```
 
----
 
 ## Estructura Final
 
@@ -290,7 +241,6 @@ proyecto/
 └── ARQUITECTURA_MODULAR.md             ✅ Guía de refactorización
 ```
 
----
 
 ## Cómo Verificar que Todo Funciona
 
@@ -324,7 +274,6 @@ console.log(testPlayer.hp)      // Debería ser un número, nunca undefined
 console.log(testPlayer.rank)    // Debería ser 'Genin', nunca undefined
 ```
 
----
 
 ## Reglas a Respetar en Próximos Módulos
 
@@ -339,24 +288,15 @@ console.log(testPlayer.rank)    // Debería ser 'Genin', nunca undefined
 9. **Métodos privados** con prefijo `_`
 10. **Testing en console** debe ser posible
 
----
 
 ## Migración de ninjagame.html → index.html
 
 ```timeline
 Ahora (FASE 1):
-- ninjagame.html → funciona con CSS modular + screen-manager.js
-- index.html → plantilla, redirige a ninjagame.html
-- game.js antiguo → sigue funcionando (TEMPORALMENTE)
 
 Después (FASE 2-4):
-- index.html → punto de entrada real
-- ninjagame.html → se reemplaza por screens HTML modulares
-- game.js antiguo → se divide en 10 sistemas
-- css/style.css antiguo → se elimina (reemplazado por modular)
 ```
 
----
 
 ## Contacto & Debugging
 
@@ -379,6 +319,5 @@ screenManager.getElement('combat-screen', 'verificación')
 // Si no existe, muestra warning en console
 ```
 
----
 
 ✅ **ESTADO**: FASE 1 COMPLETADA - Lista para FASE 2

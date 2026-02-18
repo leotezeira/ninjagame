@@ -1,6 +1,7 @@
 
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+import { createGame } from './systems/game.js';
 
 // --- Configuración de Supabase (puedes cambiar por localStorage si quieres sin backend) ---
 const supabase = createClient(
@@ -10,8 +11,7 @@ const supabase = createClient(
 window.supabase = supabase;
 
 // --- Estado global del juego ---
-const game = {};
-window.game = game;
+window.game = createGame();
 
 // --- Login simple (solo username y password, sin email) ---
 async function simpleLogin(username, password) {
@@ -113,5 +113,8 @@ window.simpleLogin = async function(username, password) {
 window.simpleLogin = simpleLogin;
 window.simpleRegister = simpleRegister;
 window.logout = logout;
+import { showModal, showConfirm } from './ui/modal.js';
+window.showModal = showModal;
+window.showConfirm = showConfirm;
 window.showScreen = showScreen;
 

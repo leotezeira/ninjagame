@@ -1,5 +1,12 @@
 import { BASE_GAME } from '../content/data.js';
 import { SaveSystem } from './save.js';
+// IDs de barras de combate centralizados
+const BAR_ID_PLAYER_HP = 'combat-player-health-bar';
+const BAR_ID_PLAYER_CHAKRA = 'combat-player-chakra-bar';
+const BAR_ID_ENEMY_HP = 'enemy-health-bar';
+
+import { BASE_GAME } from '../content/data.js';
+import { SaveSystem } from './save.js';
 
 export function createGame() {
     const game = {
@@ -108,6 +115,10 @@ export function createGame() {
         showScreen(screenId) {
             console.log('📺 showScreen called with:', screenId);
             
+            // Limpiar pendingMission si el usuario sale del briefing de misión
+            if (this.pendingMission && screenId !== 'mission-briefing-screen') {
+                this.pendingMission = null;
+            }
             // Remover clase active de todas las pantallas
             const allScreens = document.querySelectorAll('.screen');
             console.log('🔍 Found', allScreens.length, 'screens total');
@@ -1124,6 +1135,9 @@ export function createGame() {
 
         onRealTimeTick() {
             if (!this.player) return;
+
+            // Procesar avance de misiones urgentes cada tick (simular 1 turno por tick)
+            this.tickUrgentMission(1);
 
             const { absoluteDay } = this.getRealTimeState();
 
@@ -2334,12 +2348,36 @@ export function createGame() {
                 ? `Próximo intento en ${cooldownLeft} día(s)`
                 : (daysLeft === 0 ? 'HOY' : `En ${daysLeft} día(s)`);
 
+            let requirementsHtml = '';
+            if (type === 'chunin') {
+                requirementsHtml = `
+                    <div class="exam-req-box">
+                        <b>Requisitos Chunin:</b><br>
+                        - Rango: Genin<br>
+                        - 2 misiones rango A completadas<br>
+                        - 2 misiones rango B completadas<br>
+                        - 2000 Ryo (inscripción)<br>
+                        - No haber fallado en los últimos 180 días
+                    </div>
+                `;
+            } else if (type === 'jonin') {
+                requirementsHtml = `
+                    <div class="exam-req-box">
+                        <b>Requisitos Jonin:</b><br>
+                        - Rango: Chunin<br>
+                        - 5 misiones rango S completadas (siendo Chunin)<br>
+                        - 8000 Ryo (inscripción)<br>
+                        - No haber fallado en los últimos 180 días
+                    </div>
+                `;
+            }
             el.innerHTML = `
                 <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
                     <div>
                         <div style="color: var(--gold); font-weight:bold;">📅 PRÓXIMO EXAMEN</div>
                         <div style="margin-top:4px;"><b>${title}</b></div>
                         <div style="margin-top:4px; opacity:0.9;">⏰ ${timeText}</div>
+                        ${requirementsHtml}
                     </div>
                     <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
                         <button class="btn btn-small btn-secondary" onclick="game.showExamRequirements()">Ver Requisitos</button>
@@ -3507,7 +3545,10 @@ export function createGame() {
         },
 
         getNpcBattleStamp() {
-            return `${this.player.year}-${this.player.month}-${this.player.day}`;
+            const y = this.player.year;
+            const m = String(this.player.month).padStart(2, '0');
+            const d = String(this.player.day).padStart(2, '0');
+            return `${y}-${m}-${d}`;
         },
 
         friendlyBattle(npcId) {
@@ -4049,6 +4090,13 @@ export function createGame() {
                             e.stopPropagation();
                             alert(`🔒 Misión bloqueada: ${lockStatus.reason}`);
                         };
+                        // Reemplazar onclick por addEventListener
+                        card.removeEventListener('click', card._missionLockHandler || (()=>{}));
+                        card._missionLockHandler = function(e) {
+                            e.stopPropagation();
+                            alert(`🔒 Misión bloqueada: ${lockStatus.reason}`);
+                        };
+                        card.addEventListener('click', card._missionLockHandler);
                     } else {
                         // Misión disponible
                         card.style.cursor = 'pointer';
@@ -4099,31 +4147,42 @@ export function createGame() {
                 missionList.appendChild(rankContainer);
             });
 
-            if (Object.keys(missionsByRank).every(rank => (missionsByRank[rank] || []).length === 0)) {
+            // Solo mostrar mensaje si NO hay ninguna misión en ningún rango
+            const totalMissions = Object.values(missionsByRank).reduce((acc, arr) => acc + (Array.isArray(arr) ? arr.length : 0), 0);
+            if (totalMissions === 0) {
                 missionList.innerHTML = '<div class="story-text">No hay misiones disponibles para tu nivel.</div>';
             }
         },
 
         groupMissionsByRank(missions) {
+            const rankOrder = ['D', 'C', 'B', 'A', 'S', 'U', 'F'];
             const grouped = {};
+            // Inicializar todos los rangos en orden lógico
+            rankOrder.forEach(rank => { grouped[rank] = []; });
             missions.forEach(mission => {
                 const rank = (mission.rank || 'D').toUpperCase();
-                if (!grouped[rank]) {
-                    grouped[rank] = [];
-                }
+                if (!grouped[rank]) grouped[rank] = [];
                 grouped[rank].push(mission);
             });
-            return grouped;
+            // Devolver objeto solo con los rangos en el orden lógico
+            const ordered = {};
+            rankOrder.forEach(rank => { ordered[rank] = grouped[rank]; });
+            return ordered;
         },
 
         // Verificar si una misión está bloqueada por nivel o rango
         isMissionLocked(mission) {
-            if (!this.player) return true;
+            if (!this.player) return { locked: true, reason: 'No hay jugador activo' };
             
             const missionRank = (mission.rank || 'D').toUpperCase();
             const playerRank = this.player.rank || 'Genin';
             const playerLevel = this.player.level || 1;
-            
+
+            // Permitir combates amistosos (rank F) a cualquier rango/nivel
+            if (missionRank === 'F' && mission.friendlyBattle) {
+                return { locked: false };
+            }
+
             // Definir requisitos mínimos de nivel por rango de misión
             const rankRequirements = {
                 'D': { minLevel: 1, allowedRanks: ['Genin', 'Chunin', 'Jonin', 'ANBU', 'Kage'] },
@@ -4136,19 +4195,17 @@ export function createGame() {
             };
             
             const req = rankRequirements[missionRank];
-            if (!req) return false;
+            if (!req) return { locked: false };
             
             // Verificar nivel
             if (playerLevel < req.minLevel) {
                 return { locked: true, reason: `Nivel ${req.minLevel} requerido` };
             }
-            
             // Verificar rango
             if (!req.allowedRanks.includes(playerRank)) {
                 return { locked: true, reason: `Rango ${req.allowedRanks[0]} requerido` };
             }
-            
-            return false;
+            return { locked: false };
         },
 
         getRankEmoji(rank) {
@@ -4180,6 +4237,19 @@ export function createGame() {
                     console.error('❌ game.startMission not found!');
                 }
             };
+            // Reemplazar onclick por addEventListener
+            card.removeEventListener('click', card._missionClickHandler || (()=>{}));
+            card._missionClickHandler = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🎯 Renegade mission clicked:', missionData.name);
+                if (typeof game !== 'undefined' && game.startMission) {
+                    game.startMission(missionData);
+                } else {
+                    console.error('❌ game.startMission not found!');
+                }
+            };
+            card.addEventListener('click', card._missionClickHandler);
 
             const rank = (mission.rank || '').toUpperCase();
             const turnCostByRank = { D: 1, C: 2, B: 3, A: 4, S: 4 };
@@ -4832,58 +4902,42 @@ export function createGame() {
         migratePlayerSave: SaveSystem.migratePlayerSave,
         startMission(mission) {
             console.log('🔔 startMission called with:', mission);
-            
             if (!mission) {
                 console.error('❌ No mission provided');
                 alert('Error: Misión no encontrada');
                 return;
             }
-            
-            console.log('✅ Mission data valid');
-            
-            // Calcular recompensas estimadas
+            // Calcular recompensas estimadas para mostrar al usuario
             const team = this.getTeamBonuses();
             const nightRyoMult = this.getTimeOfDay() === 2 ? 1.2 : 1;
             const estRyo = Math.floor(mission.ryo * (team.missionRyoMult || 1) * nightRyoMult);
             const estExp = Math.floor(mission.exp * (team.missionExpMult || 1));
-            
-            // Construir mensaje de confirmación
+            // Confirmación (si se llama desde UI directa)
             const message = `📜 ${mission.name}\n\n${mission.description || mission.narrator || 'Una misión te espera.'}\n\n🎖️ Rango: ${mission.rank || 'D'}\n💰 Recompensa: ${estRyo} Ryo\n✨ Experiencia: ${estExp} EXP\n\n¿Aceptar esta misión?`;
-            
-            console.log('💬 Showing confirmation dialog');
-            
-            // Usar confirm nativo del navegador (siempre funciona)
             const accepted = confirm(message);
-            console.log('🗳️ User choice:', accepted ? 'ACCEPTED' : 'REJECTED');
-            
-            if (accepted) {
-                console.log('✅ Mission accepted, calling _executeMission');
-                this._executeMission(mission);
-            } else {
-                console.log('❌ Mission rejected by user');
-            }
+            if (!accepted) return;
+            this._prepareAndStartMission(mission);
         },
 
         showMissionBriefing(mission) {
             console.log('showMissionBriefing called with:', mission);
             const briefingScreen = document.getElementById('mission-briefing-screen');
-            const titleEl = document.getElementById('briefing-title');
-            const narratorEl = document.getElementById('briefing-narrator-text');
-            const rankEl = document.getElementById('briefing-rank');
-            const ryoEl = document.getElementById('briefing-ryo');
-            const expEl = document.getElementById('briefing-exp');
-
+            const titleEl = document.getElementById('mission-briefing-title');
+            const narratorEl = document.getElementById('mission-narrator-text');
+            const rankEl = document.getElementById('mission-briefing-rank');
+            const ryoEl = document.getElementById('mission-briefing-ryo');
+            const expEl = document.getElementById('mission-briefing-exp');
+            const descEl = document.getElementById('mission-briefing-description');
             if (!briefingScreen) {
                 console.error('mission-briefing-screen not found');
                 return;
             }
-
             titleEl.textContent = mission.name;
             narratorEl.textContent = mission.narrator || 'Se requiere completar esta misión. Prepárate para el combate.';
             rankEl.textContent = mission.rank;
             ryoEl.textContent = mission.ryo;
             expEl.textContent = mission.exp;
-
+            if (descEl) descEl.textContent = mission.description || '';
             console.log('Calling showScreen for mission-briefing-screen');
             this.showScreen('mission-briefing-screen');
         },
@@ -4897,7 +4951,7 @@ export function createGame() {
             const mission = this.pendingMission;
             this.pendingMission = null;
             console.log('Executing mission:', mission.name);
-            this._executeMission(mission);
+            this._prepareAndStartMission(mission);
         },
 
         cancelMissionBriefing() {
@@ -4908,60 +4962,44 @@ export function createGame() {
         },
 
         _executeMission(mission) {
-            console.log('🚀 _executeMission called with:', mission);
-            
+            // Obsoleta: toda la lógica de inicialización de misión y combate pasa por _prepareAndStartMission
+            console.warn('_executeMission está obsoleta. Usa _prepareAndStartMission');
+            this._prepareAndStartMission(mission);
+
+        },
+
+        _prepareAndStartMission(mission) {
             if (!this.player) {
                 console.error('❌ No player found!');
                 return;
             }
-            
-            console.log('✅ Player found:', this.player.name);
-
             // Fatiga por misión
             this.addFatigue(15);
-
             // Clonar misión para no mutar el catálogo
             const clonedMission = {
                 ...mission,
                 enemies: Array.isArray(mission.enemies) ? mission.enemies.map(g => ({ ...g })) : []
             };
-            
-            console.log('📋 Cloned mission:', clonedMission);
-            console.log('👹 Mission enemies:', clonedMission.enemies);
-
-            // Costo de tiempo (turnos) por complejidad - solo para cálculo de dificultad
+            // Bonus por misión nocturna y equipo
             const rank = (clonedMission.rank || '').toUpperCase();
             const turnCostByRank = { D: 1, C: 2, B: 3, A: 4, S: 4 };
             const turnCost = clonedMission.turns ?? (turnCostByRank[rank] ?? 2);
-            // El tiempo avanza naturalmente en el sistema basado en tiempo real
-            // No llamamos a advanceTurns() - el tiempo pasa solo
-
-            // Bonus por misión nocturna
             const isNight = this.getTimeOfDay() === 2;
             const nightRyoMult = isNight ? 1.2 : 1;
-
-            // Bonus por equipo
             const team = this.getTeamBonuses();
             const ryoMult = (team.missionRyoMult || 1) * nightRyoMult;
             const expMult = (team.missionExpMult || 1);
-
             clonedMission.ryo = Math.floor(clonedMission.ryo * ryoMult);
             clonedMission.exp = Math.floor(clonedMission.exp * expMult);
-
             this.currentMission = clonedMission;
             this.enemyQueue = [];
-            
-            console.log('🏪 Available enemies catalog:', this.enemies ? 'Available' : 'NOT FOUND');
-            
             // Crear cola de enemigos basado en la misión
             if (!clonedMission.enemies || clonedMission.enemies.length === 0) {
                 console.error('❌ Mission has no enemies defined!');
                 alert('Error: Esta misión no tiene enemigos configurados.');
                 return;
             }
-            
             clonedMission.enemies.forEach(enemyGroup => {
-                console.log('Processing enemy group:', enemyGroup);
                 for (let i = 0; i < enemyGroup.count; i++) {
                     if (!this.enemies || !this.enemies[enemyGroup.type] || !this.enemies[enemyGroup.type][enemyGroup.index]) {
                         console.error(`❌ Enemy not found: ${enemyGroup.type}[${enemyGroup.index}]`);
@@ -4971,21 +5009,15 @@ export function createGame() {
                     this.enemyQueue.push({ ...enemyTemplate, maxHp: enemyTemplate.hp, maxChakra: enemyTemplate.chakra });
                 }
             });
-            
-            console.log('👥 Enemy queue created:', this.enemyQueue.length, 'enemies');
-            
             if (this.enemyQueue.length === 0) {
                 console.error('❌ Enemy queue is empty!');
                 alert('Error: No se pudieron cargar los enemigos.');
                 return;
             }
-            
             this.totalWaves = this.enemyQueue.length;
             this.currentWave = 1;
-            
             // Iniciar con el primer enemigo
             this.currentEnemy = this.enemyQueue.shift();
-            console.log('⚔️ Starting combat with:', this.currentEnemy.name);
             this.startCombat();
         },
 
@@ -5030,9 +5062,13 @@ export function createGame() {
                 enemyStatsEl.textContent = `⚔️ Ataque: ${this.currentEnemy.attack} | 🛡️ Defensa: ${this.currentEnemy.defense} | 🎯 Precisión: +${this.currentEnemy.accuracy}`;
             }
             
-            this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
-            this.updateBar('combat-player-chakra-bar', this.player.chakra, this.player.maxChakra, 'Chakra');
-            this.updateBar('enemy-health-bar', this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+            this.updateBar(BAR_ID_PLAYER_HP, this.player.hp, this.player.maxHp, 'HP');
+            this.updateBar(BAR_ID_PLAYER_CHAKRA, this.player.chakra, this.player.maxChakra, 'Chakra');
+            this.updateBar(BAR_ID_ENEMY_HP, this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                                    this.updateBar(BAR_ID_ENEMY_HP, this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                            this.updateBar(BAR_ID_ENEMY_HP, this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                                    this.updateBar(BAR_ID_ENEMY_HP, this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                            this.updateBar(BAR_ID_PLAYER_CHAKRA, this.player.chakra, this.player.maxChakra, 'Chakra');
             
             if (this.currentWave === 1) {
                 if (this.currentMission && this.currentMission.isTravelEncounter) {
@@ -5059,25 +5095,50 @@ export function createGame() {
         },
 
         enableCombatButtons() {
-            document.getElementById('attack-btn').disabled = false;
-            document.getElementById('jutsu-menu-btn').disabled = false;
-            document.getElementById('genjutsu-btn').disabled = false;
-            document.getElementById('defend-btn').disabled = false;
-            document.getElementById('kawarimi-btn').disabled = this.kawairimiUsed;
-            document.getElementById('item-btn').disabled = false;
+            const attackBtn = document.getElementById('attack-btn');
+            if (attackBtn) attackBtn.disabled = false;
+            const jutsuMenuBtn = document.getElementById('jutsu-menu-btn');
+            if (jutsuMenuBtn) jutsuMenuBtn.disabled = false;
+            const genjutsuBtn = document.getElementById('genjutsu-btn');
+            if (genjutsuBtn) genjutsuBtn.disabled = false;
+            const defendBtn = document.getElementById('defend-btn');
+            if (defendBtn) defendBtn.disabled = false;
+            const kawarimiBtn = document.getElementById('kawarimi-btn');
+            if (kawarimiBtn) kawarimiBtn.disabled = this.kawairimiUsed;
+            const itemBtn = document.getElementById('item-btn');
+            if (itemBtn) itemBtn.disabled = false;
         },
 
         disableCombatButtons() {
-            document.getElementById('attack-btn').disabled = true;
-            document.getElementById('jutsu-menu-btn').disabled = true;
-            document.getElementById('genjutsu-btn').disabled = true;
-            document.getElementById('defend-btn').disabled = true;
-            document.getElementById('kawarimi-btn').disabled = true;
-            document.getElementById('item-btn').disabled = true;
+            const attackBtn = document.getElementById('attack-btn');
+            if (attackBtn) attackBtn.disabled = true;
+            const jutsuMenuBtn = document.getElementById('jutsu-menu-btn');
+            if (jutsuMenuBtn) jutsuMenuBtn.disabled = true;
+            const genjutsuBtn = document.getElementById('genjutsu-btn');
+            if (genjutsuBtn) genjutsuBtn.disabled = true;
+            const defendBtn = document.getElementById('defend-btn');
+            if (defendBtn) defendBtn.disabled = true;
+            const kawarimiBtn = document.getElementById('kawarimi-btn');
+            if (kawarimiBtn) kawarimiBtn.disabled = true;
+            const itemBtn = document.getElementById('item-btn');
+            if (itemBtn) itemBtn.disabled = true;
         },
 
         basicAttack() {
             if (this.combatTurn !== 'player') return;
+
+            // Descontar buff de combate al inicio del turno del jugador
+            if (this.player.combatBuff && this.player.combatBuff.turns) {
+                this.player.combatBuff.turns -= 1;
+                if (this.player.combatBuff.turns <= 0) {
+                    if (this.player.combatBuff.backlashHp) {
+                        this.player.hp = Math.max(1, this.player.hp - this.player.combatBuff.backlashHp);
+                        this.addCombatLog(`⚠️ Efecto secundario: -${this.player.combatBuff.backlashHp} HP.`, 'log-damage');
+                        this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
+                    }
+                    this.player.combatBuff = null;
+                }
+            }
 
             if (this.checkFatigueFaint()) return;
             
@@ -5283,7 +5344,18 @@ export function createGame() {
                     this.currentEnemy.hp = 0;
                     this.player.hp = Math.max(1, Math.floor(this.player.hp * 0.5));
                     this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
-                    this.updateBar('enemy-health-bar', this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                    this.updateBar(BAR_ID_PLAYER_HP, this.player.hp, this.player.maxHp, 'HP');
+                    this.updateBar(BAR_ID_ENEMY_HP, this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                                this.updateBar(BAR_ID_ENEMY_HP, this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                                this.updateBar(BAR_ID_PLAYER_CHAKRA, this.player.chakra, this.player.maxChakra, 'Chakra');
+                                this.updateBar(BAR_ID_PLAYER_CHAKRA, this.player.chakra, this.player.maxChakra, 'Chakra');
+                                    this.updateBar(BAR_ID_PLAYER_HP, this.player.hp, this.player.maxHp, 'HP');
+                                this.updateBar(BAR_ID_PLAYER_HP, this.player.hp, this.player.maxHp, 'HP');
+                                    this.updateBar(BAR_ID_PLAYER_CHAKRA, this.player.chakra, this.player.maxChakra, 'Chakra');
+                                this.updateBar(BAR_ID_ENEMY_HP, this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                                            this.updateBar(BAR_ID_ENEMY_HP, this.currentEnemy.hp, this.currentEnemy.maxHp, 'HP');
+                                this.updateBar(BAR_ID_PLAYER_HP, this.player.hp, this.player.maxHp, 'HP');
+                                this.updateBar(BAR_ID_PLAYER_CHAKRA, this.player.chakra, this.player.maxChakra, 'Chakra');
                     this.addCombatLog('☠️ Sacrificio activado. El enemigo cae.', 'log-special');
                     this.winCombat();
                     return;
@@ -5549,6 +5621,15 @@ export function createGame() {
                     const partAttack = Number.isFinite(part.attack) ? part.attack : this.currentEnemy.attack;
                     const partAcc = Number.isFinite(part.accuracy) ? part.accuracy : (this.currentEnemy.accuracy || 0);
 
+                    // Cálculo de evasión real
+                    const baseEvasion = stats.evasion || 0; // Si existe stat de evasión base
+                    const teamEvasion = stats.teamEvasionBonus || 0;
+                    const totalEvasion = baseEvasion + teamEvasion;
+                    if (totalEvasion > 0 && Math.random() < totalEvasion) {
+                        this.addCombatLog('¡Tu equipo te ayuda a esquivar el ataque! (Evasión)', 'log-miss');
+                        continue;
+                    }
+
                     const attackRoll = this.rollDice(20);
                     const totalAttack = attackRoll + partAttack + partAcc;
                     this.addCombatLog(`Enemigo tira: <span class="dice-roll">${attackRoll}</span> + ${partAttack} + ${partAcc} = ${totalAttack} vs Defensa ${playerDefense}`, 'log-attack');
@@ -5630,15 +5711,7 @@ export function createGame() {
                 }
 
                 if (this.player.combatBuff && this.player.combatBuff.turns) {
-                    this.player.combatBuff.turns -= 1;
-                    if (this.player.combatBuff.turns <= 0) {
-                        if (this.player.combatBuff.backlashHp) {
-                            this.player.hp = Math.max(1, this.player.hp - this.player.combatBuff.backlashHp);
-                            this.addCombatLog(`⚠️ Efecto secundario: -${this.player.combatBuff.backlashHp} HP.`, 'log-damage');
-                            this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
-                        }
-                        this.player.combatBuff = null;
-                    }
+                    // Ya se descuenta al inicio del turno del jugador
                 }
                 if (this.player.jashinTurns > 0) this.player.jashinTurns -= 1;
 
@@ -5660,13 +5733,7 @@ export function createGame() {
             // Fatiga por combate
             this.addFatigue(10);
             
-            // Ganar recompensas parciales por cada enemigo
-            const expPerEnemy = Math.floor(this.currentMission.exp / this.totalWaves);
-            const ryoPerEnemy = Math.floor(this.currentMission.ryo / this.totalWaves);
-            
-            this.player.exp += expPerEnemy;
-            this.player.totalExp = (this.player.totalExp || 0) + expPerEnemy;
-            this.player.ryo += ryoPerEnemy;
+            // Solo sumar EXP y Ryo al final de la misión (no por enemigo)
             this.player.combatsWon++;
 
             // Cura entre combates (Sakura)
@@ -5683,8 +5750,12 @@ export function createGame() {
             // Verificar si hay más enemigos
             if (this.enemyQueue.length > 0) {
                 this.addCombatLog('¡El siguiente enemigo se acerca!', 'log-special');
-                
                 setTimeout(() => {
+                    // Chequeo de fatiga/desmayo entre oleadas
+                    if (this.checkFatigueFaint()) {
+                        // Si el jugador se desmaya, no avanza la oleada hasta que pase su turno
+                        return;
+                    }
                     this.currentWave++;
                     this.currentEnemy = this.enemyQueue.shift();
                     this.kawairimiUsed = false; // Reiniciar Kawarimi para nuevo enemigo
@@ -5692,6 +5763,17 @@ export function createGame() {
                     this.startCombat();
                 }, 2000);
                 return;
+            }
+
+            // Al derrotar al último enemigo, otorgar toda la EXP y Ryo de la misión
+            if (this.currentMission) {
+                this.player.exp += this.currentMission.exp;
+                this.player.totalExp = (this.player.totalExp || 0) + this.currentMission.exp;
+                this.player.ryo += this.currentMission.ryo;
+                // Verificar level up inmediatamente después de sumar EXP
+                if (this.player.exp >= this.player.expToNext) {
+                    this.levelUp();
+                }
             }
 
             // Combate durante viaje: reanudar viaje sin pantalla de victoria
@@ -5735,10 +5817,7 @@ export function createGame() {
                     this.levelUpKekkei();
                 }
             }
-            
-            if (this.player.exp >= this.player.expToNext) {
-                this.levelUp();
-            }
+            // (Ya se verifica el level up tras sumar EXP arriba)
 
             // Robo de Kekkei Genkai (kinjutsu)
             if (this.player.pendingStealKg && !this.player.kekkeiGenkai) {
@@ -5789,7 +5868,9 @@ export function createGame() {
                     if (['B', 'A', 'S'].includes(mr)) {
                         this.player.missionsCompletedBPlus = (this.player.missionsCompletedBPlus || 0) + 1;
                     }
-                    if (mr === 'S' && this.player.rank === 'Chunin') {
+                    // Aceptar variantes de 'Chunin'/'Chūnin' y proteger el contador
+                    const validChunin = ['Chunin', 'Chūnin'];
+                    if (mr === 'S' && validChunin.includes(this.player.rank)) {
                         this.player.missionsCompletedSWhileChunin = (this.player.missionsCompletedSWhileChunin || 0) + 1;
                     }
                 }
