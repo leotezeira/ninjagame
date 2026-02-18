@@ -1,8 +1,74 @@
 import { BASE_GAME } from '../content/data.js';
+import { SaveSystem } from './save.js';
 
 export function createGame() {
     const game = {
         ...BASE_GAME,
+        // Funciones puente para login, registro y chat
+        async doLogin() {
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            document.getElementById('login-loading').style.display = '';
+            document.getElementById('login-error').style.display = 'none';
+            try {
+                await AuthSystem.login(username, password);
+            } catch(e) {
+                document.getElementById('login-error').textContent = e;
+                document.getElementById('login-error').style.display = '';
+            } finally {
+                document.getElementById('login-loading').style.display = 'none';
+            }
+        },
+        async doRegister() {
+            const username = document.getElementById('reg-username').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const password2 = document.getElementById('reg-password2').value;
+            document.getElementById('register-error').style.display = 'none';
+            if (password !== password2) {
+                document.getElementById('register-error').textContent = 'Las contraseñas no coinciden';
+                document.getElementById('register-error').style.display = '';
+                return;
+            }
+            try {
+                await AuthSystem.register(username, password);
+            } catch(e) {
+                document.getElementById('register-error').textContent = e;
+                document.getElementById('register-error').style.display = '';
+            }
+        },
+        showLoginTab(tab) {
+            document.getElementById('signin-panel').style.display = (tab === 'signin') ? '' : 'none';
+            document.getElementById('register-panel').style.display = (tab === 'register') ? '' : 'none';
+        },
+        previewUsername(value) {
+            const preview = document.getElementById('username-preview');
+            const error = AuthSystem.validateUsername(value);
+            if (error) {
+                preview.textContent = error;
+                preview.style.color = 'red';
+            } else {
+                preview.textContent = value;
+                preview.style.color = 'green';
+            }
+        },
+        async loadMyProfile() {
+            const profile = await AuthSystem.getProfile();
+            renderProfile(profile, true);
+        },
+        async loadProfile(userId) {
+            const { data } = await supabase.from('profiles').select('*').eq('user_id', userId).single();
+            renderProfile(data, false);
+        },
+        sendMessage() {
+            ChatSystem.sendMessage(document.getElementById('chat-input').value);
+        },
+        handleChatInput(event) {
+            ChatSystem.handleChatInput(event);
+        },
+        unsubscribeChat() {
+            ChatSystem.unsubscribeChat();
+        },
+        // ...existing code...
 
         rollDice(sides = 20) {
             return Math.floor(Math.random() * sides) + 1;
@@ -4760,66 +4826,10 @@ export function createGame() {
             `;
         },
 
-        saveGame() {
-            try {
-                localStorage.setItem('ninjaRPGSave', JSON.stringify(this.player));
-                console.log('Partida guardada');
-                if (this.supabase && this.authUser?.id) {
-                    this.supabase
-                        .from('players')
-                        .update({
-                            game_state: this.player,
-                            last_seen: new Date().toISOString(),
-                            is_online: true,
-                            village: this.player.village || 'unknown',
-                            clan: this.player.clan || null,
-                            level: this.player.level,
-                            rank: this.player.rank
-                        })
-                        .eq('id', this.authUser.id);
-                }
-            } catch(e) {
-                console.error('Error guardando:', e);
-            }
-        },
-
-        loadGame() {
-            try {
-                const save = localStorage.getItem('ninjaRPGSave');
-                if (!save) {
-                    alert('No hay partida guardada');
-                    return;
-                }
-                
-                this.player = JSON.parse(save);
-                this.migratePlayerSave();
-                this.startRealTimeTick();
-                if (this.player?.examState?.active) {
-                    this.renderExamFromState();
-                } else {
-                    this.showScreen('village-screen');
-                    this.showSection('home');
-                    this.updateVillageUI();
-                    this.showMissions();
-                }
-                
-                // Mostrar overlay de sueño si estaba durmiendo
-                if (this.player?.sleepState) {
-                    this.showSleepOverlay();
-                }
-                
-                alert('¡Partida cargada!');
-            } catch(e) {
-                console.error('Error cargando:', e);
-                alert('Error al cargar la partida');
-            }
-        },
-
-        deleteCharacterAndRestart() {
-            localStorage.removeItem('ninjaRPGSave');
-            location.reload();
-        },
-
+        saveGame: SaveSystem.saveGame,
+        loadGame: SaveSystem.loadGame,
+        deleteSave: SaveSystem.deleteSave,
+        migratePlayerSave: SaveSystem.migratePlayerSave,
         startMission(mission) {
             console.log('🔔 startMission called with:', mission);
             
@@ -6035,6 +6045,46 @@ export function createGame() {
 
     // Transformar jutsus al cargar el juego
     game.normalizeAcademyJutsus();
+    };
+
+    // Renderizado de perfil (puente)
+    function renderProfile(profile, isOwn) {
+        const cont = document.getElementById('profile-content');
+        if (!cont || !profile) {
+            cont.innerHTML = '<div class="login-error">Perfil no encontrado.</div>';
+            return;
+        }
+        cont.innerHTML = `
+            <div class="profile-avatar">${getAvatar(profile)}</div>
+            <h2 style="color:${ChatSystem.getMessageColor(profile.kekkei_genkai)}">${profile.display_name}</h2>
+            <div>${ChatSystem.getRankBadge(profile.rank)} ${profile.village ? '<span>' + emojiVillage(profile.village) + '</span>' : ''}</div>
+            <div>Nivel: ${profile.level || 1}</div>
+            <div>Clan: ${profile.clan || '-'}</div>
+            <div>Kekkei Genkai: ${profile.kekkei_genkai || '-'}</div>
+            <div>Misiones: ${profile.missionsCompletedTotal || 0}</div>
+            <div>Combates ganados: ${profile.combatsWon || 0}</div>
+            <div>Días jugados: ${profile.daysPlayed || 0}</div>
+            <div style="margin:10px 0;">Jutsus: ${(profile.learnedJutsus||[]).map(j=>`<span class='jutsu-pill'>${j.name||j}</span>`).join(' ') || '-'}</div>
+            ${isOwn ? '<button class="btn" onclick="game.logout()">Cerrar sesión</button>' : `<button class="btn" onclick="Router.navigate('/chat/${profile.user_id}')">💬 Enviar mensaje</button>`}
+        `;
+    }
+    function getAvatar(profile) {
+        // Emoji según clan/kekkei
+        if (profile.kekkei_genkai === 'Sharingan') return '👁️';
+        if (profile.kekkei_genkai === 'Byakugan') return '👁️‍🦳';
+        if (profile.kekkei_genkai === 'Rinnegan') return '🌀';
+        if (profile.clan === 'Uchiha') return '🔥';
+        if (profile.clan === 'Hyuga') return '🌙';
+        if (profile.clan === 'Nara') return '🌑';
+        if (profile.clan === 'Yamanaka') return '🌸';
+        if (profile.clan === 'Akimichi') return '🍡';
+        return '🥷';
+    }
+    function emojiVillage(v) {
+        return {
+            konoha: '🌳', suna: '🏜️', kiri: '💧', iwa: '⛰️', kumo: '⚡', ame: '🌧️', bosque: '🌲', olas: '🌊', valle: '🏞️', nieve: '❄️'
+        }[v] || '🏘️';
+    }
 
     return game;
 }

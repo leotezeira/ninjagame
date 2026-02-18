@@ -1,6 +1,6 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/", "destination": "/ninjagame.html" }
+    { "source": "/(.*)", "destination": "/ninjagame.html" }
   ]
 }

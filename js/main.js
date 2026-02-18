@@ -1,44 +1,26 @@
-import { createGame } from './systems/game.js';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const SUPABASE_URL = 'https://bydufkvgicwiaybrfcpg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5ZHVma3ZnaWN3aWF5YnJmY3BnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzY5NDAsImV4cCI6MjA4Njk1Mjk0MH0.YNxeF2mOMy4xzXrL4uFy9fh5BSAkxZIGRRwijVlnQr8';
+import { createClient } from '@supabase/supabase-js';
+import { AuthSystem } from './systems/auth.js';
+import { Router } from './systems/router.js';
+import { ChatSystem } from './systems/chat.js';
+import { createGame } from './systems/game.js';
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL || window.SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY
+);
+
+window.supabase = supabase;
 
 const game = createGame();
+Object.assign(game, AuthSystem, ChatSystem);
+game.router = Router;
+
 window.game = game;
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-game.supabase = supabase;
+window.Router = Router;
 
-const authError = document.getElementById('auth-error');
-const authUsername = document.getElementById('auth-username');
-const authPassword = document.getElementById('auth-password');
-const authLoginBtn = document.getElementById('auth-login-btn');
-const authRegisterBtn = document.getElementById('auth-register-btn');
-const authSessionKey = 'ninjaAuthUserId';
-
-const setAuthError = (message) => {
-    if (!authError) return;
-    if (message) {
-        authError.style.display = 'block';
-        authError.textContent = message;
-    } else {
-        authError.style.display = 'none';
-        authError.textContent = '';
-    }
-};
-
-const normalizeUsername = (value) => {
-    const raw = (value || '').trim();
-    return { raw };
-};
-
-const hashPassword = async (value) => {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(value);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-};
+Router.init();
+AuthSystem.init();
 
 const fetchProfile = async (userId) => {
     const { data, error } = await supabase
