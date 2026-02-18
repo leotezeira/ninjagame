@@ -11,6 +11,13 @@ export function createGame() {
         showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
+            
+            // Controlar visibilidad de la barra de navegación
+            const bottomNav = document.querySelector('.bottom-nav');
+            if (bottomNav) {
+                // Mostrar solo en village-screen
+                bottomNav.style.display = (screenId === 'village-screen') ? 'flex' : 'none';
+            }
         },
 
         showNameScreen() {
