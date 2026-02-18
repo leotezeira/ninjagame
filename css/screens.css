@@ -1,0 +1,276 @@
+/**
+ * SCREENS.CSS - Estilos de Pantallas Principales
+ * ==============================================
+ * - Screen containers
+ * - Animaciones de transición
+ * - Layouts específicos de cada pantalla
+ */
+
+/* === CONTENEDOR BASE === */
+.screen {
+    display: none;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    animation: screenFadeIn 0.3s ease-out;
+    z-index: var(--z-dropdown);
+}
+
+.screen.active {
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes screenFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes screenSlideIn {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* === PANTALLA DE AUTENTICACIÓN === */
+#auth-screen, #name-screen, #clan-screen, #kekkei-screen, #village-screen {
+    background: linear-gradient(135deg, rgba(10, 14, 39, 0.9) 0%, rgba(26, 31, 58, 0.7) 100%);
+}
+
+.game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-base);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.game-container h1 {
+    text-align: center;
+    padding: 20px;
+    background: rgba(255, 140, 0, 0.1);
+    border-bottom: 2px solid var(--primary);
+    font-size: 2em;
+    margin: 0;
+}
+
+/* === STORY TEXT === */
+.story-text {
+    text-align: center;
+    padding: 30px 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    animation: screenSlideIn 0.4s ease-out;
+}
+
+.story-text h2 {
+    margin-bottom: 15px;
+    font-size: 2.2em;
+}
+
+.story-text p {
+    font-size: 1.1em;
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+/* === AUTH SCREEN === */
+#auth-screen.active {
+    justify-content: center;
+    align-items: center;
+}
+
+.auth-box {
+    background: var(--bg-panel);
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-lg);
+    padding: 30px;
+    box-shadow: var(--shadow-lg);
+    animation: modalSlideIn 0.4s ease-out;
+    max-width: 500px;
+}
+
+.auth-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.auth-actions button {
+    flex: 1;
+}
+
+/* === VILLAGE SCREEN === */
+#village-screen.active {
+    flex-direction: row;
+    overflow: hidden;
+}
+
+#village-screen main {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* === COMBAT SCREEN === */
+#combat-screen {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-combat);
+    background: linear-gradient(180deg, rgba(10, 14, 39, 0.95) 0%, rgba(5, 8, 20, 0.98) 100%);
+}
+
+#combat-screen.active {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* === MISSION BRIEFING SCREEN === */
+#mission-briefing-screen.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mission-briefing-content {
+    width: 90%;
+    max-width: 700px;
+    background: var(--bg-panel);
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-lg);
+    padding: 30px;
+    box-shadow: var(--shadow-lg);
+    animation: modalSlideIn 0.4s ease-out;
+}
+
+.briefing-narrator {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 15px;
+    background: rgba(124, 58, 237, 0.15);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--accent-primary);
+}
+
+/* === VICTORY/DEFEAT SCREENS === */
+#mission-victory-screen.active,
+#defeat-screen.active,
+#exam-screen.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.victory, .defeat {
+    background: var(--bg-panel);
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-lg);
+    padding: 40px 30px;
+    text-align: center;
+    max-width: 600px;
+    box-shadow: var(--shadow-lg);
+    animation: modalSlideIn 0.4s ease-out;
+}
+
+.victory h2 {
+    color: var(--accent-secondary);
+    font-size: 2.2em;
+    margin-bottom: 20px;
+}
+
+.defeat h2 {
+    color: var(--accent-danger);
+    font-size: 2.2em;
+    margin-bottom: 20px;
+}
+
+/* === MODALES === */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal);
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-overlay.high-priority {
+    z-index: var(--z-modal-top);
+}
+
+.modal-content {
+    background: var(--bg-panel);
+    border: 2px solid var(--accent-primary);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: var(--shadow-lg);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    .game-container h1 {
+        font-size: 1.5em;
+        padding: 15px;
+    }
+
+    .mission-briefing-content,
+    .modal-content,
+    .auth-box,
+    .victory,
+    .defeat {
+        padding: 20px;
+    }
+
+    .story-text {
+        padding: 20px 15px;
+    }
+
+    #village-screen.active {
+        flex-direction: column;
+    }
+
+    #village-screen main {
+        order: 2;
+    }
+}

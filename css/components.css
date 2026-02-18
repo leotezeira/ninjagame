@@ -1,0 +1,347 @@
+/**
+ * COMPONENTS.CSS - Componentes Reutilizables
+ * =========================================
+ * - Botones
+ * - Cards
+ * - Barras de progreso
+ * - Tabs
+ * - Inputs
+ */
+
+/* === BOTONES === */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: 0.95em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--primary-light);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 140, 0, 0.4);
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+}
+
+.btn:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-md);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, var(--accent-primary) 0%, rgba(124, 58, 237, 0.8) 100%);
+    border-color: var(--accent-primary);
+}
+
+.btn-secondary:hover {
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 0.8em;
+}
+
+.btn-large {
+    padding: 14px 28px;
+    font-size: 1.1em;
+}
+
+/* === CARDS === */
+.card {
+    background: var(--bg-card);
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    border-radius: var(--radius-md);
+    padding: 15px;
+    transition: all var(--transition-normal);
+}
+
+.card:hover {
+    border-color: var(--accent-primary);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.card-content {
+    color: var(--text-secondary);
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+
+.card-footer {
+    margin-top: 12px;
+    border-top: 1px solid rgba(124, 58, 237, 0.2);
+    padding-top: 12px;
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+}
+
+/* === BARRAS DE PROGRESO === */
+.bar-container {
+    margin: 10px 0;
+}
+
+.bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85em;
+    margin-bottom: 5px;
+    color: var(--text-secondary);
+}
+
+.health-bar, .chakra-bar {
+    height: 20px;
+    background: var(--bg-card);
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.health-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff4444, #ff7f7f);
+    width: 100%;
+    transition: width 0.3s ease-out;
+    box-shadow: inset 1px 0 2px rgba(255, 255, 255, 0.3);
+}
+
+.chakra-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00ccff, #00ff88);
+    width: 100%;
+    transition: width 0.3s ease-out;
+    box-shadow: inset 1px 0 2px rgba(255, 255, 255, 0.3);
+}
+
+.bar-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75em;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+/* === TABS === */
+.tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 2px solid rgba(124, 58, 237, 0.3);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    border-bottom-color: var(--accent-primary);
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(255, 140, 0, 0.2);
+}
+
+/* === INPUTS === */
+.text-input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg-card);
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 1em;
+    transition: all var(--transition-fast);
+    font-family: inherit;
+}
+
+.text-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+    background: rgba(25, 31, 58, 0.8);
+}
+
+.text-input::placeholder {
+    color: var(--text-muted);
+}
+
+/* === SELECT === */
+select {
+    padding: 10px 12px;
+    background: var(--bg-card);
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 1em;
+    transition: all var(--transition-fast);
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+}
+
+/* === PLAYER INFO === */
+.player-info {
+    background: var(--bg-panel);
+    border: 2px solid var(--accent-primary);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin: 15px;
+    box-shadow: var(--shadow-md);
+}
+
+.player-info h2, .player-info h3 {
+    color: var(--primary);
+    margin-bottom: 15px;
+}
+
+.player-bars {
+    display: grid;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+/* === GRID DE STATS === */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin: 15px 0;
+}
+
+.stat-item {
+    background: var(--bg-card);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    text-align: center;
+    border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+.stat-item-label {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    text-transform: uppercase;
+}
+
+.stat-item-value {
+    color: var(--accent-secondary);
+    font-size: 1.5em;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+/* === TOGGLE === */
+.toggle {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--text-muted);
+    transition: 0.3s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: var(--accent-secondary);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 600px) {
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.85em;
+    }
+
+    .btn-small {
+        padding: 4px 8px;
+        font-size: 0.75em;
+    }
+
+    .tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .card {
+        padding: 10px;
+    }
+}
