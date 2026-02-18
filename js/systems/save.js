@@ -2,60 +2,54 @@
 // Extraído de game.js para modularización
 
 const SaveSystem = {
-    async saveGame() {
-        if (!this.player) return;
-        const json = JSON.stringify(this.player);
-        try { localStorage.setItem('ninjaRPGSave', json); } catch(e) {}
-        const user = AuthSystem.getUser && AuthSystem.getUser();
-        if (!user) return;
+    saveGame() {
         try {
-            await supabase.from('player_saves').upsert({
-                user_id: user.id,
-                data: this.player,
-                updated_at: new Date().toISOString()
-            });
-            await supabase.from('profiles').update({
-                clan: this.player.clan,
-                rank: this.player.rank,
-                level: this.player.level,
-                kekkei_genkai: this.player.kekkeiGenkai?.name || null,
-                village: this.player.location,
-                last_seen: new Date().toISOString()
-            }).eq('user_id', user.id);
+            localStorage.setItem('ninjaRPGSave', JSON.stringify(this.player));
+            console.log('Partida guardada');
+            if (this.supabase && this.authUser?.id) {
+                this.supabase
+                    .from('players')
+                    .update({
+                        game_state: this.player,
+                        last_seen: new Date().toISOString(),
+                        is_online: true,
+                        village: this.player.village || 'unknown',
+                        clan: this.player.clan || null,
+                        level: this.player.level,
+                        rank: this.player.rank
+                    })
+                    .eq('id', this.authUser.id);
+            }
         } catch(e) {
-            console.warn('Supabase save failed, usando localStorage:', e);
+            console.error('Error guardando:', e);
         }
     },
 
-    async loadGame() {
-        const user = AuthSystem.getUser && AuthSystem.getUser();
-        if (user) {
-            try {
-                const { data } = await supabase
-                    .from('player_saves')
-                    .select('data')
-                    .eq('user_id', user.id)
-                    .single();
-                if (data?.data) {
-                    this.player = data.data;
-                    localStorage.setItem('ninjaRPGSave', JSON.stringify(this.player));
-                    this.updateVillageUI && this.updateVillageUI();
-                    return;
-                }
-            } catch(e) {
-                console.warn('Supabase load failed, intentando localStorage:', e);
+    loadGame() {
+        try {
+            const save = localStorage.getItem('ninjaRPGSave');
+            if (!save) {
+                alert('No hay partida guardada');
+                return;
             }
-        }
-        const local = localStorage.getItem('ninjaRPGSave');
-        if (local) {
-            try {
-                this.player = JSON.parse(local);
-                if (user && this.saveGame) await this.saveGame();
-                this.updateVillageUI && this.updateVillageUI();
-            } catch(e) {
-                console.error('Save corrupto:', e);
-                this.player = null;
+            this.player = JSON.parse(save);
+            this.migratePlayerSave();
+            this.startRealTimeTick();
+            if (this.player?.examState?.active) {
+                this.renderExamFromState();
+            } else {
+                this.showScreen('village-screen');
+                this.showSection('home');
+                this.updateVillageUI();
+                this.showMissions();
             }
+            if (this.player?.sleepState) {
+                this.showSleepOverlay();
+            }
+            alert('¡Partida cargada!');
+        } catch(e) {
+            console.error('Error cargando:', e);
+            alert('Error al cargar la partida');
         }
     },
 

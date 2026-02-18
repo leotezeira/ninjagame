@@ -34,7 +34,20 @@
 ```
 
 ### HTML SCREENS (Pantallas nuevas)
-<!-- Eliminado: html/screens/mission-briefing.html (obsoleto, solo usar versión funcional en ninjagame.html) -->
+```
+✅ html/screens/mission-briefing.html  (180 líneas)
+   - Nuevamente creada (NO EXISTÍA antes)
+   - Elementos clave:
+     * id="mission-briefing-screen" - Pantalla
+     * id="mission-narrator-text" - Narrador
+     * id="mission-briefing-title" - Título
+     * id="mission-briefing-description" - Descripción
+     * id="mission-briefing-rank/enemies/exp/ryo" - Stats
+     * id="mission-briefing-accept-btn" - Botón aceptar
+     * id="mission-briefing-cancel-btn" - Botón cancelar
+     * id="mission-briefing-difficulty" - Contexto de dificultad
+   - Estilos incluidos inline con z-index 6000
+```
 
 ### CSS MODULARIZADO
 ```

@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>🍥 Ninja RPG - Estilo Naruto</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/modal.css">
 </head>
 <body>
     <div class="game-container">
@@ -489,68 +488,57 @@
             <button id="combat-defeat-return-btn" class="btn">Regresar a la Aldea</button>
         </div>
     </div>
-
-    <!-- ========== NUEVAS PANTALLAS ========== -->
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen" class="screen" style="display:none">
-      <div class="login-logo">
-        <div class="login-title">⚔️ NINJA RPG</div>
-        <div class="login-subtitle">El camino del shinobi te espera</div>
-      </div>
-      <div class="login-tabs">
-        <button onclick="game.showLoginTab('signin')">Ingresar</button>
-        <button onclick="game.showLoginTab('register')">Registrarse</button>
-      </div>
-      <div id="signin-panel" class="login-panel">
-        <input id="login-username" type="text" placeholder="Nombre de ninja" maxlength="20" onkeydown="if(event.key==='Enter') game.doLogin()"/>
-        <input id="login-password" type="password" placeholder="Contraseña" onkeydown="if(event.key==='Enter') game.doLogin()"/>
-        <button class="btn" onclick="game.doLogin()">Entrar al mundo ninja</button>
-        <div id="login-error" class="login-error" style="display:none"></div>
-      </div>
-      <div id="register-panel" class="login-panel" style="display:none">
-        <input id="reg-username" type="text" placeholder="Nombre de ninja (3-20 caracteres)" maxlength="20" oninput="game.previewUsername(this.value)"/>
-        <div id="username-preview" class="username-preview"></div>
-        <input id="reg-password" type="password" placeholder="Contraseña (mín. 6 caracteres)"/>
-        <input id="reg-password2" type="password" placeholder="Confirmar contraseña" onkeydown="if(event.key==='Enter') game.doRegister()"/>
-        <button class="btn" onclick="game.doRegister()">Comenzar aventura</button>
-        <div id="register-error" class="login-error" style="display:none"></div>
-      </div>
-      <div id="login-loading" style="display:none; text-align:center; margin-top:16px;">
-        <div class="chakra-spinner"></div>
-        <div>Conectando con el mundo ninja...</div>
-      </div>
-    </div>
-
-    <!-- PROFILE SCREEN -->
-    <div id="profile-screen" class="screen" style="display:none">
-      <div class="screen-header">
-        <button class="btn btn-small" onclick="Router.navigate('/inicio')">← Volver</button>
-        <h2 id="profile-title">Perfil Ninja</h2>
-      </div>
-      <div id="profile-content"></div>
-    </div>
-
-    <!-- CHAT SCREEN -->
-    <div id="chat-screen" class="screen" style="display:none">
-      <div class="chat-header">
-        <button class="btn btn-small" onclick="game.unsubscribeChat(); Router.navigate('/inicio')">←</button>
-        <span id="chat-channel-name">Chat</span>
-        <div id="chat-online-count" class="online-count"></div>
-      </div>
-      <div id="chat-messages" class="chat-messages"></div>
-      <div class="chat-input-area">
-        <input id="chat-input" type="text" placeholder="Escribe un mensaje..." maxlength="500" onkeydown="game.handleChatInput(event)"/>
-        <button class="btn btn-small" onclick="game.sendMessage()">Enviar</button>
-      </div>
-      <div class="chat-nav">
-        <button onclick="Router.navigate('/chat-global')">🌍 Global</button>
-        <button onclick="Router.navigate('/chat-aldea')">🏘️ Aldea</button>
-      </div>
-    </div>
 </div>
 
 <!-- Script de navegación (NO módulo, carga antes que main.js) -->
-<!-- Script de navegación movido a main.js para asegurar que game esté listo -->
+<script>
+    // Funciones globales de navegación que esperan a que game esté listo
+    function safeShowSection(name) {
+        if (typeof game !== 'undefined' && game.showSection) {
+            game.showSection(name);
+        } else {
+            console.warn('Game not ready yet, retrying...');
+            setTimeout(() => safeShowSection(name), 100);
+        }
+    }
+    
+    // Configurar event listeners cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+        // Bottom nav buttons
+        document.querySelectorAll('#bottom-nav .nav-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tab = this.getAttribute('data-tab');
+                safeShowSection(tab);
+            });
+        });
+        
+        // Sidebar nav buttons
+        document.querySelectorAll('#sidebar .sidebar-nav-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const section = this.getAttribute('data-section');
+                if (typeof game !== 'undefined') {
+                    game.navigateFromSidebar(section);
+                } else {
+                    safeShowSection(section);
+                }
+            });
+        });
+        
+        // Sidebar close button
+        const closeBtn = document.getElementById('sidebar-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                if (typeof game !== 'undefined' && game.closeSidebar) {
+                    game.closeSidebar();
+                } else {
+                    document.getElementById('sidebar').classList.remove('open');
+                }
+            });
+        }
+        
+        // Menu toggle button
+        const menuToggle = document.getElementById('menu-toggle');
+        if (menuToggle) {
             menuToggle.addEventListener('click', function() {
                 if (typeof game !== 'undefined' && game.toggleSidebar) {
                     game.toggleSidebar();
