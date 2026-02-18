@@ -1,1904 +1,1527 @@
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+/* ============================================
+   🍥 NINJA RPG - NUEVO DISEÑO UI/UX
+   Paleta: Púrpura oscuro + Cyan + Dorado
+   ============================================ */
 
-        :root {
-            --bg-0: #0f1020;
-            --bg-1: #1a1a2e;
-            --bg-2: #0f3460;
-            --panel: rgba(0, 0, 0, 0.72);
-            --panel-2: rgba(0, 0, 0, 0.55);
-            --stroke: #4a5583;
-            --accent: #ff8c00;
-            --accent-2: #ff6b00;
-            --gold: #ffd700;
-            --text: #f0f0f0;
-            --muted: rgba(240, 240, 240, 0.75);
-            --shadow: rgba(0, 0, 0, 0.45);
-        }
+:root {
+    --bg-dark: #0d0d1a;
+    --bg-panel: #1a1a2e;
+    --bg-card: #16213e;
+    --accent-primary: #00d4ff;
+    --accent-secondary: #7c3aed;
+    --accent-gold: #fbbf24;
+    --accent-danger: #ef4444;
+    --accent-success: #22c55e;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --border-color: rgba(0, 212, 255, 0.2);
+    --border-hover: rgba(0, 212, 255, 0.5);
+    --shadow-glow: 0 0 20px rgba(0, 212, 255, 0.15);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-        html {
-            color-scheme: dark;
-            -webkit-text-size-adjust: 100%;
-        }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-    body {
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-        background:
-            radial-gradient(1200px 600px at 50% -20%, rgba(255, 140, 0, 0.18), transparent 60%),
-            radial-gradient(900px 500px at 10% 10%, rgba(52, 152, 219, 0.14), transparent 55%),
-            radial-gradient(800px 500px at 90% 20%, rgba(241, 196, 15, 0.08), transparent 55%),
-            linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%);
-        color: var(--text);
-        min-height: 100vh;
-        padding: 14px;
-        line-height: 1.45;
-        letter-spacing: 0.2px;
-        text-rendering: optimizeLegibility;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
 
-    ::selection {
-        background: rgba(255, 140, 0, 0.35);
-    }
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
 
-    .game-container {
-        max-width: 920px;
-        margin: 0 auto;
-        background: var(--panel);
-        border-radius: 16px;
-        padding: 22px;
-        box-shadow:
-            0 18px 60px rgba(0, 0, 0, 0.55),
-            0 10px 40px rgba(255, 140, 0, 0.22);
-        border: 2px solid rgba(255, 140, 0, 0.65);
-        position: relative;
-        overflow: hidden;
-        backdrop-filter: blur(8px);
-    }
+/* ============================================
+   SCROLLBAR PERSONALIZADO
+   ============================================ */
+::-webkit-scrollbar {
+    width: 6px;
+}
 
-    .game-container::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background:
-            linear-gradient(180deg, rgba(255, 140, 0, 0.08), transparent 30%),
-            radial-gradient(900px 260px at 50% 0%, rgba(255, 140, 0, 0.12), transparent 70%),
-            repeating-linear-gradient(
-                45deg,
-                rgba(255, 255, 255, 0.03) 0px,
-                rgba(255, 255, 255, 0.03) 2px,
-                transparent 2px,
-                transparent 10px
-            );
-        opacity: 0.85;
-    }
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
 
-    .game-container > * {
-        position: relative;
-        z-index: 1;
-    }
+::-webkit-scrollbar-thumb {
+    background: var(--accent-secondary);
+    border-radius: 3px;
+}
 
-    h1 {
-        text-align: center;
-        color: var(--accent);
-        font-size: 2.5em;
-        margin-bottom: 36px;
-        text-shadow: 0 0 14px rgba(255, 140, 0, 0.35);
-        letter-spacing: 3px;
-        font-variant: small-caps;
-        font-weight: 700;
-        animation: titleEntry 0.8s ease-out;
-    }
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
+}
 
-    @keyframes titleEntry {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+/* ============================================
+   CONTENEDOR PRINCIPAL DEL JUEGO
+   ============================================ */
+.game-container {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-dark);
+    overflow: hidden;
+}
 
-    h2, h3, h4 {
-        letter-spacing: 0.4px;
-    }
+.game-container > h1 {
+    display: none;
+}
 
-    p {
-        color: var(--muted);
-    }
+/* ============================================
+   PANTALLAS (SCREENS)
+   ============================================ */
+.screen {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: var(--bg-dark);
+    overflow-y: auto;
+    padding: 20px;
+    padding-top: env(safe-area-inset-top, 20px);
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+}
 
+.screen.active {
+    display: block;
+}
+
+/* ============================================
+   HEADER PRINCIPAL
+   ============================================ */
+#game-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: calc(60px + env(safe-area-inset-top, 0px));
+    padding-top: env(safe-area-inset-top, 0px);
+    background: linear-gradient(180deg, var(--bg-panel) 0%, rgba(26, 26, 46, 0.95) 100%);
+    border-bottom: 1px solid var(--border-color);
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 16px;
+    padding-right: 16px;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+}
+
+#game-header.visible {
+    display: flex;
+}
+
+#menu-toggle {
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 20px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#menu-toggle:hover {
+    background: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+}
+
+#header-player-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+}
+
+#header-name {
+    color: var(--accent-primary);
+    font-weight: 600;
+}
+
+#header-ryo {
+    color: var(--accent-gold);
+}
+
+#header-bars {
+    display: flex;
+    gap: 8px;
+    width: 120px;
+}
+
+.mini-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.mini-bar > div {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.hp-bar > div {
+    background: linear-gradient(90deg, #ef4444, #f87171);
+    width: 100%;
+}
+
+.chakra-bar-mini > div {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    width: 100%;
+}
+
+/* ============================================
+   SIDEBAR / MENÚ LATERAL
+   ============================================ */
+#sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1500;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+}
+
+#sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100%;
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border-color);
+    z-index: 2000;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    padding-top: env(safe-area-inset-top, 0px);
+}
+
+#sidebar.open {
+    transform: translateX(280px);
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar-header h2 {
+    color: var(--accent-primary);
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-close {
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 24px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+}
+
+.sidebar-close:hover {
+    background: var(--accent-danger);
+    color: white;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 16px 12px;
+    overflow-y: auto;
+}
+
+.sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 15px;
+    cursor: pointer;
+    transition: var(--transition);
+    width: 100%;
+    text-align: left;
+}
+
+.sidebar-nav-item:hover {
+    background: rgba(0, 212, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.sidebar-nav-item.active {
+    background: linear-gradient(135deg, var(--accent-secondary) 0%, rgba(124, 58, 237, 0.6) 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+}
+
+.sidebar-nav-item .nav-icon {
+    font-size: 20px;
+    width: 28px;
+    text-align: center;
+}
+
+.sidebar-player-stats {
+    padding: 16px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-card);
+}
+
+.sidebar-player-stats .stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.sidebar-player-stats .stat-label {
+    color: var(--text-secondary);
+}
+
+.sidebar-player-stats .stat-value {
+    color: var(--accent-gold);
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.sidebar-footer .btn {
+    width: 100%;
+}
+
+/* ============================================
+   CONTENIDO PRINCIPAL (VILLAGE-SCREEN)
+   ============================================ */
+#village-screen {
+    position: fixed !important;
+    inset: 0;
+    padding: 0 !important;
+    padding-top: calc(60px + env(safe-area-inset-top, 0px)) !important;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-dark);
+}
+
+#game-main {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ============================================
+   SECCIONES DE CONTENIDO
+   ============================================ */
+.section-content {
+    position: absolute;
+    inset: 0;
+    padding: 20px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+    display: none;
+    background: var(--bg-dark);
+}
+
+.section-content.active {
+    display: block;
+}
+
+.section-content h3 {
+    color: var(--accent-primary);
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+}
+
+/* ============================================
+   BOTONES
+   ============================================ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--accent-secondary) 0%, #5b21b6 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-glow);
+}
+
+.btn-small, .btn-sm {
+    padding: 8px 16px;
+    font-size: 12px;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--accent-danger) 0%, #b91c1c 100%);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--accent-success) 0%, #15803d 100%);
+}
+
+/* ============================================
+   INPUTS
+   ============================================ */
+.text-input, input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 15px;
+    transition: var(--transition);
+}
+
+.text-input:focus, input[type="text"]:focus, input[type="password"]:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+}
+
+.text-input::placeholder, input::placeholder {
+    color: var(--text-muted);
+}
+
+/* ============================================
+   CARDS Y PANELES
+   ============================================ */
+.player-info {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.player-info h2 {
+    color: var(--accent-primary);
+    font-size: 1.4em;
+    margin-bottom: 8px;
+}
+
+.player-info-clan {
+    color: var(--accent-gold);
+    font-size: 0.9em;
+    margin-bottom: 12px;
+}
+
+/* ============================================
+   BARRAS DE VIDA Y CHAKRA
+   ============================================ */
+.player-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.bar-container {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+}
+
+.bar-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.health-bar, .chakra-bar {
+    height: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+}
+
+.health-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ef4444, #f87171);
+    border-radius: 5px;
+    transition: width 0.4s ease;
+}
+
+.chakra-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    border-radius: 5px;
+    transition: width 0.4s ease;
+}
+
+.bar-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* ============================================
+   INFO GRID (Stats rápidos)
+   ============================================ */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.info-item span:first-child {
+    font-size: 16px;
+}
+
+/* ============================================
+   ONLINE PANEL
+   ============================================ */
+.online-panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-top: 16px;
+}
+
+.online-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    color: var(--accent-success);
+    font-weight: 600;
+}
+
+.online-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.online-list .online-player {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+}
+
+/* ============================================
+   TABS
+   ============================================ */
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.tabs-inline {
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 10px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.tab-btn:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: var(--accent-primary);
+}
+
+.tab-btn.active {
+    background: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+    color: white;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* ============================================
+   MISSION LIST
+   ============================================ */
+.mission-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mission-card, .mission-item {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    transition: var(--transition);
+}
+
+.mission-card:hover, .mission-item:hover {
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-glow);
+}
+
+.mission-card h4, .mission-item h4 {
+    color: var(--accent-primary);
+    margin-bottom: 8px;
+}
+
+.mission-card p, .mission-item p {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.mission-rewards {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.mission-rewards span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ============================================
+   SHOP GRID
+   ============================================ */
+.shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.shop-item, .training-item {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    transition: var(--transition);
+}
+
+.shop-item:hover, .training-item:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+}
+
+.shop-item h4 {
+    color: var(--accent-primary);
+    margin-bottom: 8px;
+}
+
+.shop-item .price {
+    color: var(--accent-gold);
+    font-weight: 600;
+    margin: 8px 0;
+}
+
+/* ============================================
+   NPC LIST
+   ============================================ */
+.npc-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.npc-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.npc-card:hover {
+    border-color: var(--accent-secondary);
+    transform: translateY(-2px);
+}
+
+.npc-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    padding: 20px;
+}
+
+.npc-modal-content {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* ============================================
+   ACADEMIA
+   ============================================ */
+.academy-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.academy-header h3 {
+    color: var(--accent-primary);
+    margin-bottom: 8px;
+}
+
+.academy-header p {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.academy-section {
+    margin-bottom: 20px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.section-icon {
+    font-size: 20px;
+}
+
+.section-title h4 {
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.academy-jutsus-container {
+    margin-top: 20px;
+}
+
+.jutsu-academy-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.jutsu-item, .jutsu-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    transition: var(--transition);
+}
+
+.jutsu-item:hover, .jutsu-card:hover {
+    border-color: var(--accent-primary);
+}
+
+.jutsu-item h4 {
+    color: var(--accent-primary);
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.jutsu-item p {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.jutsu-stats {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+/* ============================================
+   COMBAT SCREEN
+   ============================================ */
+#combat-screen {
+    background: linear-gradient(180deg, #1a0a0a 0%, var(--bg-dark) 100%);
+    padding-top: 20px;
+}
+
+#combat-screen .player-info {
+    max-width: 600px;
+    margin: 0 auto 16px;
+}
+
+.combat-area {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.enemy-info {
+    background: linear-gradient(135deg, rgba(185, 28, 28, 0.2) 0%, var(--bg-panel) 100%);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.enemy-info h3 {
+    color: var(--accent-danger);
+    margin-bottom: 10px;
+}
+
+.combat-log {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.combat-log p {
+    margin-bottom: 4px;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.jutsu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.jutsu-quick-bar {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.jutsu-quick-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.jutsu-quick-slots {
+    display: flex;
+    gap: 8px;
+}
+
+.jutsu-slot {
+    flex: 1;
+    min-height: 50px;
+    background: var(--bg-card);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 4px;
+}
+
+.jutsu-slot:hover {
+    border-color: var(--accent-primary);
+}
+
+.jutsu-slot.filled {
+    border-style: solid;
+    background: var(--accent-secondary);
+    color: white;
+}
+
+#combat-inventory {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-top: 16px;
+}
+
+#combat-items-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+}
+
+/* ============================================
+   VICTORY & DEFEAT SCREENS
+   ============================================ */
+.victory, .defeat {
+    text-align: center;
+    padding: 40px 20px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.victory h2 {
+    color: var(--accent-gold);
+    font-size: 1.8em;
+    margin-bottom: 20px;
+}
+
+.victory p {
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.defeat h2 {
+    color: var(--accent-danger);
+    font-size: 1.8em;
+    margin-bottom: 20px;
+}
+
+.defeat p {
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+/* ============================================
+   CLAN & VILLAGE SELECTION
+   ============================================ */
+.clan-select, .village-select {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.clan-card, .village-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.clan-card:hover, .village-card:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.clan-card.selected, .village-card.selected {
+    border-color: var(--accent-secondary);
+    background: rgba(124, 58, 237, 0.15);
+}
+
+.clan-card .clan-icon, .village-card .village-icon {
+    font-size: 2em;
+    margin-bottom: 8px;
+}
+
+.clan-card h4, .village-card h4 {
+    color: var(--accent-primary);
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.clan-card p, .village-card p {
+    color: var(--text-secondary);
+    font-size: 11px;
+}
+
+/* ============================================
+   KEKKEI GENKAI
+   ============================================ */
+.kekkei-genkai-notification {
+    text-align: center;
+    padding: 30px;
+    background: linear-gradient(135deg, var(--bg-panel) 0%, rgba(124, 58, 237, 0.2) 100%);
+    border: 1px solid var(--accent-secondary);
+    border-radius: var(--radius-lg);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.kekkei-genkai-notification h2 {
+    color: var(--accent-gold);
+    margin-bottom: 16px;
+}
+
+.kekkei-genkai-notification p {
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   MISSION BRIEFING
+   ============================================ */
+#mission-briefing-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mission-briefing-overlay {
+    width: 100%;
+    max-width: 500px;
+}
+
+.mission-briefing-content {
+    background: var(--bg-panel);
+    border: 1px solid var(--accent-gold);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+}
+
+.mission-briefing-content h2 {
+    color: var(--accent-gold);
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.briefing-narrator {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 16px;
+    font-style: italic;
+    color: var(--text-secondary);
+}
+
+.briefing-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.briefing-stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+}
+
+.briefing-stat span:last-child {
+    color: var(--accent-gold);
+    font-weight: 600;
+}
+
+/* ============================================
+   EXAM SCREEN
+   ============================================ */
+#exam-screen .player-info {
+    border-color: var(--accent-gold);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+#exam-screen h2 {
+    color: var(--accent-gold);
+}
+
+#exam-content {
+    margin: 20px 0;
+}
+
+#exam-content .question {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+#exam-content .answers {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#exam-content .answer-btn {
+    padding: 12px 16px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: left;
+}
+
+#exam-content .answer-btn:hover {
+    border-color: var(--accent-primary);
+    background: rgba(0, 212, 255, 0.1);
+}
+
+/* ============================================
+   AUTH SCREEN
+   ============================================ */
+#auth-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+}
+
+.auth-box {
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-box label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--accent-primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+.auth-box input {
+    margin-bottom: 16px;
+}
+
+.auth-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.auth-actions .btn {
+    flex: 1;
+}
+
+#auth-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--accent-danger);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    color: var(--accent-danger);
+    font-size: 13px;
+}
+
+.story-text {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.story-text h2 {
+    color: var(--accent-primary);
+    margin-bottom: 12px;
+}
+
+.story-text p {
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   NAME SCREEN
+   ============================================ */
+#name-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#name-screen .player-info {
+    width: 100%;
+    max-width: 500px;
+}
+
+#name-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--accent-danger);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    color: var(--accent-danger);
+    font-size: 13px;
+}
+
+/* ============================================
+   WORLD HUD
+   ============================================ */
+#world-hud-display {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+}
+
+#world-hud-display .hud-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#world-hud-display .hud-row:last-child {
+    border-bottom: none;
+}
+
+/* ============================================
+   STATS DISPLAY
+   ============================================ */
+#stats-display {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.stats-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+}
+
+.stats-card h4 {
+    color: var(--accent-primary);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 14px;
+}
+
+.stats-row .label {
+    color: var(--text-secondary);
+}
+
+.stats-row .value {
+    color: var(--accent-gold);
+    font-weight: 600;
+}
+
+/* ============================================
+   EXAM WIDGET
+   ============================================ */
+#exam-widget {
+    margin: 16px 0;
+}
+
+#exam-widget .exam-available {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, var(--bg-panel) 100%);
+    border: 1px solid var(--accent-gold);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    text-align: center;
+}
+
+#exam-widget h4 {
+    color: var(--accent-gold);
+    margin-bottom: 8px;
+}
+
+/* ============================================
+   ELEMENT & KEKKEI DISPLAY
+   ============================================ */
+#element-display, #kekkei-display {
+    text-align: center;
+    padding: 10px 12px;
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+#kekkei-display {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.2) 0%, var(--bg-card) 100%);
+    border: 1px solid var(--accent-secondary);
+}
+
+/* ============================================
+   UTILITIES
+   ============================================ */
+.hidden {
+    display: none !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-gold {
+    color: var(--accent-gold);
+}
+
+.text-cyan {
+    color: var(--accent-primary);
+}
+
+.text-purple {
+    color: var(--accent-secondary);
+}
+
+.text-danger {
+    color: var(--accent-danger);
+}
+
+.text-success {
+    color: var(--accent-success);
+}
+
+.mt-8 { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+
+/* ============================================
+   ANIMACIONES
+   ============================================ */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes slideInLeft {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 5px var(--accent-primary); }
+    50% { box-shadow: 0 0 20px var(--accent-primary); }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 480px) {
     .screen {
-        display: none;
-    }
-
-    .screen.active {
-        display: block;
-        animation: fadeIn 0.5s;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .screen.active {
-            animation: none;
-        }
-
-        .log-entry {
-            animation: none;
-        }
-
-        .kekkei-genkai-notification {
-            animation: none;
-        }
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .clan-select {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 15px;
-        margin-top: 20px;
-    }
-
-    .clan-card {
-        background: linear-gradient(135deg, rgba(45, 53, 97, 0.95) 0%, rgba(31, 37, 68, 0.95) 100%);
-        border: 2px solid rgba(74, 85, 131, 0.6);
-        border-radius: 12px;
-        padding: 0;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-align: center;
-        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
-        overflow: hidden;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .clan-card-header {
-        padding: 24px 16px 20px;
-        flex-shrink: 0;
-    }
-
-    .clan-card-header h3 {
-        color: #ff8c00;
-        margin: 0;
-        font-size: 1.35em;
-        font-weight: 700;
-        margin-bottom: 12px;
-    }
-
-    .clan-card-stats-preview {
-        display: flex;
-        gap: 8px;
-        justify-content: center;
-        flex-wrap: wrap;
-        font-size: 0.8em;
-    }
-
-    .clan-stat-pill {
-        background: rgba(255, 140, 0, 0.15);
-        border: 1px solid rgba(255, 140, 0, 0.3);
-        color: #ff8c00;
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-weight: 600;
-    }
-
-    .clan-card-body {
-        padding: 16px;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-    }
-
-    .clan-stats {
-        text-align: left;
-        margin: 0;
-        font-size: 0.9em;
-        display: none;
-    }
-
-    .clan-card:hover .clan-stats {
-        display: block;
-    }
-
-    .stat {
-        margin: 6px 0;
-        padding: 6px 8px;
-        background: rgba(74, 85, 131, 0.3);
-        border-radius: 5px;
-        border: 1px solid rgba(74, 85, 131, 0.4);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 0.9em;
-    }
-
-    .stat-bar {
-        flex-grow: 1;
-        height: 6px;
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 3px;
-        margin-left: 8px;
-        overflow: hidden;
-    }
-
-    .stat-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--accent), var(--accent-2));
-        border-radius: 3px;
-    }
-
-    .clan-card:hover {
-        transform: translateY(-4px);
-        border-color: rgba(255, 140, 0, 0.8);
-        box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.3), 0 15px 35px rgba(0, 0, 0, 0.4);
-    }
-
-    .clan-card:active {
-        transform: translateY(-2px);
-    }
-
-    .btn {
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-        color: #fff;
-        border: 2px solid var(--accent);
-        padding: 12px 28px;
-        font-size: 1em;
-        font-weight: 600;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        margin: 8px 5px;
-        box-shadow:
-            0 10px 18px rgba(0, 0, 0, 0.35),
-            0 0 0 1px rgba(255, 255, 255, 0.06) inset;
-        letter-spacing: 0.5px;
-        position: relative;
-        text-align: center;
-        min-width: 120px;
-    }
-
-    .btn::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent);
-        border-radius: 10px;
-        pointer-events: none;
-    }
-
-    .btn:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 24px rgba(255, 140, 0, 0.35);
-        border-color: rgba(255, 140, 0, 0.95);
-    }
-
-    .btn:active:not(:disabled) {
-        transform: scale(0.97);
-        filter: brightness(0.95);
-    }
-
-    .btn:disabled {
-        opacity: 0.45;
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    /* SECUNDARIO: Botones alternativos */
-    .btn-secondary {
-        background: transparent;
-        border: 1.5px solid var(--stroke);
-        color: var(--text);
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-        border-color: var(--accent);
-        background: rgba(255, 140, 0, 0.08);
-    }
-
-    /* TERCIARIO: Botones pequeños/utility */
-    .btn-utility {
-        background: transparent;
-        border: 1px solid rgba(74, 85, 131, 0.4);
-        color: var(--muted);
-        padding: 4px 12px;
-        font-size: 0.85em;
-        border-radius: 20px;
-        min-width: unset;
-    }
-
-    .btn-utility:hover:not(:disabled) {
-        border-color: var(--accent);
-        background: rgba(255, 140, 0, 0.06);
-        color: var(--accent);
-    }
-
-    /* PEQUEÑO: Botón pequeño con padding reducido */
-    .btn-small {
-        padding: 8px 16px;
-        font-size: 0.9em;
-        min-width: unset;
-    }
-
-    /* Estilos especiales para botones en aldea */
-    #village-screen > div:has(.btn-secondary) {
-        margin: 18px 0 20px;
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .player-info {
-        background: var(--panel-2);
-        padding: 24px;
-        border-radius: 12px;
-        margin-bottom: 24px;
-        border: 1px solid rgba(255, 140, 0, 0.55);
-        border-top: 3px solid rgba(255, 140, 0, 0.4);
-        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-        align-items: start;
-    }
-
-    .player-info h2 {
-        text-shadow: 0 0 12px rgba(255, 140, 0, 0.3);
-        letter-spacing: 0.5px;
-        font-size: 1.6em;
-        margin: 0 0 4px 0;
-        grid-column: 1;
-    }
-
-    .player-info-clan {
-        font-size: 0.9em;
-        color: var(--muted);
-        margin-bottom: 16px;
-        grid-column: 1;
-    }
-
-    .player-bars {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-        grid-column: 2;
-        grid-row: 1 / 3;
-    }
-
-    .bar-container {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .bar-label {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.9em;
-        font-weight: 600;
-        color: var(--muted);
-    }
-
-    .health-bar, .chakra-bar {
-        width: 100%;
-        height: 28px;
-        background: #333;
-        border-radius: 14px;
-        overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35) inset;
-        position: relative;
-    }
-
-    .health-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
-        transition: width 0.5s;
-        border-radius: 14px;
-    }
-
-    .chakra-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #3498db 0%, #2980b9 100%);
-        transition: width 0.5s;
-        border-radius: 14px;
-    }
-
-    .bar-text {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-        font-size: 0.85em;
-        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.9);
-        pointer-events: none;
-    }
-
-    .info-grid {
-        display: flex;
-        flex-direction: row;
-        gap: 12px;
-        margin-top: 16px;
-        grid-column: 1 / -1;
-        justify-content: flex-start;
-    }
-
-    .info-item {
-        background: linear-gradient(135deg, rgba(74, 85, 131, 0.3), rgba(74, 85, 131, 0.15));
-        padding: 10px 14px;
-        border-radius: 8px;
-        text-align: center;
-        border: 1px solid rgba(74, 85, 131, 0.5);
-        transition: all 0.3s;
-        cursor: default;
-        font-size: 0.9em;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        white-space: nowrap;
-        border-left: 3px solid rgba(255, 140, 0, 0.2);
-    }
-
-    .info-item:hover {
-        border-color: rgba(255, 140, 0, 0.3);
-        border-left-color: var(--accent);
-        background: linear-gradient(135deg, rgba(74, 85, 131, 0.35), rgba(74, 85, 131, 0.2));
-    }
-
-    .info-item span:first-child {
-        font-size: 1.1em;
-    }
-
-    .info-item span:last-child {
-        color: var(--accent);
-        font-weight: 600;
-    }
-
-    .online-panel {
-        margin-top: 16px;
-        padding: 12px;
-        border-radius: 10px;
-        background: rgba(0, 0, 0, 0.35);
-        border: 1px solid rgba(74, 85, 131, 0.45);
-        grid-column: 1 / -1;
-    }
-
-    .online-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-size: 0.9em;
-        color: var(--muted);
-        margin-bottom: 10px;
-    }
-
-    .online-header span:last-child {
-        color: var(--accent);
-        font-weight: 600;
-    }
-
-    .online-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 8px;
-    }
-
-    .online-pill {
-        background: rgba(74, 85, 131, 0.25);
-        border: 1px solid rgba(74, 85, 131, 0.5);
-        border-radius: 8px;
-        padding: 8px 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        font-size: 0.85em;
-    }
-
-    .online-pill strong {
-        color: var(--accent);
-        font-weight: 600;
-        word-break: break-word;
-    }
-
-    .online-pill span {
-        color: var(--muted);
-        font-size: 0.8em;
-    }
-
-    .online-pill .online-challenge {
-        align-self: flex-start;
-        margin-top: 6px;
-    }
-
-    .combat-area {
-        background: rgba(20, 20, 40, 0.72);
-        padding: 20px;
-        border-radius: 10px;
-        margin: 20px 0;
-        border: 1px solid rgba(255, 140, 0, 0.55);
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-    }
-
-    .enemy-info {
-        background: rgba(139, 0, 0, 0.3);
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        border: 1px solid rgba(139, 0, 0, 0.85);
-    }
-
-    .combat-log {
-        background: rgba(0, 0, 0, 0.6);
-        padding: 15px;
-        border-radius: 8px;
-        margin: 15px 0;
-        max-height: 250px;
-        overflow-y: auto;
-        border: 1px solid #4a5583;
-        font-size: 0.9em;
-        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35) inset;
-    }
-
-    .combat-log::-webkit-scrollbar {
-        width: 10px;
-    }
-
-    .combat-log::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.06);
-        border-radius: 10px;
-    }
-
-    .combat-log::-webkit-scrollbar-thumb {
-        background: rgba(255, 140, 0, 0.35);
-        border-radius: 10px;
-        border: 2px solid rgba(0, 0, 0, 0.25);
-    }
-
-    .combat-log::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 140, 0, 0.5);
-    }
-
-    #combat-screen .combat-area > div[style*="text-align: center"] {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-    }
-
-    #combat-screen .combat-area > div[style*="text-align: center"] .btn-small {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .log-entry {
-        padding: 6px;
-        margin: 4px 0;
-        border-radius: 5px;
-        animation: slideIn 0.3s;
-    }
-
-    @keyframes slideIn {
-        from { transform: translateX(-20px); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-
-    .log-attack { background: rgba(231, 76, 60, 0.3); border-left: 3px solid #e74c3c; }
-    .log-damage { background: rgba(192, 57, 43, 0.3); border-left: 3px solid #c0392b; }
-    .log-heal { background: rgba(46, 204, 113, 0.3); border-left: 3px solid #2ecc71; }
-    .log-miss { background: rgba(149, 165, 166, 0.3); border-left: 3px solid #95a5a6; }
-    .log-special { background: rgba(255, 140, 0, 0.3); border-left: 3px solid #ff8c00; }
-
-    .dice-roll {
-        display: inline-block;
-        background: #ff8c00;
-        color: #fff;
-        padding: 2px 6px;
-        border-radius: 5px;
-        font-weight: bold;
-        margin: 0 3px;
-    }
-
-    .story-text {
-        background: rgba(255, 140, 0, 0.04);
-        padding: 28px;
-        border-radius: 8px;
-        margin: 28px 0;
-        line-height: 1.9;
-        font-size: 1.05em;
-        border-left: 4px solid var(--accent);
-        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
-        position: relative;
-    }
-
-    .story-text h2 {
-        letter-spacing: 0.6px;
-        text-shadow: 0 0 14px rgba(255, 140, 0, 0.25);
-        font-size: 1.4em;
-        margin-bottom: 16px;
-    }
-
-    .story-text p:first-of-type {
-        font-size: 1.1em;
-        font-style: italic;
-        color: var(--text);
-        margin-bottom: 12px;
-    }
-
-    .story-text p:not(:first-of-type):not(:last-of-type) {
-        color: var(--muted);
-        margin-bottom: 12px;
-    }
-
-    .story-kekkei-hint {
-        background: rgba(255, 215, 0, 0.12);
-        border: 1px solid rgba(255, 215, 0, 0.3);
-        padding: 10px 14px;
-        border-radius: 6px;
-        margin-top: 16px;
-        color: #ffd700;
-        font-weight: 500;
-        display: inline-block;
-    }
-
-    .mission-list, .jutsu-academy-list {
-        display: grid;
-        gap: 12px;
-        margin-top: 20px;
-    }
-
-    .mission-card, .jutsu-card {
-        background: rgba(74, 85, 131, 0.22);
-        padding: 16px;
-        border-radius: 10px;
-        border-left: 5px solid #ff8c00;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        border-right: 1px solid rgba(255, 255, 255, 0.04);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .mission-card::before, .jutsu-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 140, 0, 0.05), transparent);
-        transition: left 0.5s;
-        pointer-events: none;
-    }
-
-    .mission-card:hover::before, .jutsu-card:hover::before {
-        left: 100%;
-    }
-
-    .mission-card:hover, .jutsu-card:hover {
-        background: rgba(74, 85, 131, 0.35);
-        transform: translateX(8px);
-        border-left-color: #ff6b00;
-        box-shadow: 0 8px 20px rgba(255, 140, 0, 0.15);
-    }
-
-    .mission-card h4, .jutsu-card h4 {
-        color: #ff8c00;
-        margin-bottom: 10px;
-        font-size: 1.05em;
-        letter-spacing: 0.3px;
-    }
-
-    .mission-card p, .jutsu-card p {
-        margin: 6px 0;
-    }
-
-    .mission-card p {
-        word-break: break-word;
-        overflow-wrap: anywhere;
-    }
-
-    /* NUEVO: Estados visuales de jutsu */
-    .jutsu-card.learned {
-        border-left-color: #2ecc71;
-        background: rgba(46, 204, 113, 0.12);
-    }
-
-    .jutsu-card.learned:hover {
-        background: rgba(46, 204, 113, 0.18);
-        border-left-color: #27ae60;
-    }
-
-    .jutsu-card.locked {
-        opacity: 0.7;
-        border-left-color: #95a5a6;
-        background: rgba(149, 165, 166, 0.08);
-        cursor: not-allowed;
-    }
-
-    .jutsu-card.locked:hover {
-        opacity: 0.75;
-        background: rgba(149, 165, 166, 0.12);
-        transform: none;
-    }
-
-    .jutsu-card.unlocked {
-        border-left-color: #3498db;
-        background: rgba(52, 152, 219, 0.1);
-    }
-
-    .jutsu-card.unlocked:hover {
-        background: rgba(52, 152, 219, 0.16);
-        border-left-color: #2980b9;
-    }
-
-    .jutsu-card-status {
-        display: inline-block;
-        padding: 3px 8px;
-        border-radius: 4px;
-        font-size: 0.75em;
-        font-weight: bold;
-        margin-left: 8px;
-    }
-
-    .status-learned {
-        background: #2ecc71;
-        color: white;
-    }
-
-    .status-unlocked {
-        background: #3498db;
-        color: white;
-    }
-
-    .status-locked {
-        background: #95a5a6;
-        color: white;
-    }
-
-    .shop-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 15px;
-        margin-top: 20px;
-    }
-
-    .shop-item {
-        background: rgba(74, 85, 131, 0.22);
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px solid rgba(74, 85, 131, 0.6);
-        box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
-        transition: transform 0.2s, background 0.2s, border-color 0.2s;
-    }
-
-    .shop-item:hover {
-        transform: translateY(-2px);
-        background: rgba(74, 85, 131, 0.32);
-        border-color: rgba(255, 140, 0, 0.45);
-    }
-
-    .shop-item h4 {
-        color: #ff8c00;
-        margin-bottom: 8px;
-    }
-
-    .shop-item .price {
-        color: var(--gold);
-        font-weight: bold;
-        margin: 8px 0;
-    }
-
-    .jutsu-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 10px;
-        margin-top: 15px;
-    }
-
-    .jutsu-quick-bar {
-        margin: 12px 0 6px;
-        padding: 10px 12px;
-        border-radius: 10px;
-        background: rgba(0, 0, 0, 0.35);
-        border: 1px solid rgba(74, 85, 131, 0.45);
-    }
-
-    .jutsu-quick-header {
-        display: flex;
-        justify-content: space-between;
-        gap: 8px;
-        font-size: 0.85em;
-        color: var(--muted);
-        margin-bottom: 8px;
-        flex-wrap: wrap;
-    }
-
-    .jutsu-quick-header span:last-child {
-        color: var(--accent);
-    }
-
-    .jutsu-quick-slots {
-        display: grid;
-        grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 8px;
-    }
-
-    .jutsu-quick-slot {
-        background: rgba(74, 85, 131, 0.2);
-        border: 1px solid rgba(74, 85, 131, 0.5);
-        border-radius: 8px;
-        padding: 8px;
-        font-size: 0.8em;
-        color: var(--text);
-        text-align: center;
-        cursor: pointer;
-        position: relative;
-        min-height: 56px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        gap: 4px;
-    }
-
-    .jutsu-quick-slot.selected {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 1px rgba(255, 140, 0, 0.4);
-        background: rgba(255, 140, 0, 0.08);
-    }
-
-    .jutsu-quick-slot .slot-clear {
-        position: absolute;
-        top: 6px;
-        right: 6px;
-        font-size: 0.75em;
-        color: rgba(240, 240, 240, 0.7);
-        cursor: pointer;
-    }
-
-    .jutsu-quick-slot .slot-clear:hover {
-        color: var(--accent);
-    }
-
-    .jutsu-entry {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-    }
-
-    .jutsu-assign-btn {
-        align-self: flex-start;
-    }
-
-    .jutsu-btn {
-        background: rgba(52, 152, 219, 0.3);
-        border: 2px solid #3498db;
-        padding: 12px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s;
-        text-align: left;
-        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
-    }
-
-    .jutsu-btn:hover:not(:disabled) {
-        background: rgba(52, 152, 219, 0.5);
-        transform: scale(1.05);
-    }
-
-    .jutsu-btn:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-    }
-
-    .jutsu-btn h4 {
-        color: #3498db;
-        margin-bottom: 5px;
-    }
-
-    .kekkei-genkai-notification {
-        background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
-        color: #000;
-        padding: 40px 30px;
-        border-radius: 15px;
-        text-align: center;
-        margin: 20px 0;
-        box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-        animation: kekkeiPulse 2s infinite;
-        font-size: 1.3em;
-        font-weight: 700;
-        letter-spacing: 1px;
-    }
-
-    .kekkei-genkai-notification h2 {
-        margin: 0;
-        font-size: 1.4em;
-    }
-
-    .kekkei-genkai-notification.granted {
-        animation: kekkeiGranted 0.8s ease-out;
-    }
-
-    @keyframes kekkeiPulse {
-        0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
-        50% { transform: scale(1.02); box-shadow: 0 0 50px rgba(255, 215, 0, 0.7); }
-    }
-
-    @keyframes kekkeiGranted {
-        0% {
-            opacity: 0;
-            transform: scale(0.8);
-        }
-        100% {
-            opacity: 1;
-            transform: scale(1);
-        }
-    }
-
-    .tabs {
-        display: flex;
-        gap: 12px;
-        margin-bottom: 24px;
-        flex-wrap: wrap;
-        padding: 14px;
-        background: linear-gradient(135deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.15));
-        border: 2px solid rgba(74, 85, 131, 0.4);
-        border-radius: 12px;
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2) inset;
-    }
-
-    #village-screen > .tabs {
-        background: linear-gradient(135deg, rgba(45, 53, 97, 0.4), rgba(31, 37, 68, 0.3));
-        border: 2px solid rgba(74, 85, 131, 0.5);
         padding: 16px;
     }
-
-    .tabs-inline {
-        background: transparent;
-        border: none;
-        padding: 0;
-        gap: 8px;
-        margin-bottom: 0;
-        box-shadow: none;
-    }
-
-    .tab-btn {
-        background: rgba(74, 85, 131, 0.5);
-        border: 2px solid rgba(74, 85, 131, 0.5);
-        padding: 10px 20px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.25s ease;
-        color: var(--text);
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
-        user-select: none;
-        font-weight: 600;
-    }
-
-    .tab-btn.active {
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-        border-color: rgba(255, 140, 0, 0.95);
-        box-shadow: 0 10px 22px rgba(255, 140, 0, 0.25);
-        position: relative;
-    }
-
-    .tab-btn.active::after {
-        content: "";
-        position: absolute;
-        bottom: -7px;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, transparent, #ff8c00, transparent);
-        border-radius: 2px;
-    }
-
-    .tab-btn:hover:not(.active) {
-        transform: translateY(-1px);
-        background: rgba(74, 85, 131, 0.65);
-        border-color: rgba(255, 140, 0, 0.4);
-    }
-
-    .tab-content {
-        display: none;
-        animation: fadeIn 0.3s ease-out;
-    }
-
-    .tab-content.active {
-        display: block;
-    }
-
-    @keyframes fadeIn {
-        from { 
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to { 
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .text-input {
-        width: 100%;
-        padding: 14px 16px;
-        border-radius: 8px;
-        border: 2px solid var(--stroke);
-        background: rgba(0, 0, 0, 0.35);
-        color: var(--text);
-        font-size: 1.1em;
-        box-shadow: 0 10px 22px rgba(0,0,0,0.25);
-        transition: all 0.2s ease;
-    }
-
-    .text-input::placeholder {
-        color: rgba(240, 240, 240, 0.4);
-        font-style: italic;
-    }
-
-    .text-input:focus {
-        outline: none;
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.25), 0 10px 22px rgba(0,0,0,0.25);
-        background: rgba(0, 0, 0, 0.45);
-    }
-
-    .text-input[readonly] {
-        opacity: 0.85;
-        cursor: default;
-    }
-
-    .auth-actions {
-        text-align: center;
-        margin-top: 18px;
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    #name-error {
-        background: rgba(231, 76, 60, 0.15);
-        border: 1px solid rgba(231, 76, 60, 0.4);
-        color: #ff7f66;
-        padding: 12px 14px;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 500;
-        margin-top: 12px;
-    }
-
-    #name-error::before {
-        content: "⚠️";
-        font-size: 1.2em;
-    }
-
-    #exam-widget {
-        background: rgba(0, 0, 0, 0.35);
-        border: 1px solid rgba(255, 215, 0, 0.40);
-        border-radius: 12px;
-        padding: 12px 14px;
-        margin: 0 0 16px;
-        box-shadow: 0 10px 24px rgba(0,0,0,0.35);
-    }
-
-    .npc-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 12px;
-        margin-top: 10px;
-    }
-
-    .npc-card {
-        background: linear-gradient(135deg, rgba(45, 53, 97, 0.85) 0%, rgba(31, 37, 68, 0.85) 100%);
-        border: 1px solid rgba(74, 85, 131, 0.60);
-        border-radius: 12px;
-        padding: 12px;
-        cursor: pointer;
-        box-shadow: 0 10px 22px rgba(0,0,0,0.30);
-        transition: transform 0.2s, border-color 0.2s;
-    }
-
-    .npc-card:hover {
-        transform: translateY(-2px);
-        border-color: rgba(255, 140, 0, 0.70);
-    }
-
-    .npc-modal {
-        margin-top: 14px;
-        padding: 14px;
-        border-radius: 12px;
-        border: 1px solid rgba(74, 85, 131, 0.55);
-        background: rgba(0, 0, 0, 0.30);
-    }
-
-    .victory {
-        text-align: center;
-        padding: 30px;
-        background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
-        border-radius: 10px;
-        color: #000;
-        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
-    }
-
-    .defeat {
-        text-align: center;
-        padding: 30px;
-        background: linear-gradient(135deg, #8b0000 0%, #c0392b 100%);
-        border-radius: 10px;
-        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
-    }
-
-    .kekkei-level {
-        background: rgba(255, 215, 0, 0.2);
-        border: 2px solid #ffd700;
-        padding: 10px;
-        border-radius: 8px;
-        margin-top: 10px;
-        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
-    }
-
-    .progress-bar {
-        width: 100%;
-        height: 20px;
-        background: #333;
-        border-radius: 10px;
-        overflow: hidden;
-        margin: 8px 0;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35) inset;
-    }
-
-    .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #ffd700 0%, #ff8c00 100%);
-        transition: width 0.5s;
-    }
-
-    /* ============================================== */
-    /* ENHANCEMENTS FINALES: CONTROLES Y ESPACIADO */
-    /* ============================================== */
-
-    /* Botones de tab principales (Misiones, NPCs, Academia, etc) */
-    #village-screen > .tabs {
-        margin-bottom: 25px;
-        gap: 12px;
-    }
-
-    #village-screen > .tabs .tab-btn {
-        flex: 1 1 auto;
-        text-align: center;
-        min-width: 120px;
-        font-weight: 600;
-        padding: 11px 18px;
-        background: linear-gradient(135deg, rgba(74, 85, 131, 0.6), rgba(74, 85, 131, 0.4));
-        border: 2px solid rgba(74, 85, 131, 0.5);
-        transition: all 0.3s ease;
-    }
-
-    #village-screen > .tabs .tab-btn:hover:not(.active) {
-        background: linear-gradient(135deg, rgba(74, 85, 131, 0.75), rgba(74, 85, 131, 0.6));
-        border-color: rgba(255, 140, 0, 0.4);
-    }
-
-    #village-screen > .tabs .tab-btn.active {
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-        border-color: rgba(255, 140, 0, 1);
-        box-shadow: 0 8px 20px rgba(255, 140, 0, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.1);
-    }
-
-    /* Mejora de espaciado y visual de las secciones */
-    #village-screen > .player-info {
-        border-top: 3px solid rgba(255, 140, 0, 0.4);
-    }
-
-    /* Botones de acción rápida en la aldea */
-    #village-screen > div:has(.btn-secondary) {
-        text-align: center;
-        margin: 18px 0 20px;
-    }
-
-    @media (max-width: 600px) {
-        .game-container {
-            padding: 15px;
-        }
-        
-        h1 {
-            font-size: 1.8em;
-        }
-
-        .tabs {
-            padding: 8px;
-        }
-
-        .tab-btn {
-            flex: 1 1 auto;
-            padding: 8px 12px;
-            font-size: 0.9em;
-        }
-
-        .tabs-inline .tab-btn {
-            padding: 6px 14px;
-            font-size: 0.85em;
-        }
-
-        #village-screen > .tabs .tab-btn {
-            font-size: 0.9em;
-        }
-        
-        .clan-select {
-            grid-template-columns: 1fr;
-        }
-
-        .player-info {
-            grid-template-columns: 1fr;
-            gap: 16px;
-            padding: 18px;
-        }
-
-        .player-info h2,
-        .player-info-clan {
-            grid-column: 1;
-        }
-
-        .player-bars {
-            grid-column: 1;
-            grid-row: auto;
-        }
-
-        .info-grid {
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .info-item {
-            flex: 1 1 45%;
-            justify-content: center;
-            white-space: normal;
-            text-align: center;
-        }
-
-        .online-list {
-            grid-template-columns: 1fr;
-        }
-
-        .online-pill .online-challenge {
-            width: 100%;
-            text-align: center;
-        }
-
-        #name-screen .player-info {
-            max-width: 100% !important;
-        }
-
-        #name-screen .player-info > div[style*="display: flex"] {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        #name-screen .player-info .btn {
-            width: 100%;
-        }
-
-        .auth-actions {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .auth-actions .btn {
-            width: 100%;
-        }
-
-        #stats-display .stat {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 6px;
-        }
-
-        #stats-display .stat-bar {
-            width: 100%;
-            margin-left: 0;
-        }
-
-        .combat-area {
-            padding: 16px;
-        }
-
-        .combat-log {
-            max-height: 200px;
-        }
-
-        #combat-screen .combat-area > div[style*="text-align: center"] {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
-        }
-
-        #combat-screen .combat-area .btn-small {
-            flex: 1 1 46%;
-        }
-
-        .mission-card:hover,
-        .jutsu-card:hover {
-            transform: none;
-        }
-
-        .mission-card h4 {
-            font-size: 0.95em;
-        }
-
-        .mission-card p {
-            font-size: 0.85em;
-        }
-
-        .shop-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .jutsu-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .jutsu-quick-slots {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .npc-list {
-            grid-template-columns: 1fr;
-        }
-
-        .mission-briefing-content {
-            padding: 20px;
-        }
-
-        .briefing-details {
-            grid-template-columns: 1fr;
-        }
-
-        .academy-header p {
-            font-size: 0.9em;
-        }
-
-        .section-title {
-            gap: 8px;
-        }
-
-        .section-icon {
-            width: 32px;
-            height: 32px;
-            font-size: 1.1em;
-        }
-
-        .section-title h4 {
-            font-size: 1em;
-        }
-
-        .jutsu-card-status {
-            padding: 2px 6px;
-            font-size: 0.7em;
-        }
-    }
-
-    @media (max-width: 480px) {
-        body {
-            padding: 10px;
-        }
-
-        .game-container {
-            padding: 12px;
-            border-radius: 12px;
-        }
-
-        h1 {
-            font-size: 1.5em;
-            letter-spacing: 1.5px;
-            margin-bottom: 24px;
-        }
-
-        .tab-btn {
-            padding: 8px 10px;
-            font-size: 0.85em;
-        }
-
-        .mission-card,
-        .jutsu-card {
-            padding: 12px;
-        }
-
-        .jutsu-quick-slots {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .text-input {
-            padding: 12px 14px;
-            font-size: 1em;
-        }
-
-        #name-screen label[for="player-name-input"] {
-            font-size: 0.8em;
-        }
-
-        .kekkei-genkai-notification {
-            padding: 24px 16px;
-            font-size: 1.05em;
-        }
-    }
-
-    .element-badge {
-        display: inline-block;
-        padding: 3px 8px;
-        border-radius: 5px;
-        font-size: 0.85em;
-        font-weight: bold;
-        margin: 3px;
-    }
-
-    .element-fire { background: #e74c3c; color: white; }
-    .element-water { background: #3498db; color: white; }
-    .element-wind { background: #95a5a6; color: white; }
-    .element-earth { background: #795548; color: white; }
-    .element-lightning { background: #f1c40f; color: black; }
-
-    .learned-jutsu {
-        background: rgba(46, 204, 113, 0.3);
-        border: 2px solid #2ecc71;
-        padding: 10px;
-        border-radius: 8px;
-        margin: 5px 0;
-    }
-
-    /* Mejor consistencia visual en contenido generado (stats/inventario) */
-    #stats-display .player-info {
-        margin-top: 15px;
-    }
-
-    #stats-display h3 {
-        color: var(--accent);
-        margin-bottom: 10px;
-        text-shadow: 0 0 12px rgba(255, 140, 0, 0.25);
-    }
-
-    #combat-items-list .mission-card,
-    #combat-items-list .jutsu-card,
-    #combat-items-list .shop-item {
-        margin: 8px 0;
-    }
-
-    /* ============================================== */
-    /* NUEVA INTERFAZ: SECCIONES DE ACADEMIA */
-    /* ============================================== */
-
-    .academy-header {
-        margin-bottom: 25px;
-    }
-
-    .academy-header h3 {
-        color: #ff8c00;
-        font-size: 1.5em;
-        margin-bottom: 8px;
-        text-shadow: 0 0 14px rgba(255, 140, 0, 0.25);
-    }
-
-    .academy-header p {
-        color: var(--muted);
-        font-size: 0.95em;
-    }
-
-    .academy-section {
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(74, 85, 131, 0.35);
-        border-radius: 12px;
-        padding: 18px;
-        margin-bottom: 18px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-        transition: all 0.3s;
-    }
-
-    .academy-section:hover {
-        border-color: rgba(255, 140, 0, 0.25);
-        background: rgba(0, 0, 0, 0.35);
-    }
-
-    .section-title {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 15px;
-        padding-bottom: 12px;
-        border-bottom: 2px solid rgba(255, 140, 0, 0.25);
-    }
-
-    .section-icon {
-        font-size: 1.4em;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        background: rgba(255, 140, 0, 0.15);
-        border-radius: 8px;
-        border: 2px solid rgba(255, 140, 0, 0.3);
-    }
-
-    .section-title h4 {
-        color: #ff8c00;
-        font-size: 1.1em;
-        margin: 0;
-        letter-spacing: 0.3px;
-    }
-
-    .academy-section .tabs-inline {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .academy-section .tab-btn {
-        padding: 8px 16px;
-        font-size: 0.9em;
-    }
-
-    .academy-jutsus-container {
-        margin-top: 25px;
-        padding-top: 20px;
-        border-top: 2px solid rgba(255, 140, 0, 0.15);
-    }
-
-    .academy-jutsus-container .jutsu-card {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        align-items: start;
-        gap: 15px;
-    }
-
-    .academy-jutsus-container .jutsu-card > div:first-child {
-        flex: 1;
-    }
-
-    /* ============================================== */
-    /* INDICADORES VISUALES DE TIPO/RAREZA */
-    /* ============================================== */
-
-    .jutsu-type-badge {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 5px;
-        font-size: 0.8em;
-        font-weight: bold;
-        margin: 4px 4px 4px 0;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .type-genin { background: rgba(100, 149, 237, 0.3); color: #87ceeb; border-color: #87ceeb; }
-    .type-chunin { background: rgba(255, 140, 0, 0.2); color: #ff8c00; border-color: #ff8c00; }
-    .type-jonin { background: rgba(255, 20, 147, 0.2); color: #ff1493; border-color: #ff1493; }
-    .type-master { background: rgba(255, 215, 0, 0.2); color: #ffd700; border-color: #ffd700; }
-
-    .type-sharingan { background: rgba(231, 76, 60, 0.2); color: #e74c3c; border-color: #e74c3c; }
-    .type-byakugan { background: rgba(155, 89, 182, 0.2); color: #9b59b6; border-color: #9b59b6; }
-    .type-rinnegan { background: rgba(142, 68, 173, 0.2); color: #8e44ad; border-color: #8e44ad; }
-    .type-bijuu { background: rgba(230, 126, 34, 0.2); color: #e67e22; border-color: #e67e22; }
-
-    /* ============================================== */
-    /* SISTEMA DE NARRADOR PARA MISIONES */
-    /* ============================================== */
-
-    .mission-briefing-overlay {
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(4px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        min-height: 100vh;
-        animation: fadeIn 0.4s ease;
-    }
-
-    .mission-briefing-content {
-        background: linear-gradient(135deg, rgba(15, 16, 32, 0.95) 0%, rgba(26, 26, 46, 0.95) 100%);
-        border: 2px solid rgba(255, 140, 0, 0.5);
-        border-radius: 12px;
-        padding: 30px;
-        max-width: 600px;
-        width: 100%;
-        box-shadow: 
-            0 0 30px rgba(255, 140, 0, 0.2),
-            inset 0 0 20px rgba(255, 140, 0, 0.1);
-        animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .mission-briefing-content h2 {
-        color: var(--accent);
-        font-size: 1.8em;
-        margin-bottom: 18px;
-        text-shadow: 0 0 10px rgba(255, 140, 0, 0.4);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .briefing-narrator {
-        background: rgba(255, 140, 0, 0.08);
-        border-left: 4px solid var(--accent);
-        padding: 15px;
-        border-radius: 6px;
-        margin-bottom: 20px;
-        max-height: 200px;
-        overflow-y: auto;
-    }
-
-    .briefing-narrator p {
-        color: rgba(240, 240, 240, 0.9);
-        font-style: italic;
-        line-height: 1.6;
-        margin: 0;
-        font-size: 0.95em;
-    }
-
-    .briefing-narrator::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .briefing-narrator::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.3);
-        border-radius: 3px;
-    }
-
-    .briefing-narrator::-webkit-scrollbar-thumb {
-        background: rgba(255, 140, 0, 0.5);
-        border-radius: 3px;
-    }
-
-    .briefing-narrator::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 140, 0, 0.8);
-    }
-
-    .briefing-details {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 12px;
-        margin-bottom: 22px;
-    }
-
-    .briefing-stat {
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255, 140, 0, 0.3);
-        padding: 12px;
-        border-radius: 6px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .briefing-stat span:first-child {
-        font-size: 0.85em;
-        color: rgba(240, 240, 240, 0.7);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .briefing-stat span:last-child {
-        font-size: 1.1em;
-        color: var(--accent);
-        font-weight: bold;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    /* ============================================
-       BARRA DE NAVEGACIÓN INFERIOR
-       ============================================ */
-    #bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        display: none; /* Controlado por JS — visible solo en village-screen */
-        background: linear-gradient(180deg, #1a1a1a 0%, #111 100%);
-        border-top: 2px solid var(--accent);
-        z-index: 9999;
-        /* Clave: respeta la zona segura del navegador móvil */
-        padding-bottom: env(safe-area-inset-bottom, 0px);
-        /* Altura mínima garantizada */
-        min-height: 60px;
-    }
-
-    .nav-btn {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 8px 0;
-        background: none;
-        border: none;
-        border-top: 2px solid transparent;
-        color: #666;
-        font-size: 20px;
-        cursor: pointer;
-        transition: color 0.2s, border-top 0.2s;
-    }
-
-    .nav-btn span {
-        font-size: 10px;
-        margin-top: 2px;
-    }
-
-    .nav-btn.active {
-        color: #ff8c00;
-        border-top: 2px solid #ff8c00;
-    }
-
-    .nav-btn:hover {
-        color: #ffd700;
-    }
-
-    /* Layout completo para village-screen */
-    #village-screen {
-        position: fixed !important;
-        inset: 0;
-        display: flex;
-        flex-direction: column;
-        max-width: none !important;
-        width: 100% !important;
-        height: 100vh;
-        height: 100dvh;
-        padding: 0 !important;
-        margin: 0 !important;
-        border-radius: 0 !important;
-        background: var(--bg);
-        z-index: 100;
-    }
-
-    /* Header del juego */
-    #game-header {
-        flex-shrink: 0;
-        background: linear-gradient(180deg, #1a1a1a 0%, #111 100%);
-        border-bottom: 2px solid var(--accent);
-        padding: 8px 12px;
-        padding-top: calc(8px + env(safe-area-inset-top, 0px));
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-    }
-
-    #header-player-info {
-        display: flex;
-        gap: 12px;
-        font-size: 14px;
-        color: var(--text);
-    }
-
-    #header-ryo {
-        color: #ffd700;
-    }
-
-    #header-bars {
-        display: flex;
-        gap: 8px;
-        flex: 1;
-        max-width: 200px;
-    }
-
-    .mini-bar {
-        flex: 1;
-        height: 8px;
-        background: rgba(0, 0, 0, 0.5);
-        border-radius: 4px;
-        overflow: hidden;
-    }
-
-    .mini-bar > div {
-        height: 100%;
-        border-radius: 4px;
-        transition: width 0.3s ease;
-    }
-
-    .hp-bar > div {
-        background: linear-gradient(90deg, #ff4444, #ff6666);
-        width: 100%;
-    }
-
-    .chakra-bar-mini > div {
-        background: linear-gradient(90deg, #4488ff, #66aaff);
-        width: 100%;
-    }
-
-    /* Contenedor principal del juego */
-    #game-main {
-        flex: 1;
-        overflow: hidden;
-        position: relative;
-        background: var(--bg);
-    }
-
-    /* Secciones de contenido */
+    
     .section-content {
-        position: absolute;
-        inset: 0;
-        overflow-y: auto;
-        overflow-x: hidden;
         padding: 16px;
-        padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .shop-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .jutsu-academy-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .clan-select, .village-select {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    #header-bars {
         display: none;
     }
-
-    .section-content.active {
-        display: block;
+    
+    .tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
     }
-
-    /* Ajustes específicos de la sección home */
-    #section-home .online-panel {
-        margin-top: 16px;
+    
+    .tab-btn {
+        flex-shrink: 0;
     }
+}
 
-    #section-home .player-info {
-        margin-bottom: 16px;
+@media (min-width: 768px) {
+    #sidebar {
+        width: 300px;
+        left: -300px;
     }
-
-    /* HUD Mundial en sección mundo */
-    #world-hud-display {
-        background: linear-gradient(135deg, rgba(74, 85, 131, 0.2) 0%, rgba(45, 53, 97, 0.3) 100%);
-        border: 1px solid rgba(255, 140, 0, 0.3);
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 20px;
+    
+    #sidebar.open {
+        transform: translateX(300px);
     }
-
-    /* Responsive para la barra de navegación */
-    @media (max-width: 480px) {
-        .nav-btn span {
-            font-size: 9px;
-        }
-
-        .nav-btn {
-            font-size: 18px;
-        }
-
-        .section-content {
-            padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
-        }
+    
+    .section-content {
+        padding: 24px 32px;
     }
-
-    @media (min-width: 768px) {
-        #bottom-nav {
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 20px 20px 0 0;
-        }
+    
+    .info-grid {
+        grid-template-columns: repeat(4, 1fr);
     }
+}
+
+@media (min-width: 1024px) {
+    .shop-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .section-content {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+}
+
+/* ============================================
+   BOTTOM NAV - OCULTO (Ya no se usa)
+   ============================================ */
+#bottom-nav {
+    display: none !important;
+}
+
+/* ============================================
+   KEKKEI EXP GAIN
+   ============================================ */
+#kekkei-exp-gain {
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin: 12px 0;
+}
+
+/* ============================================
+   VILLAGE INFO
+   ============================================ */
+#village-info {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin: 8px 0;
+}

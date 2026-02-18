@@ -12,12 +12,18 @@ export function createGame() {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
             
-            // Controlar visibilidad de la barra de navegación
-            const bottomNav = document.getElementById('bottom-nav');
-            if (bottomNav) {
-                // Mostrar solo en village-screen
-                bottomNav.style.display = (screenId === 'village-screen') ? 'flex' : 'none';
+            // Controlar visibilidad del header (solo en village-screen)
+            const header = document.getElementById('game-header');
+            if (header) {
+                if (screenId === 'village-screen') {
+                    header.classList.add('visible');
+                } else {
+                    header.classList.remove('visible');
+                }
             }
+            
+            // Cerrar sidebar si está abierto
+            this.closeSidebar();
         },
 
         showNameScreen() {
@@ -3005,16 +3011,17 @@ export function createGame() {
 
         showSection(name) {
             document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('#bottom-nav .nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('#sidebar .sidebar-nav-item').forEach(b => b.classList.remove('active'));
             
             const target = document.getElementById('section-' + name);
             if (target) target.classList.add('active');
             
-            const activeBtn = document.querySelector(`#bottom-nav [data-tab="${name}"]`);
+            const activeBtn = document.querySelector(`#sidebar [data-section="${name}"]`);
             if (activeBtn) activeBtn.classList.add('active');
 
-            // Actualizar header
+            // Actualizar header y sidebar
             this.updateHeader();
+            this.updateSidebarStats();
 
             // Acciones específicas por sección
             if (name === 'home') {
@@ -3031,6 +3038,41 @@ export function createGame() {
             } else if (name === 'statspage') {
                 this.showStats();
             }
+        },
+
+        // ============================================
+        // SIDEBAR NAVIGATION
+        // ============================================
+        toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('active');
+            }
+        },
+
+        closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar) sidebar.classList.remove('open');
+            if (overlay) overlay.classList.remove('active');
+        },
+
+        navigateFromSidebar(section) {
+            this.closeSidebar();
+            this.showSection(section);
+        },
+
+        updateSidebarStats() {
+            if (!this.player) return;
+            const rankEl = document.getElementById('sidebar-rank');
+            const levelEl = document.getElementById('sidebar-level');
+            const ryoEl = document.getElementById('sidebar-ryo');
+            
+            if (rankEl) rankEl.textContent = this.player.rank || 'Genin';
+            if (levelEl) levelEl.textContent = this.player.level || 1;
+            if (ryoEl) ryoEl.textContent = this.player.ryo || 0;
         },
 
         updateHeader() {

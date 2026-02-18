@@ -100,6 +100,7 @@
         
         <!-- HEADER fijo arriba -->
         <header id="game-header">
+            <button id="menu-toggle" onclick="game.toggleSidebar()">☰</button>
             <div id="header-player-info">
                 <span id="header-name">👤 Ninja</span>
                 <span id="header-ryo">💰 0</span>
@@ -109,6 +110,56 @@
                 <div class="mini-bar chakra-bar-mini"><div id="header-chakra-fill"></div></div>
             </div>
         </header>
+
+        <!-- SIDEBAR OVERLAY -->
+        <div id="sidebar-overlay" onclick="game.closeSidebar()"></div>
+
+        <!-- SIDEBAR / MENÚ LATERAL -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h2>🍥 Menú</h2>
+                <button class="sidebar-close" onclick="game.closeSidebar()">✕</button>
+            </div>
+            <div class="sidebar-nav">
+                <button class="sidebar-nav-item active" data-section="home" onclick="game.navigateFromSidebar('home')">
+                    <span class="nav-icon">🏠</span>
+                    <span>Inicio</span>
+                </button>
+                <button class="sidebar-nav-item" data-section="world" onclick="game.navigateFromSidebar('world')">
+                    <span class="nav-icon">🗺️</span>
+                    <span>Mundo</span>
+                </button>
+                <button class="sidebar-nav-item" data-section="inventory" onclick="game.navigateFromSidebar('inventory')">
+                    <span class="nav-icon">🎒</span>
+                    <span>Inventario</span>
+                </button>
+                <button class="sidebar-nav-item" data-section="shop" onclick="game.navigateFromSidebar('shop')">
+                    <span class="nav-icon">🏪</span>
+                    <span>Tienda</span>
+                </button>
+                <button class="sidebar-nav-item" data-section="statspage" onclick="game.navigateFromSidebar('statspage')">
+                    <span class="nav-icon">⚙️</span>
+                    <span>Stats & Config</span>
+                </button>
+            </div>
+            <div class="sidebar-player-stats">
+                <div class="stat-row">
+                    <span class="stat-label">Rango</span>
+                    <span class="stat-value" id="sidebar-rank">Genin</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Nivel</span>
+                    <span class="stat-value" id="sidebar-level">1</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Ryo</span>
+                    <span class="stat-value" id="sidebar-ryo">0</span>
+                </div>
+            </div>
+            <div class="sidebar-footer">
+                <button class="btn btn-secondary btn-small" onclick="game.saveGame(); game.closeSidebar();">💾 Guardar</button>
+            </div>
+        </nav>
 
         <!-- MAIN: contenedor de secciones -->
         <main id="game-main">
