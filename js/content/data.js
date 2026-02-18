@@ -1,6 +1,19 @@
 // Datos y configuración estática del juego
 // Editá este archivo para agregar clanes, jutsus, misiones, enemigos, etc.
 
+import { taijutsuJutsus } from './taijutsu.js';
+import { genjutsuJutsus } from './genjutsu.js';
+import { escapeJutsus } from './escape.js';
+import { katonJutsus } from './elements/katon.js';
+import { suitonJutsus } from './elements/suiton.js';
+import { futonJutsus } from './elements/futon.js';
+import { dotonJutsus } from './elements/doton.js';
+import { raitonJutsus } from './elements/raiton.js';
+import { sharinganJutsus } from './kekkei/sharingan.js';
+import { byakuganJutsus } from './kekkei/byakugan.js';
+import { rinneganJutsus } from './kekkei/rinnegan.js';
+import { bijuuJutsus } from './kekkei/bijuu.js';
+
 export const BASE_GAME = {
 
         player: null,
@@ -771,160 +784,1917 @@ export const BASE_GAME = {
             lightning: { name: 'Rayo (Raiton)', icon: '⚡', bonus: '+Crítico' }
         },
 
+        // Sistema de desbloqueo de jutsus
+        normalizeAcademyJutsus() {
+            const rankRequirements = {
+                'D': { level: 1, rank: 'Genin', exp: 30, ninjutsu: 3 },
+                'C': { level: 2, rank: 'Genin', exp: 100, ninjutsu: 8 },
+                'B': { level: 5, rank: 'Chunin', exp: 350, ninjutsu: 15 },
+                'A': { level: 9, rank: 'Jonin', exp: 1200, ninjutsu: 28 },
+                'S': { level: 15, rank: 'Kage', exp: 3000, ninjutsu: 45 }
+            };
+            
+            // Normalizar Academy Jutsus (por elemento/rango)
+            const allRanks = ['genin', 'chunin', 'jonin', 'master'];
+            
+            allRanks.forEach(rankKey => {
+                if (!this.academyJutsus[rankKey]) return;
+                
+                this.academyJutsus[rankKey].forEach(jutsu => {
+                    // Eliminar campo price
+                    delete jutsu.price;
+                    
+                    // Asegurar que tiene learnMethod
+                    if (!jutsu.learnMethod) {
+                        jutsu.learnMethod = 'auto';
+                    }
+                    
+                    // Si no tiene requirements, generarlos basados en rank
+                    if (!jutsu.requirements) {
+                        const baseReq = rankRequirements[jutsu.rank] || rankRequirements['D'];
+                        jutsu.requirements = {
+                            stats: { ninjutsu: baseReq.ninjutsu },
+                            exp: baseReq.exp,
+                            level: baseReq.level,
+                            rank: baseReq.rank,
+                            element: jutsu.element
+                        };
+                    }
+                });
+            });
+
+            // Normalizar Taijutsu Jutsus
+            if (this.taijutsuAcademy && Array.isArray(this.taijutsuAcademy)) {
+                this.taijutsuAcademy.forEach(jutsu => {
+                    // Eliminar campo price
+                    delete jutsu.price;
+                    
+                    // Asegurar que tiene learnMethod
+                    if (!jutsu.learnMethod) {
+                        jutsu.learnMethod = 'auto';
+                    }
+                    
+                    // Los jutsus de taijutsu ya vienen con requirements configurados
+                    // pero podemos validar que sean correctos
+                    if (!jutsu.requirements) {
+                        const baseReq = rankRequirements[jutsu.rank] || rankRequirements['D'];
+                        jutsu.requirements = {
+                            stats: { taijutsu: baseReq.ninjutsu }, // Notar: usan taijutsu, no ninjutsu
+                            exp: baseReq.exp,
+                            level: baseReq.level,
+                            rank: baseReq.rank,
+                            element: null
+                        };
+                    }
+                });
+            }
+
+            // Normalizar Genjutsu Jutsus
+            if (this.genjutsuAcademy && Array.isArray(this.genjutsuAcademy)) {
+                this.genjutsuAcademy.forEach(jutsu => {
+                    // Eliminar campo price
+                    delete jutsu.price;
+                    
+                    // Asegurar que tiene learnMethod
+                    if (!jutsu.learnMethod) {
+                        jutsu.learnMethod = 'auto';
+                    }
+                    
+                    // Los jutsus de genjutsu ya vienen con requirements configurados
+                    if (!jutsu.requirements) {
+                        const baseReq = rankRequirements[jutsu.rank] || rankRequirements['D'];
+                        jutsu.requirements = {
+                            stats: { genjutsu: baseReq.ninjutsu }, // Notar: usan genjutsu, no ninjutsu
+                            exp: baseReq.exp,
+                            level: baseReq.level,
+                            rank: baseReq.rank,
+                            element: null
+                        };
+                    }
+                });
+            }
+
+            // Normalizar Escape Jutsus
+            if (this.escapeAcademy && Array.isArray(this.escapeAcademy)) {
+                this.escapeAcademy.forEach(jutsu => {
+                    // Eliminar campo price
+                    delete jutsu.price;
+                    
+                    // Asegurar que tiene learnMethod
+                    if (!jutsu.learnMethod) {
+                        jutsu.learnMethod = 'auto';
+                    }
+                    
+                    // Los jutsus de escape ya vienen con requirements configurados
+                    if (!jutsu.requirements) {
+                        const baseReq = rankRequirements[jutsu.rank] || rankRequirements['D'];
+                        jutsu.requirements = {
+                            stats: { ninjutsu: baseReq.ninjutsu },
+                            exp: baseReq.exp,
+                            level: baseReq.level,
+                            rank: baseReq.rank,
+                            element: null
+                        };
+                    }
+                });
+            }
+
+            // Normalizar Katon Jutsus (Elemento Fuego)
+            if (this.katonAcademy && Array.isArray(this.katonAcademy)) {
+                this.katonAcademy.forEach(jutsu => {
+                    // Eliminar campo price
+                    delete jutsu.price;
+                    
+                    // Asegurar que tiene learnMethod
+                    if (!jutsu.learnMethod) {
+                        jutsu.learnMethod = 'auto';
+                    }
+                    
+                    // Todos los katon jutsus requieren element: 'fire'
+                    if (!jutsu.requirements) {
+                        const baseReq = rankRequirements[jutsu.rank] || rankRequirements['D'];
+                        jutsu.requirements = {
+                            stats: { ninjutsu: baseReq.ninjutsu },
+                            exp: baseReq.exp,
+                            level: baseReq.level,
+                            rank: baseReq.rank,
+                            element: 'fire'
+                        };
+                    }
+                });
+            }
+
+            // Normalizar Suiton Jutsus (Elemento Agua)
+            if (this.suitonAcademy && Array.isArray(this.suitonAcademy)) {
+                this.suitonAcademy.forEach(jutsu => {
+                    // Eliminar campo price
+                    delete jutsu.price;
+                    
+                    // Asegurar que tiene learnMethod
+                    if (!jutsu.learnMethod) {
+                        jutsu.learnMethod = 'auto';
+                    }
+                    
+                    // Todos los suiton jutsus requieren element: 'water'
+                    if (!jutsu.requirements) {
+                        const baseReq = rankRequirements[jutsu.rank] || rankRequirements['D'];
+                        jutsu.requirements = {
+                            stats: { ninjutsu: baseReq.ninjutsu },
+                            exp: baseReq.exp,
+                            level: baseReq.level,
+                            rank: baseReq.rank,
+                            element: 'water'
+                        };
+                    }
+                });
+            }
+
+            // Normalizar Futon Jutsus (Elemento Viento)
+            if (this.futonAcademy && Array.isArray(this.futonAcademy)) {
+                this.futonAcademy.forEach(jutsu => {
+                    // Eliminar campo price
+                    delete jutsu.price;
+                    
+                    // Asegurar que tiene learnMethod
+                    if (!jutsu.learnMethod) {
+                        jutsu.learnMethod = 'auto';
+                    }
+                    
+                    // Todos los futon jutsus requieren element: 'wind'
+                    if (!jutsu.requirements) {
+                        const baseReq = rankRequirements[jutsu.rank] || rankRequirements['D'];
+                        jutsu.requirements = {
+                            stats: { ninjutsu: baseReq.ninjutsu },
+                            exp: baseReq.exp,
+                            level: baseReq.level,
+                            rank: baseReq.rank,
+                            element: 'wind'
+                        };
+                    }
+                });
+            }
+
+            // Normalizar Doton Jutsus (Elemento Tierra)
+            if (this.dotonAcademy && Array.isArray(this.dotonAcademy)) {
+                this.dotonAcademy.forEach(jutsu => {
+                    // Eliminar campo price
+                    delete jutsu.price;
+                    
+                    // Asegurar que tiene learnMethod
+                    if (!jutsu.learnMethod) {
+                        jutsu.learnMethod = 'auto';
+                    }
+                    
+                    // Todos los doton jutsus requieren element: 'earth'
+                    if (!jutsu.requirements) {
+                        const baseReq = rankRequirements[jutsu.rank] || rankRequirements['D'];
+                        jutsu.requirements = {
+                            stats: { ninjutsu: baseReq.ninjutsu },
+                            exp: baseReq.exp,
+                            level: baseReq.level,
+                            rank: baseReq.rank,
+                            element: 'earth'
+                        };
+                    }
+                });
+            }
+
+            // Normalizar Raiton Jutsus (Elemento Rayo)
+            if (this.raitonAcademy && Array.isArray(this.raitonAcademy)) {
+                this.raitonAcademy.forEach(jutsu => {
+                    // Eliminar campo price
+                    delete jutsu.price;
+                    
+                    // Asegurar que tiene learnMethod
+                    if (!jutsu.learnMethod) {
+                        jutsu.learnMethod = 'auto';
+                    }
+                    
+                    // Todos los raiton jutsus requieren element: 'lightning'
+                    if (!jutsu.requirements) {
+                        const baseReq = rankRequirements[jutsu.rank] || rankRequirements['D'];
+                        jutsu.requirements = {
+                            stats: { ninjutsu: baseReq.ninjutsu },
+                            exp: baseReq.exp,
+                            level: baseReq.level,
+                            rank: baseReq.rank,
+                            element: 'lightning'
+                        };
+                    }
+                });
+            }
+
+            // Normalizar Sharingan Jutsus (Kekkei Genkai)
+            if (this.sharinganAcademy && Array.isArray(this.sharinganAcademy)) {
+                this.sharinganAcademy.forEach(jutsu => {
+                    // Eliminar campo price
+                    delete jutsu.price;
+                    
+                    // Asegurar que tiene learnMethod
+                    if (!jutsu.learnMethod) {
+                        jutsu.learnMethod = 'auto';
+                    }
+                    
+                    // Los jutsus de Sharingan requieren kekkei_genkai: 'sharingan' y KG_level
+                    // Ya vienen configurados, solo validamos estructura
+                    if (!jutsu.requirements) {
+                        const baseReq = rankRequirements[jutsu.rank] || rankRequirements['D'];
+                        jutsu.requirements = {
+                            stats: { genjutsu: baseReq.ninjutsu },
+                            exp: baseReq.exp,
+                            level: baseReq.level,
+                            rank: baseReq.rank,
+                            kekkei_genkai: 'sharingan',
+                            KG_level: 1
+                        };
+                    }
+                });
+            }
+
+            // Normalizar Byakugan Jutsus (Kekkei Genkai)
+            if (this.byakuganAcademy && Array.isArray(this.byakuganAcademy)) {
+                this.byakuganAcademy.forEach(jutsu => {
+                    // Eliminar campo price
+                    delete jutsu.price;
+                    
+                    // Asegurar que tiene learnMethod
+                    if (!jutsu.learnMethod) {
+                        jutsu.learnMethod = 'auto';
+                    }
+                    
+                    // Los jutsus de Byakugan requieren kekkei_genkai: 'byakugan' y KG_level
+                    // Ya vienen configurados, solo validamos estructura
+                    if (!jutsu.requirements) {
+                        const baseReq = rankRequirements[jutsu.rank] || rankRequirements['D'];
+                        jutsu.requirements = {
+                            stats: { taijutsu: baseReq.ninjutsu },
+                            exp: baseReq.exp,
+                            level: baseReq.level,
+                            rank: baseReq.rank,
+                            kekkei_genkai: 'byakugan',
+                            KG_level: 1
+                        };
+                    }
+                });
+            }
+
+            // Normalizar Rinnegan Jutsus (Kekkei Genkai - ULTRA RARO)
+            if (this.rinneganAcademy && Array.isArray(this.rinneganAcademy)) {
+                this.rinneganAcademy.forEach(jutsu => {
+                    // Eliminar campo price
+                    delete jutsu.price;
+                    
+                    // Asegurar que tiene learnMethod
+                    if (!jutsu.learnMethod) {
+                        jutsu.learnMethod = 'auto';
+                    }
+                    
+                    // Los jutsus de Rinnegan requieren kekkei_genkai: 'rinnegan' y KG_level
+                    // Ya vienen configurados, solo validamos estructura
+                    if (!jutsu.requirements) {
+                        const baseReq = rankRequirements[jutsu.rank] || rankRequirements['A'];
+                        jutsu.requirements = {
+                            stats: { ninjutsu: baseReq.ninjutsu },
+                            exp: baseReq.exp,
+                            level: baseReq.level,
+                            rank: baseReq.rank,
+                            kekkei_genkai: 'rinnegan',
+                            KG_level: 1
+                        };
+                    }
+                });
+            }
+
+            // Normalizar Bijuu Jutsus (Solo para Jinchurikis)
+            if (this.bijuuAcademy && Array.isArray(this.bijuuAcademy)) {
+                this.bijuuAcademy.forEach(jutsu => {
+                    // Eliminar campo price
+                    delete jutsu.price;
+                    
+                    // Asegurar que tiene learnMethod
+                    if (!jutsu.learnMethod) {
+                        jutsu.learnMethod = 'auto';
+                    }
+                    
+                    // Los jutsus de Bijuu requieren kekkei_genkai: 'bijuu' y bijuu_relation (0-100)
+                    // Ya vienen configurados, solo validamos estructura
+                    if (!jutsu.requirements) {
+                        const baseReq = rankRequirements[jutsu.rank] || rankRequirements['B'];
+                        jutsu.requirements = {
+                            stats: { ninjutsu: baseReq.ninjutsu },
+                            exp: baseReq.exp,
+                            level: baseReq.level,
+                            rank: baseReq.rank,
+                            kekkei_genkai: 'bijuu',
+                            bijuu_relation: 10
+                        };
+                    }
+                });
+            }
+        },
+
+        checkJutsuUnlocks(player) {
+            allJutsus = [...(this.academyJutsus.genin || []), ...(this.academyJutsus.chunin || []), 
+                        ...(this.academyJutsus.jonin || []), ...(this.academyJutsus.master || []),
+                        ...(this.taijutsuAcademy || []), ...(this.genjutsuAcademy || []),
+                        ...(this.escapeAcademy || []), ...(this.katonAcademy || []),
+                        ...(this.suitonAcademy || []), ...(this.futonAcademy || []),
+                        ...(this.dotonAcademy || []), ...(this.raitonAcademy || []),
+                        ...(this.sharinganAcademy || []), ...(this.byakuganAcademy || []),
+                        ...(this.rinneganAcademy || []), ...(this.bijuuAcademy || [])];
+            if (!player.unlockedJutsus) player.unlockedJutsus = [];
+            
+            allJutsus.forEach(jutsu => {
+                const alreadyLearned = player.learnedJutsus.some(j => j.name === jutsu.name);
+                const alreadyUnlocked = player.unlockedJutsus.some(j => j.name === jutsu.name);
+                if (alreadyLearned || alreadyUnlocked) return;
+                
+                if (this.meetsJutsuRequirements(player, jutsu.requirements)) {
+                    // Solo desbloquea el jutsu, no lo aprende automáticamente
+                    player.unlockedJutsus.push(jutsu);
+                }
+            });
+        },
+
+        meetsJutsuRequirements(player, req) {
+            if (!req) return false;
+            
+            // Verificar stats
+            if (req.stats) {
+                for (const [stat, value] of Object.entries(req.stats)) {
+                    if (!player[stat] || player[stat] < value) return false;
+                }
+            }
+            
+            // Verificar EXP total acumulada
+            if (req.exp && (player.totalExp || 0) < req.exp) return false;
+            
+            // Verificar nivel
+            if (req.level && player.level < req.level) return false;
+            
+            // Verificar rango
+            if (req.rank) {
+                const rankOrder = { Genin: 0, Chunin: 1, Jonin: 2, Kage: 3, Master: 4 };
+                if (!rankOrder[player.rank] || rankOrder[player.rank] < rankOrder[req.rank]) return false;
+            }
+            
+            // Verificar elemento
+            if (req.element && player.element !== req.element) return false;
+            
+            // Verificar Kekkei Genkai
+            if (req.kekkei_genkai) {
+                if (!player.kekkei_genkai || player.kekkei_genkai !== req.kekkei_genkai) return false;
+            }
+            
+            // Verificar nivel de Kekkei Genkai (ej: nivel de Sharingan)
+            if (req.KG_level) {
+                if (!player.KG_level || player.KG_level < req.KG_level) return false;
+            }
+            
+            // Verificar relación con Bijuu (solo para Jinchurikis)
+            if (req.bijuu_relation !== undefined) {
+                if (player.bijuu_relation === undefined || player.bijuu_relation < req.bijuu_relation) return false;
+            }
+            
+            // Verificar jutsu prerequisito
+            if (req.prerequisiteJutsu) {
+                const hasPrereq = player.learnedJutsus.some(j => j.name === req.prerequisiteJutsu);
+                if (!hasPrereq) return false;
+            }
+            
+            return true;
+        },
+
         academyJutsus: {
             // Genin (D-C)
             genin: [
                 // 🔥 Fuego
-                { name: 'Katon: Gōkakyū no Jutsu', rank: 'C', price: 300, chakra: 35, damage: 35, element: 'fire', description: 'Gran Bola de Fuego: una llamarada icónica que arrasa el frente.' },
-                { name: 'Katon: Hōsenka no Jutsu', rank: 'C', price: 280, chakra: 30, damage: 30, element: 'fire', description: 'Flores Fénix: múltiples proyectiles de fuego que persiguen al objetivo.' },
-                { name: 'Katon: Hinotama', rank: 'D', price: 120, chakra: 18, damage: 18, element: 'fire', description: 'Esferas de fuego rápidas, perfectas para hostigar.' },
-                { name: 'Katon: Kasumi Enbu', rank: 'D', price: 150, chakra: 20, damage: 16, element: 'fire', description: 'Danza de Niebla: humo inflamable que detona al impacto.', effect: 'burn' },
-                { name: 'Katon: Enjin no Kama', rank: 'C', price: 260, chakra: 32, damage: 28, element: 'fire', description: 'Guadaña Ígnea: un arco de llamas que corta y quema.', effect: 'burn' },
+                { name: 'Katon: Gōkakyū no Jutsu', rank: 'C', chakra: 35, damage: 35, element: 'fire', description: 'Gran Bola de Fuego: una llamarada icónica que arrasa el frente.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 11 }, exp: 140, level: 2, rank: 'Genin', element: 'fire' } },
+                { name: 'Katon: Hōsenka no Jutsu', rank: 'C', chakra: 30, damage: 30, element: 'fire', description: 'Flores Fénix: múltiples proyectiles de fuego que persiguen al objetivo.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 10 }, exp: 130, level: 2, rank: 'Genin', element: 'fire' } },
+                { name: 'Katon: Hinotama', rank: 'D', chakra: 18, damage: 18, element: 'fire', description: 'Esferas de fuego rápidas, perfectas para hostigar.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 4 }, exp: 50, level: 1, rank: 'Genin', element: 'fire' } },
+                { name: 'Katon: Kasumi Enbu', rank: 'D', chakra: 20, damage: 16, element: 'fire', description: 'Danza de Niebla: humo inflamable que detona al impacto.', effect: 'burn', learnMethod: 'auto', requirements: { stats: { ninjutsu: 5 }, exp: 60, level: 1, rank: 'Genin', element: 'fire' } },
+                { name: 'Katon: Enjin no Kama', rank: 'C', chakra: 32, damage: 28, element: 'fire', description: 'Guadaña Ígnea: un arco de llamas que corta y quema.', effect: 'burn', learnMethod: 'auto', requirements: { stats: { ninjutsu: 11 }, exp: 135, level: 2, rank: 'Genin', element: 'fire' } },
 
                 // 💧 Agua
-                { name: 'Suiton: Mizurappa', rank: 'C', price: 280, chakra: 30, damage: 30, element: 'water', description: 'Ola Violenta: empuje de agua que golpea y desestabiliza.' },
-                { name: 'Suiton: Teppōdama', rank: 'C', price: 260, chakra: 28, damage: 28, element: 'water', description: 'Bala de Agua: disparo comprimido que perfora.' },
-                { name: 'Suiton: Mizu no Yaiba', rank: 'D', price: 150, chakra: 20, damage: 18, element: 'water', description: 'Hoja de Agua: filo líquido para cortes rápidos.' },
-                { name: 'Suiton: Kirigakure no Jutsu', rank: 'C', price: 300, chakra: 35, damage: 15, element: 'water', description: 'Niebla Oculta: reduce visibilidad y confunde.', effect: 'stun' },
-                { name: 'Suiton: Suiryūdan (Mini)', rank: 'C', price: 290, chakra: 34, damage: 33, element: 'water', description: 'Mini Dragón de Agua: impacto contundente con control.' },
+                { name: 'Suiton: Mizurappa', rank: 'C', chakra: 30, damage: 30, element: 'water', description: 'Ola Violenta: empuje de agua que golpea y desestabiliza.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 10 }, exp: 130, level: 2, rank: 'Genin', element: 'water' } },
+                { name: 'Suiton: Teppōdama', rank: 'C', chakra: 28, damage: 28, element: 'water', description: 'Bala de Agua: disparo comprimido que perfora.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 11 }, exp: 135, level: 2, rank: 'Genin', element: 'water' } },
+                { name: 'Suiton: Mizu no Yaiba', rank: 'D', chakra: 20, damage: 18, element: 'water', description: 'Hoja de Agua: filo líquido para cortes rápidos.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 5 }, exp: 60, level: 1, rank: 'Genin', element: 'water' } },
+                { name: 'Suiton: Kirigakure no Jutsu', rank: 'C', chakra: 35, damage: 15, element: 'water', description: 'Niebla Oculta: reduce visibilidad y confunde.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 12 }, exp: 150, level: 2, rank: 'Genin', element: 'water' } },
+                { name: 'Suiton: Suiryūdan (Mini)', rank: 'C', chakra: 34, damage: 33, element: 'water', description: 'Mini Dragón de Agua: impacto contundente con control.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 11 }, exp: 145, level: 2, rank: 'Genin', element: 'water' } },
 
                 // 💨 Viento
-                { name: 'Fūton: Kaze no Yaiba', rank: 'D', price: 120, chakra: 18, damage: 18, element: 'wind', description: 'Hoja de Viento: corte invisible a corta distancia.' },
-                { name: 'Fūton: Reppūshō', rank: 'C', price: 250, chakra: 30, damage: 28, element: 'wind', description: 'Palma Huracanada: empuje que rompe postura.' },
-                { name: 'Fūton: Shinkūgyoku', rank: 'C', price: 280, chakra: 34, damage: 33, element: 'wind', description: 'Esfera de Vacío: proyectiles compactos de aire.' },
-                { name: 'Fūton: Kamaitachi (Básico)', rank: 'C', price: 300, chakra: 38, damage: 35, element: 'wind', description: 'Hoz de Viento: ráfaga cortante que hiere en línea.' },
-                { name: 'Fūton: Kaze Shibari', rank: 'D', price: 160, chakra: 22, damage: 15, element: 'wind', description: 'Atadura de Viento: traba el movimiento con presión.', effect: 'stun' },
+                { name: 'Fūton: Kaze no Yaiba', rank: 'D', chakra: 18, damage: 18, element: 'wind', description: 'Hoja de Viento: corte invisible a corta distancia.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 4 }, exp: 50, level: 1, rank: 'Genin', element: 'wind' } },
+                { name: 'Fūton: Reppūshō', rank: 'C', chakra: 30, damage: 28, element: 'wind', description: 'Palma Huracanada: empuje que rompe postura.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 10 }, exp: 125, level: 2, rank: 'Genin', element: 'wind' } },
+                { name: 'Fūton: Shinkūgyoku', rank: 'C', chakra: 34, damage: 33, element: 'wind', description: 'Esfera de Vacío: proyectiles compactos de aire.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 10 }, exp: 130, level: 2, rank: 'Genin', element: 'wind' } },
+                { name: 'Fūton: Kamaitachi (Básico)', rank: 'C', chakra: 38, damage: 35, element: 'wind', description: 'Hoz de Viento: ráfaga cortante que hiere en línea.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 12 }, exp: 150, level: 2, rank: 'Genin', element: 'wind' } },
+                { name: 'Fūton: Kaze Shibari', rank: 'D', chakra: 22, damage: 15, element: 'wind', description: 'Atadura de Viento: traba el movimiento con presión.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 5 }, exp: 65, level: 1, rank: 'Genin', element: 'wind' } },
 
                 // 🪨 Tierra
-                { name: 'Doton: Doryūheki (Básico)', rank: 'C', price: 300, chakra: 35, damage: 20, element: 'earth', description: 'Muro de Tierra: defensa rápida que bloquea el avance.', effect: 'defense' },
-                { name: 'Doton: Moguragakure', rank: 'C', price: 260, chakra: 30, damage: 28, element: 'earth', description: 'Escondite Subterráneo: golpe sorpresa desde abajo.' },
-                { name: 'Doton: Iwa Tsubute', rank: 'D', price: 120, chakra: 18, damage: 18, element: 'earth', description: 'Piedras Lanzadas: proyectiles de roca a corta distancia.' },
-                { name: 'Doton: Tsuchi Shibari', rank: 'D', price: 150, chakra: 22, damage: 15, element: 'earth', description: 'Atadura de Tierra: el suelo atrapa los pies.', effect: 'stun' },
-                { name: 'Doton: Kōgan no Kama', rank: 'C', price: 280, chakra: 34, damage: 33, element: 'earth', description: 'Guadaña Rocosa: filo pesado que rompe guardias.' },
+                { name: 'Doton: Doryūheki (Básico)', rank: 'C', chakra: 35, damage: 20, element: 'earth', description: 'Muro de Tierra: defensa rápida que bloquea el avance.', effect: 'defense', learnMethod: 'auto', requirements: { stats: { ninjutsu: 12 }, exp: 150, level: 2, rank: 'Genin', element: 'earth' } },
+                { name: 'Doton: Moguragakure', rank: 'C', chakra: 30, damage: 28, element: 'earth', description: 'Escondite Subterráneo: golpe sorpresa desde abajo.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 11 }, exp: 135, level: 2, rank: 'Genin', element: 'earth' } },
+                { name: 'Doton: Iwa Tsubute', rank: 'D', chakra: 18, damage: 18, element: 'earth', description: 'Piedras Lanzadas: proyectiles de roca a corta distancia.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 4 }, exp: 50, level: 1, rank: 'Genin', element: 'earth' } },
+                { name: 'Doton: Tsuchi Shibari', rank: 'D', chakra: 22, damage: 15, element: 'earth', description: 'Atadura de Tierra: el suelo atrapa los pies.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 5 }, exp: 60, level: 1, rank: 'Genin', element: 'earth' } },
+                { name: 'Doton: Kōgan no Kama', rank: 'C', chakra: 34, damage: 33, element: 'earth', description: 'Guadaña Rocosa: filo pesado que rompe guardias.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 10 }, exp: 130, level: 2, rank: 'Genin', element: 'earth' } },
 
                 // ⚡ Rayo
-                { name: 'Raiton: Chispa', rank: 'D', price: 120, chakra: 18, damage: 18, element: 'lightning', description: 'Descarga rápida para aturdir y abrir guardias.', effect: 'stun' },
-                { name: 'Raiton: Denki Tama', rank: 'C', price: 260, chakra: 30, damage: 30, element: 'lightning', description: 'Esfera Eléctrica: golpe directo con zumbido paralizante.', effect: 'stun' },
-                { name: 'Raiton: Raikyū', rank: 'C', price: 280, chakra: 34, damage: 33, element: 'lightning', description: 'Orbe de Rayo: daño sostenido y presión constante.' },
-                { name: 'Raiton: Ikazuchi no Yaiba', rank: 'C', price: 300, chakra: 38, damage: 35, element: 'lightning', description: 'Hoja de Trueno: filo eléctrico para cortes letales.' },
+                { name: 'Raiton: Chispa', rank: 'D', chakra: 18, damage: 18, element: 'lightning', description: 'Descarga rápida para aturdir y abrir guardias.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 4 }, exp: 50, level: 1, rank: 'Genin', element: 'lightning' } },
+                { name: 'Raiton: Denki Tama', rank: 'C', chakra: 30, damage: 30, element: 'lightning', description: 'Esfera Eléctrica: golpe directo con zumbido paralizante.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 11 }, exp: 135, level: 2, rank: 'Genin', element: 'lightning' } },
+                { name: 'Raiton: Raikyū', rank: 'C', chakra: 34, damage: 33, element: 'lightning', description: 'Orbe de Rayo: daño sostenido y presión constante.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 10 }, exp: 130, level: 2, rank: 'Genin', element: 'lightning' } },
+                { name: 'Raiton: Ikazuchi no Yaiba', rank: 'C', chakra: 38, damage: 35, element: 'lightning', description: 'Hoja de Trueno: filo eléctrico para cortes letales.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 12 }, exp: 150, level: 2, rank: 'Genin', element: 'lightning' } },
                 { name: 'Raiton: Kōden', rank: 'D', price: 150, chakra: 22, damage: 15, element: 'lightning', description: 'Conducto: chispa que “engancha” el objetivo.', effect: 'stun' },
 
                 // Neutrales (para todos)
-                { name: 'Kawarimi no Jutsu', rank: 'D', price: 100, chakra: 15, damage: 0, element: null, description: 'Sustitución para evitar un golpe crítico.', effect: 'defense' },
-                { name: 'Oiroke no Jutsu (Distracción)', rank: 'D', price: 120, chakra: 15, damage: 15, element: null, description: 'Distracción absurda pero efectiva para romper el ritmo.', effect: 'stun' },
-                { name: 'Iryō Ninjutsu: Shōsen', rank: 'C', price: 280, chakra: 35, damage: 0, element: null, description: 'Técnica médica para cerrar heridas rápidamente.', effect: 'heal' },
-                { name: 'Shunshin no Jutsu', rank: 'C', price: 250, chakra: 30, damage: 0, element: null, description: 'Desplazamiento instantáneo que aumenta velocidad.', effect: 'speed' },
-                { name: 'Kage Bunshin no Jutsu', rank: 'C', price: 300, chakra: 40, damage: 0, element: null, description: 'Clones sólidos que confunden y multiplican presión.', effect: 'clone' }
+                { name: 'Kawarimi no Jutsu', rank: 'D', chakra: 15, damage: 0, element: null, description: 'Sustitución para evitar un golpe crítico.', effect: 'defense', learnMethod: 'auto', requirements: { stats: { ninjutsu: 3 }, exp: 30, level: 1, rank: 'Genin', element: null } },
+                { name: 'Oiroke no Jutsu (Distracción)', rank: 'D', chakra: 15, damage: 15, element: null, description: 'Distracción absurda pero efectiva para romper el ritmo.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 4 }, exp: 50, level: 1, rank: 'Genin', element: null } },
+                { name: 'Iryō Ninjutsu: Shōsen', rank: 'C', chakra: 35, damage: 0, element: null, description: 'Técnica médica para cerrar heridas rápidamente.', effect: 'heal', learnMethod: 'auto', requirements: { stats: { ninjutsu: 10 }, exp: 130, level: 2, rank: 'Genin', element: null } },
+                { name: 'Shunshin no Jutsu', rank: 'C', chakra: 30, damage: 0, element: null, description: 'Desplazamiento instantáneo que aumenta velocidad.', effect: 'speed', learnMethod: 'auto', requirements: { stats: { ninjutsu: 10 }, exp: 125, level: 2, rank: 'Genin', element: null } },
+                { name: 'Kage Bunshin no Jutsu', rank: 'C', chakra: 40, damage: 0, element: null, description: 'Clones sólidos que confunden y multiplican presión.', effect: 'clone', learnMethod: 'auto', requirements: { stats: { ninjutsu: 12 }, exp: 150, level: 2, rank: 'Genin', element: null } }
             ],
 
             // Chunin (B)
             chunin: [
                 // 🔥
-                { name: 'Katon: Ryūka no Jutsu', rank: 'B', price: 800, chakra: 55, damage: 65, element: 'fire', description: 'Dragón de Fuego: un chorro concentrado que atraviesa defensas.', effect: 'burn' },
-                { name: 'Katon: Gōryūka no Jutsu', rank: 'B', price: 900, chakra: 60, damage: 75, element: 'fire', description: 'Gran Dragón de Fuego: calor abrumador y daño sostenido.', effect: 'burn' },
-                { name: 'Katon: Haisekishō', rank: 'B', price: 700, chakra: 50, damage: 55, element: 'fire', description: 'Ceniza Ardiente: nube que explota al inhalarla.', effect: 'stun' },
-                { name: 'Katon: Enkōdan', rank: 'B', price: 650, chakra: 48, damage: 50, element: 'fire', description: 'Bala de Llama: disparo compacto, veloz y preciso.' },
-                { name: 'Katon: Karyū Endan', rank: 'B', price: 1100, chakra: 70, damage: 80, element: 'fire', description: 'Llamarada Continua: un río de fuego que no da respiro.', effect: 'burn' },
-                { name: 'Katon: Shakunetsu Kekkai', rank: 'B', price: 1000, chakra: 65, damage: 60, element: 'fire', description: 'Barrera Abrasadora: el calor frena al enemigo y lo desgasta.', effect: 'defense' },
+                { name: 'Katon: Ryūka no Jutsu', rank: 'B', chakra: 55, damage: 65, element: 'fire', description: 'Dragón de Fuego: un chorro concentrado que atraviesa defensas.', effect: 'burn', learnMethod: 'auto', requirements: { stats: { ninjutsu: 19 }, exp: 450, level: 5, rank: 'Chunin', element: 'fire' } },
+                { name: 'Katon: Gōryūka no Jutsu', rank: 'B', chakra: 60, damage: 75, element: 'fire', description: 'Gran Dragón de Fuego: calor abrumador y daño sostenido.', effect: 'burn', learnMethod: 'auto', requirements: { stats: { ninjutsu: 20 }, exp: 500, level: 5, rank: 'Chunin', element: 'fire' } },
+                { name: 'Katon: Haisekishō', rank: 'B', chakra: 50, damage: 55, element: 'fire', description: 'Ceniza Ardiente: nube que explota al inhalarla.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 17 }, exp: 400, level: 5, rank: 'Chunin', element: 'fire' } },
+                { name: 'Katon: Enkōdan', rank: 'B', chakra: 48, damage: 50, element: 'fire', description: 'Bala de Llama: disparo compacto, veloz y preciso.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 16 }, exp: 360, level: 5, rank: 'Chunin', element: 'fire' } },
+                { name: 'Katon: Karyū Endan', rank: 'B', chakra: 70, damage: 80, element: 'fire', description: 'Llamarada Continua: un río de fuego que no da respiro.', effect: 'burn', learnMethod: 'auto', requirements: { stats: { ninjutsu: 22 }, exp: 600, level: 6, rank: 'Chunin', element: 'fire' } },
+                { name: 'Katon: Shakunetsu Kekkai', rank: 'B', chakra: 65, damage: 60, element: 'fire', description: 'Barrera Abrasadora: el calor frena al enemigo y lo desgasta.', effect: 'defense', learnMethod: 'auto', requirements: { stats: { ninjutsu: 20 }, exp: 480, level: 5, rank: 'Chunin', element: 'fire' } },
 
                 // 💧
-                { name: 'Suiton: Suiryūdan no Jutsu', rank: 'B', price: 900, chakra: 65, damage: 80, element: 'water', description: 'Dragón de Agua: un coloso acuático que arrasa.' },
-                { name: 'Suiton: Suijinheki', rank: 'B', price: 700, chakra: 50, damage: 40, element: 'water', description: 'Muro de Agua: bloquea ataques y contraataca con presión.', effect: 'defense' },
-                { name: 'Suiton: Daibakufu', rank: 'B', price: 1000, chakra: 70, damage: 75, element: 'water', description: 'Gran Cascada: ola masiva que barre el terreno.' },
-                { name: 'Suiton: Hōmatsu Rappa', rank: 'B', price: 650, chakra: 48, damage: 55, element: 'water', description: 'Espuma Violenta: espuma densa que ralentiza y golpea.', effect: 'stun' },
-                { name: 'Suiton: Mizukiri no Yaiba', rank: 'B', price: 800, chakra: 55, damage: 65, element: 'water', description: 'Cuchillas de Agua: múltiples filos cortantes.' },
-                { name: 'Suiton: Suiro no Jutsu', rank: 'B', price: 600, chakra: 45, damage: 42, element: 'water', description: 'Prisión de Agua (impacto): inmoviliza y castiga.', effect: 'stun' },
+                { name: 'Suiton: Suiryūdan no Jutsu', rank: 'B', chakra: 65, damage: 80, element: 'water', description: 'Dragón de Agua: un coloso acuático que arrasa.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 20 }, exp: 500, level: 5, rank: 'Chunin', element: 'water' } },
+                { name: 'Suiton: Suijinheki', rank: 'B', chakra: 50, damage: 40, element: 'water', description: 'Muro de Agua: bloquea ataques y contraataca con presión.', effect: 'defense', learnMethod: 'auto', requirements: { stats: { ninjutsu: 17 }, exp: 400, level: 5, rank: 'Chunin', element: 'water' } },
+                { name: 'Suiton: Daibakufu', rank: 'B', chakra: 70, damage: 75, element: 'water', description: 'Gran Cascada: ola masiva que barre el terreno.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 20 }, exp: 480, level: 5, rank: 'Chunin', element: 'water' } },
+                { name: 'Suiton: Hōmatsu Rappa', rank: 'B', chakra: 48, damage: 55, element: 'water', description: 'Espuma Violenta: espuma densa que ralentiza y golpea.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 16 }, exp: 360, level: 5, rank: 'Chunin', element: 'water' } },
+                { name: 'Suiton: Mizukiri no Yaiba', rank: 'B', chakra: 55, damage: 65, element: 'water', description: 'Cuchillas de Agua: múltiples filos cortantes.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 19 }, exp: 450, level: 5, rank: 'Chunin', element: 'water' } },
+                { name: 'Suiton: Suiro no Jutsu', rank: 'B', chakra: 45, damage: 42, element: 'water', description: 'Prisión de Agua (impacto): inmoviliza y castiga.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 15 }, exp: 320, level: 5, rank: 'Chunin', element: 'water' } },
 
                 // 💨
-                { name: 'Fūton: Shinkūha', rank: 'B', price: 700, chakra: 50, damage: 55, element: 'wind', description: 'Onda de Vacío: cuchilla larga de aire que atraviesa.' },
-                { name: 'Fūton: Shinkū Renpa', rank: 'B', price: 850, chakra: 60, damage: 70, element: 'wind', description: 'Ráfaga en Cadena: varias ondas que saturan la defensa.' },
-                { name: 'Fūton: Kazekiri', rank: 'B', price: 650, chakra: 45, damage: 45, element: 'wind', description: 'Corte de Viento: filo rápido y mortal.' },
-                { name: 'Fūton: Daitoppa', rank: 'B', price: 900, chakra: 65, damage: 80, element: 'wind', description: 'Gran Avance: tormenta frontal que arrasa formación.' },
-                { name: 'Fūton: Kaze no Tate', rank: 'B', price: 600, chakra: 50, damage: 40, element: 'wind', description: 'Escudo de Viento: desvía ataques y reduce impacto.', effect: 'defense' },
-                { name: 'Fūton: Shinkūsen', rank: 'B', price: 1100, chakra: 70, damage: 75, element: 'wind', description: 'Cuchilla Circular: anillo de aire que golpea alrededor.' },
+                { name: 'Fūton: Shinkūha', rank: 'B', chakra: 50, damage: 55, element: 'wind', description: 'Onda de Vacío: cuchilla larga de aire que atraviesa.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 17 }, exp: 400, level: 5, rank: 'Chunin', element: 'wind' } },
+                { name: 'Fūton: Shinkū Renpa', rank: 'B', chakra: 60, damage: 70, element: 'wind', description: 'Ráfaga en Cadena: varias ondas que saturan la defensa.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 19 }, exp: 475, level: 5, rank: 'Chunin', element: 'wind' } },
+                { name: 'Fūton: Kazekiri', rank: 'B', chakra: 45, damage: 45, element: 'wind', description: 'Corte de Viento: filo rápido y mortal.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 16 }, exp: 360, level: 5, rank: 'Chunin', element: 'wind' } },
+                { name: 'Fūton: Daitoppa', rank: 'B', chakra: 65, damage: 80, element: 'wind', description: 'Gran Avance: tormenta frontal que arrasa formación.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 20 }, exp: 500, level: 5, rank: 'Chunin', element: 'wind' } },
+                { name: 'Fūton: Kaze no Tate', rank: 'B', chakra: 50, damage: 40, element: 'wind', description: 'Escudo de Viento: desvía ataques y reduce impacto.', effect: 'defense', learnMethod: 'auto', requirements: { stats: { ninjutsu: 15 }, exp: 320, level: 5, rank: 'Chunin', element: 'wind' } },
+                { name: 'Fūton: Shinkūsen', rank: 'B', chakra: 70, damage: 75, element: 'wind', description: 'Cuchilla Circular: anillo de aire que golpea alrededor.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 22 }, exp: 600, level: 6, rank: 'Chunin', element: 'wind' } },
 
                 // 🪨
-                { name: 'Doton: Doryūsō', rank: 'B', price: 650, chakra: 45, damage: 50, element: 'earth', description: 'Lanza de Tierra: estaca que emerge y perfora.' },
-                { name: 'Doton: Yomi Numa', rank: 'B', price: 900, chakra: 65, damage: 60, element: 'earth', description: 'Pantano del Inframundo: hunde al enemigo y lo inmoviliza.', effect: 'stun' },
-                { name: 'Doton: Iwagakure no Jutsu', rank: 'B', price: 700, chakra: 50, damage: 45, element: 'earth', description: 'Camuflaje de Roca: embiste desde cobertura sólida.' },
-                { name: 'Doton: Ganban Kyū', rank: 'B', price: 800, chakra: 55, damage: 65, element: 'earth', description: 'Ataúd de Roca: aprisiona y aplasta con fuerza.' },
-                { name: 'Doton: Iwa Gōlem (Impacto)', rank: 'B', price: 1200, chakra: 70, damage: 80, element: 'earth', description: 'Gólem de Roca: golpe masivo que sacude el suelo.' },
-                { name: 'Doton: Doryūtaiga', rank: 'B', price: 1000, chakra: 65, damage: 75, element: 'earth', description: 'Río de Tierra: ola de lodo que derriba formaciones.', effect: 'stun' },
+                { name: 'Doton: Doryūsō', rank: 'B', chakra: 45, damage: 50, element: 'earth', description: 'Lanza de Tierra: estaca que emerge y perfora.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 16 }, exp: 360, level: 5, rank: 'Chunin', element: 'earth' } },
+                { name: 'Doton: Yomi Numa', rank: 'B', chakra: 65, damage: 60, element: 'earth', description: 'Pantano del Inframundo: hunde al enemigo y lo inmoviliza.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 20 }, exp: 500, level: 5, rank: 'Chunin', element: 'earth' } },
+                { name: 'Doton: Iwagakure no Jutsu', rank: 'B', chakra: 50, damage: 45, element: 'earth', description: 'Camuflaje de Roca: embiste desde cobertura sólida.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 17 }, exp: 400, level: 5, rank: 'Chunin', element: 'earth' } },
+                { name: 'Doton: Ganban Kyū', rank: 'B', chakra: 55, damage: 65, element: 'earth', description: 'Ataúd de Roca: aprisiona y aplasta con fuerza.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 19 }, exp: 450, level: 5, rank: 'Chunin', element: 'earth' } },
+                { name: 'Doton: Iwa Gōlem (Impacto)', rank: 'B', chakra: 70, damage: 80, element: 'earth', description: 'Gólem de Roca: golpe masivo que sacude el suelo.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 22 }, exp: 600, level: 6, rank: 'Chunin', element: 'earth' } },
+                { name: 'Doton: Doryūtaiga', rank: 'B', chakra: 65, damage: 75, element: 'earth', description: 'Río de Tierra: ola de lodo que derriba formaciones.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 20 }, exp: 480, level: 5, rank: 'Chunin', element: 'earth' } },
 
                 // ⚡
-                { name: 'Raiton: Raikiri (Práctica)', rank: 'B', price: 1200, chakra: 70, damage: 80, element: 'lightning', description: 'Corte de Rayo entrenado: velocidad y precisión.' },
-                { name: 'Raiton: Chidori', rank: 'B', price: 1100, chakra: 65, damage: 75, element: 'lightning', description: 'Chidori: estocada relámpago que atraviesa armaduras.' },
-                { name: 'Raiton: Gian', rank: 'B', price: 900, chakra: 60, damage: 70, element: 'lightning', description: 'Falsa Oscuridad: rayo lineal de alta potencia.' },
-                { name: 'Raiton: Jibashi', rank: 'B', price: 650, chakra: 45, damage: 45, element: 'lightning', description: 'Torre de Choque: electricidad que inmoviliza al tocar.', effect: 'stun' },
-                { name: 'Raiton: Raijū Tsuiga', rank: 'B', price: 800, chakra: 55, damage: 65, element: 'lightning', description: 'Bestia de Rayo: forma animal que muerde y paraliza.', effect: 'stun' },
-                { name: 'Raiton: Hiraishin Pulse', rank: 'B', price: 1000, chakra: 68, damage: 60, element: 'lightning', description: 'Pulso Relámpago: descarga de área que corta el ritmo enemigo.', effect: 'stun' },
+                { name: 'Raiton: Raikiri (Práctica)', rank: 'B', chakra: 70, damage: 80, element: 'lightning', description: 'Corte de Rayo entrenado: velocidad y precisión.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 22 }, exp: 600, level: 6, rank: 'Chunin', element: 'lightning' } },
+                { name: 'Raiton: Chidori', rank: 'B', chakra: 65, damage: 75, element: 'lightning', description: 'Chidori: estocada relámpago que atraviesa armaduras.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 21 }, exp: 550, level: 6, rank: 'Chunin', element: 'lightning' } },
+                { name: 'Raiton: Gian', rank: 'B', chakra: 60, damage: 70, element: 'lightning', description: 'Falsa Oscuridad: rayo lineal de alta potencia.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 20 }, exp: 500, level: 5, rank: 'Chunin', element: 'lightning' } },
+                { name: 'Raiton: Jibashi', rank: 'B', chakra: 45, damage: 45, element: 'lightning', description: 'Torre de Choque: electricidad que inmoviliza al tocar.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 16 }, exp: 360, level: 5, rank: 'Chunin', element: 'lightning' } },
+                { name: 'Raiton: Raijū Tsuiga', rank: 'B', chakra: 55, damage: 65, element: 'lightning', description: 'Bestia de Rayo: forma animal que muerde y paraliza.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 19 }, exp: 450, level: 5, rank: 'Chunin', element: 'lightning' } },
+                { name: 'Raiton: Hiraishin Pulse', rank: 'B', chakra: 68, damage: 60, element: 'lightning', description: 'Pulso Relámpago: descarga de área que corta el ritmo enemigo.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 20 }, exp: 480, level: 5, rank: 'Chunin', element: 'lightning' } },
 
                 // Neutrales B
-                { name: 'Tajū Kage Bunshin', rank: 'B', price: 1200, chakra: 70, damage: 40, element: null, description: 'Muchos clones para abrumar al enemigo.', effect: 'clone' },
-                { name: 'Fūinjutsu: Sello de Contención', rank: 'B', price: 900, chakra: 60, damage: 50, element: null, description: 'Sello que inmoviliza y debilita al objetivo.', effect: 'stun' },
-                { name: 'Kuchiyose: Invocación (Aliado)', rank: 'B', price: 900, chakra: 55, damage: 60, element: null, description: 'Invoca un aliado temporal que golpea fuerte.', effect: 'summon' }
+                { name: 'Tajū Kage Bunshin', rank: 'B', chakra: 70, damage: 40, element: null, description: 'Muchos clones para abrumar al enemigo.', effect: 'clone', learnMethod: 'auto', requirements: { stats: { ninjutsu: 22 }, exp: 600, level: 6, rank: 'Chunin', element: null } },
+                { name: 'Fūinjutsu: Sello de Contención', rank: 'B', chakra: 60, damage: 50, element: null, description: 'Sello que inmoviliza y debilita al objetivo.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 20 }, exp: 500, level: 5, rank: 'Chunin', element: null } },
+                { name: 'Kuchiyose: Invocación (Aliado)', rank: 'B', chakra: 55, damage: 60, element: null, description: 'Invoca un aliado temporal que golpea fuerte.', effect: 'summon', learnMethod: 'auto', requirements: { stats: { ninjutsu: 20 }, exp: 500, level: 5, rank: 'Chunin', element: null } }
             ],
 
             // Jonin (A)
             jonin: [
                 // 🔥
-                { name: 'Katon: Gōka Mekkyaku', rank: 'A', price: 2500, chakra: 90, damage: 130, element: 'fire', description: 'Extinción Majestuosa: un mar de fuego que consume el campo.', effect: 'burn' },
-                { name: 'Katon: Gōka Messhitsu', rank: 'A', price: 2800, chakra: 100, damage: 150, element: 'fire', description: 'Extinción Suprema: presión térmica que rompe líneas defensivas.', effect: 'burn' },
-                { name: 'Katon: Bakuenjin', rank: 'A', price: 2200, chakra: 85, damage: 110, element: 'fire', description: 'Anillo Explosivo: círculo ígneo que atrapa y castiga.', effect: 'stun' },
+                { name: 'Katon: Gōka Mekkyaku', rank: 'A', chakra: 90, damage: 130, element: 'fire', description: 'Extinción Majestuosa: un mar de fuego que consume el campo.', effect: 'burn', learnMethod: 'auto', requirements: { stats: { ninjutsu: 31 }, exp: 1400, level: 9, rank: 'Jonin', element: 'fire' } },
+                { name: 'Katon: Gōka Messhitsu', rank: 'A', chakra: 100, damage: 150, element: 'fire', description: 'Extinción Suprema: presión térmica que rompe líneas defensivas.', effect: 'burn', learnMethod: 'auto', requirements: { stats: { ninjutsu: 33 }, exp: 1600, level: 10, rank: 'Jonin', element: 'fire' } },
+                { name: 'Katon: Bakuenjin', rank: 'A', chakra: 85, damage: 110, element: 'fire', description: 'Anillo Explosivo: círculo ígneo que atrapa y castiga.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 29 }, exp: 1200, level: 9, rank: 'Jonin', element: 'fire' } },
 
                 // 💧
-                { name: 'Suiton: Suikōdan', rank: 'A', price: 2200, chakra: 85, damage: 110, element: 'water', description: 'Tiburón de Agua: mordida giratoria que destroza.' },
-                { name: 'Suiton: Dai Suiryūdan', rank: 'A', price: 2600, chakra: 95, damage: 140, element: 'water', description: 'Dragón de Agua Supremo: presión brutal, difícil de esquivar.' },
-                { name: 'Suiton: Suijinheki Kai', rank: 'A', price: 2000, chakra: 80, damage: 90, element: 'water', description: 'Muro de Agua Mejorado: defensa y contraataque en un solo flujo.', effect: 'defense' },
+                { name: 'Suiton: Suikōdan', rank: 'A', chakra: 85, damage: 110, element: 'water', description: 'Tiburón de Agua: mordida giratoria que destroza.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 29 }, exp: 1200, level: 9, rank: 'Jonin', element: 'water' } },
+                { name: 'Suiton: Dai Suiryūdan', rank: 'A', chakra: 95, damage: 140, element: 'water', description: 'Dragón de Agua Supremo: presión brutal, difícil de esquivar.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 32 }, exp: 1500, level: 10, rank: 'Jonin', element: 'water' } },
+                { name: 'Suiton: Suijinheki Kai', rank: 'A', chakra: 80, damage: 90, element: 'water', description: 'Muro de Agua Mejorado: defensa y contraataque en un solo flujo.', effect: 'defense', learnMethod: 'auto', requirements: { stats: { ninjutsu: 28 }, exp: 1100, level: 9, rank: 'Jonin', element: 'water' } },
 
                 // 💨
-                { name: 'Fūton: Kazekiri Ranbu', rank: 'A', price: 2400, chakra: 90, damage: 120, element: 'wind', description: 'Danza de Cortes: combo de ráfagas que despedaza.' },
-                { name: 'Fūton: Shinkū Taigyoku', rank: 'A', price: 2800, chakra: 100, damage: 150, element: 'wind', description: 'Gran Esfera de Vacío: explosión de presión al impacto.' },
-                { name: 'Fūton: Kamaitachi Guren', rank: 'A', price: 2200, chakra: 80, damage: 100, element: 'wind', description: 'Hoz Carmesí: tajos amplios que persiguen al objetivo.' },
+                { name: 'Fūton: Kazekiri Ranbu', rank: 'A', chakra: 90, damage: 120, element: 'wind', description: 'Danza de Cortes: combo de ráfagas que despedaza.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 31 }, exp: 1350, level: 9, rank: 'Jonin', element: 'wind' } },
+                { name: 'Fūton: Shinkū Taigyoku', rank: 'A', chakra: 100, damage: 150, element: 'wind', description: 'Gran Esfera de Vacío: explosión de presión al impacto.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 33 }, exp: 1600, level: 10, rank: 'Jonin', element: 'wind' } },
+                { name: 'Fūton: Kamaitachi Guren', rank: 'A', chakra: 80, damage: 100, element: 'wind', description: 'Hoz Carmesí: tajos amplios que persiguen al objetivo.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 29 }, exp: 1200, level: 9, rank: 'Jonin', element: 'wind' } },
 
                 // 🪨
-                { name: 'Doton: Ganchūrō', rank: 'A', price: 2400, chakra: 90, damage: 120, element: 'earth', description: 'Prisión de Roca: encierra y presiona hasta quebrar.', effect: 'stun' },
-                { name: 'Doton: Chidōkaku', rank: 'A', price: 2600, chakra: 95, damage: 140, element: 'earth', description: 'Terremoto Angular: el suelo se parte bajo el enemigo.' },
-                { name: 'Doton: Kōka no Tate', rank: 'A', price: 2000, chakra: 80, damage: 90, element: 'earth', description: 'Escudo Endurecido: defensa extrema que devuelve impacto.', effect: 'defense' },
+                { name: 'Doton: Ganchūrō', rank: 'A', chakra: 90, damage: 120, element: 'earth', description: 'Prisión de Roca: encierra y presiona hasta quebrar.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 31 }, exp: 1350, level: 9, rank: 'Jonin', element: 'earth' } },
+                { name: 'Doton: Chidōkaku', rank: 'A', chakra: 95, damage: 140, element: 'earth', description: 'Terremoto Angular: el suelo se parte bajo el enemigo.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 32 }, exp: 1500, level: 10, rank: 'Jonin', element: 'earth' } },
+                { name: 'Doton: Kōka no Tate', rank: 'A', chakra: 80, damage: 90, element: 'earth', description: 'Escudo Endurecido: defensa extrema que devuelve impacto.', effect: 'defense', learnMethod: 'auto', requirements: { stats: { ninjutsu: 28 }, exp: 1100, level: 9, rank: 'Jonin', element: 'earth' } },
 
                 // ⚡
-                { name: 'Raiton: Raikiri', rank: 'A', price: 2800, chakra: 95, damage: 140, element: 'lightning', description: 'Raikiri: corte letal, más rápido que el sonido.' },
-                { name: 'Raiton: Chidori Nagashi', rank: 'A', price: 2500, chakra: 90, damage: 120, element: 'lightning', description: 'Corriente Chidori: descarga alrededor del usuario.', effect: 'stun' },
-                { name: 'Raiton: Rairyū no Yoroi', rank: 'A', price: 2200, chakra: 85, damage: 90, element: 'lightning', description: 'Armadura de Rayo: mejora defensa y castiga al contacto.', effect: 'defense' },
+                { name: 'Raiton: Raikiri', rank: 'A', chakra: 95, damage: 140, element: 'lightning', description: 'Raikiri: corte letal, más rápido que el sonido.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 33 }, exp: 1600, level: 10, rank: 'Jonin', element: 'lightning' } },
+                { name: 'Raiton: Chidori Nagashi', rank: 'A', chakra: 90, damage: 120, element: 'lightning', description: 'Corriente Chidori: descarga alrededor del usuario.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 31 }, exp: 1400, level: 9, rank: 'Jonin', element: 'lightning' } },
+                { name: 'Raiton: Rairyū no Yoroi', rank: 'A', chakra: 85, damage: 90, element: 'lightning', description: 'Armadura de Rayo: mejora defensa y castiga al contacto.', effect: 'defense', learnMethod: 'auto', requirements: { stats: { ninjutsu: 29 }, exp: 1200, level: 9, rank: 'Jonin', element: 'lightning' } },
 
                 // Neutrales A
-                { name: 'Rasengan', rank: 'A', price: 3000, chakra: 90, damage: 130, element: null, description: 'Esfera de chakra puro: impacto devastador a corta distancia.' },
+                { name: 'Rasengan', rank: 'A', chakra: 90, damage: 130, element: null, description: 'Esfera de chakra puro: impacto devastador a corta distancia.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 35 }, exp: 1800, level: 10, rank: 'Jonin', element: null } },
                 { name: 'Sensō no Kōdō (Disciplina)', rank: 'A', price: 2500, chakra: 80, damage: 90, element: null, description: 'Entra en “modo combate”: mente fría, golpes más certeros.', effect: 'speed' }
             ],
 
             // Master (S)
             master: [
                 // 🔥
-                { name: 'Katon: Amaterasu (Llama Negra)', rank: 'S', price: 6000, chakra: 140, damage: 170, element: 'fire', description: 'Llamas negras que no se apagan. Dolor que persiste.', effect: 'burn_permanent' },
-                { name: 'Katon: Tenro no Kiba', rank: 'S', price: 5200, chakra: 150, damage: 180, element: 'fire', description: 'Colmillos del Horno: columnas de fuego que persiguen al objetivo.', effect: 'burn' },
+                { name: 'Katon: Amaterasu (Llama Negra)', rank: 'S', chakra: 140, damage: 170, element: 'fire', description: 'Llamas negras que no se apagan. Dolor que persiste.', effect: 'burn_permanent', learnMethod: 'auto', requirements: { stats: { ninjutsu: 43 }, exp: 3200, level: 16, rank: 'Master', element: 'fire' } },
+                { name: 'Katon: Tenro no Kiba', rank: 'S', chakra: 150, damage: 180, element: 'fire', description: 'Colmillos del Horno: columnas de fuego que persiguen al objetivo.', effect: 'burn', learnMethod: 'auto', requirements: { stats: { ninjutsu: 42 }, exp: 3000, level: 16, rank: 'Master', element: 'fire' } },
 
                 // 💧
-                { name: 'Suiton: Bakusui Shōha', rank: 'S', price: 5200, chakra: 130, damage: 160, element: 'water', description: 'Ola Explosiva: inunda y aplasta el campo de batalla.' },
-                { name: 'Suiton: Guren no Nagare', rank: 'S', price: 6000, chakra: 150, damage: 180, element: 'water', description: 'Corriente Carmesí: remolino que tritura y arrastra.', effect: 'stun' },
+                { name: 'Suiton: Bakusui Shōha', rank: 'S', chakra: 130, damage: 160, element: 'water', description: 'Ola Explosiva: inunda y aplasta el campo de batalla.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 42 }, exp: 3000, level: 16, rank: 'Master', element: 'water' } },
+                { name: 'Suiton: Guren no Nagare', rank: 'S', chakra: 150, damage: 180, element: 'water', description: 'Corriente Carmesí: remolino que tritura y arrastra.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 43 }, exp: 3200, level: 16, rank: 'Master', element: 'water' } },
 
                 // 💨
-                { name: 'Fūton: Rasenshuriken', rank: 'S', price: 6000, chakra: 150, damage: 180, element: 'wind', description: 'Rasen-Shuriken: millones de cortes microscópicos.', effect: 'stun' },
-                { name: 'Fūton: Kaze Gokui', rank: 'S', price: 5200, chakra: 140, damage: 170, element: 'wind', description: 'Esencia del Viento: huracán concentrado que no deja respirar.' },
+                { name: 'Fūton: Rasenshuriken', rank: 'S', chakra: 150, damage: 180, element: 'wind', description: 'Rasen-Shuriken: millones de cortes microscópicos.', effect: 'stun', learnMethod: 'auto', requirements: { stats: { ninjutsu: 43 }, exp: 3200, level: 16, rank: 'Master', element: 'wind' } },
+                { name: 'Fūton: Kaze Gokui', rank: 'S', chakra: 140, damage: 170, element: 'wind', description: 'Esencia del Viento: huracán concentrado que no deja respirar.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 42 }, exp: 3000, level: 16, rank: 'Master', element: 'wind' } },
 
                 // 🪨
-                { name: 'Doton: Dai Ganban Kyū', rank: 'S', price: 5200, chakra: 130, damage: 160, element: 'earth', description: 'Gran Ataúd de Roca: aplastamiento total sin escape.' },
-                { name: 'Doton: Jigoku no Saji', rank: 'S', price: 6000, chakra: 150, damage: 180, element: 'earth', description: 'Cuchara del Infierno: columna de roca que pulveriza el área.' },
+                { name: 'Doton: Dai Ganban Kyū', rank: 'S', chakra: 130, damage: 160, element: 'earth', description: 'Gran Ataúd de Roca: aplastamiento total sin escape.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 42 }, exp: 3000, level: 16, rank: 'Master', element: 'earth' } },
+                { name: 'Doton: Jigoku no Saji', rank: 'S', chakra: 150, damage: 180, element: 'earth', description: 'Cuchara del Infierno: columna de roca que pulveriza el área.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 43 }, exp: 3200, level: 16, rank: 'Master', element: 'earth' } },
 
                 // ⚡
-                { name: 'Raiton: Kirin', rank: 'S', price: 6000, chakra: 150, damage: 180, element: 'lightning', description: 'Kirin: rayo natural guiado. Una sentencia desde el cielo.' },
-                { name: 'Raiton: Shiden', rank: 'S', price: 5200, chakra: 130, damage: 160, element: 'lightning', description: 'Relámpago Púrpura: rayo controlado de alto voltaje.' },
+                { name: 'Raiton: Kirin', rank: 'S', chakra: 150, damage: 180, element: 'lightning', description: 'Kirin: rayo natural guiado. Una sentencia desde el cielo.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 43 }, exp: 3200, level: 16, rank: 'Master', element: 'lightning' } },
+                { name: 'Raiton: Shiden', rank: 'S', chakra: 130, damage: 160, element: 'lightning', description: 'Relámpago Púrpura: rayo controlado de alto voltaje.', learnMethod: 'auto', requirements: { stats: { ninjutsu: 42 }, exp: 3000, level: 16, rank: 'Master', element: 'lightning' } },
 
                 // Neutrales S (ya existentes)
-                { name: 'Edo Tensei', rank: 'S', price: 10000, chakra: 150, damage: 0, element: null, effect: 'revive', description: 'Maestro: Resurrección prohibida' },
-                { name: 'Kamui', rank: 'S', price: 8000, chakra: 100, damage: 80, element: null, effect: 'teleport', description: 'Maestro: Espacio-tiempo' },
-                { name: 'Tsukuyomi', rank: 'S', price: 7000, chakra: 90, damage: 0, element: null, effect: 'mega_genjutsu', description: 'Maestro: Genjutsu supremo' },
-                { name: 'Shinra Tensei', rank: 'S', price: 5000, chakra: 120, damage: 150, element: null, description: 'Rechaza todo' }
+                { name: 'Edo Tensei', rank: 'S', chakra: 150, damage: 0, element: null, effect: 'revive', description: 'Maestro: Resurrección prohibida', learnMethod: 'auto', requirements: { stats: { ninjutsu: 50 }, exp: 5000, level: 20, rank: 'Master', element: null } },
+                { name: 'Kamui', rank: 'S', chakra: 100, damage: 80, element: null, effect: 'teleport', description: 'Maestro: Espacio-tiempo', learnMethod: 'auto', requirements: { stats: { ninjutsu: 47 }, exp: 4500, level: 19, rank: 'Master', element: null } },
+                { name: 'Tsukuyomi', rank: 'S', chakra: 90, damage: 0, element: null, effect: 'mega_genjutsu', description: 'Maestro: Genjutsu supremo', learnMethod: 'auto', requirements: { stats: { ninjutsu: 45 }, exp: 4000, level: 18, rank: 'Master', element: null } },
+                { name: 'Shinra Tensei', rank: 'S', chakra: 120, damage: 150, element: null, description: 'Rechaza todo', learnMethod: 'auto', requirements: { stats: { ninjutsu: 40 }, exp: 2500, level: 15, rank: 'Master', element: null } }
             ]
+        },
+
+        // ========== JUTSUS DE TAIJUTSU (Artes Marciales) ==========
+        taijutsuAcademy: taijutsuJutsus.taijutsu,
+
+        // ========== JUTSUS DE GENJUTSU (Ilusiones) ==========
+        genjutsuAcademy: genjutsuJutsus.genjutsu,
+
+        // ========== JUTSUS DE ESCAPE (Técnicas de Huida) ==========
+        escapeAcademy: escapeJutsus.escape,
+
+        // ========== JUTSUS DE ELEMENTO FUEGO (Katon) ==========
+        katonAcademy: katonJutsus.katon,
+
+        // ========== JUTSUS DE ELEMENTO AGUA (Suiton) ==========
+        suitonAcademy: suitonJutsus.suiton,
+
+        // ========== JUTSUS DE ELEMENTO VIENTO (Futon) ==========
+        futonAcademy: futonJutsus.futon,
+
+        // ========== JUTSUS DE ELEMENTO TIERRA (Doton) ==========
+        dotonAcademy: dotonJutsus.doton,
+
+        // ========== JUTSUS DE ELEMENTO RAYO (Raiton) ==========
+        raitonAcademy: raitonJutsus.raiton,
+
+        // ========== JUTSUS DE KEKKEI GENKAI: SHARINGAN ==========
+        sharinganAcademy: sharinganJutsus.sharingan,
+
+        // ========== JUTSUS DE KEKKEI GENKAI: BYAKUGAN ==========
+        byakuganAcademy: byakuganJutsus.byakugan,
+
+        // ========== JUTSUS DE KEKKEI GENKAI: RINNEGAN ==========
+        rinneganAcademy: rinneganJutsus.rinnegan,
+
+        // ========== JUTSUS DE BIJUU (JINCHURIKIS) ==========
+        bijuuAcademy: bijuuJutsus.bijuu,
+
+        // ========== BESTIAS CON COLA (BIJUUS) ==========
+        bijuus: {
+            shukaku: {
+                name: 'Shukaku',
+                tails: 1,
+                icon: '🦝',
+                element: 'wind',
+                color: '#D4A574',
+                jinchuriki: 'Gaara',
+                village: 'sunagakure',
+                location: 'desert_temple',
+                
+                stats: {
+                    hp: 1500,
+                    chakra: 2000,
+                    attack: 45,
+                    defense: 40,
+                    accuracy: 20
+                },
+                
+                abilities: [
+                    {
+                        name: 'Tormenta de Arena',
+                        chakra: 150,
+                        damage: 120,
+                        effect: 'blind', // Enemigo pierde 1 turno
+                        description: 'Arena envuelve al enemigo'
+                    },
+                    {
+                        name: 'Práctica de Sellos',
+                        chakra: 100,
+                        damage: 80,
+                        effect: 'seal_jutsu',
+                        description: 'Sella jutsus del enemigo'
+                    },
+                    {
+                        name: 'Esfera Bijuu',
+                        chakra: 200,
+                        damage: 200,
+                        effect: 'pierce',
+                        description: 'Ignora defensa'
+                    }
+                ],
+                
+                dropRewards: {
+                    ryo: 30000,
+                    exp: 2000,
+                    item: 'Arena de Shukaku', // Item legendario
+                    specialUnlock: 'Jutsu: Cueva de Arena'
+                },
+                
+                captureRequirements: {
+                    level: 12,
+                    hp: 300, // HP mínimo para capturar
+                    specialItem: 'Sello de Sellado',
+                    difficulty: 'hard'
+                }
+            },
+            
+            matatabi: {
+                name: 'Matatabi',
+                tails: 2,
+                icon: '😺',
+                element: 'fire',
+                color: '#4A90E2',
+                jinchuriki: 'Yugito Nii',
+                village: 'kumogakure',
+                location: 'mountain_shrine',
+                
+                stats: {
+                    hp: 1800,
+                    chakra: 2200,
+                    attack: 50,
+                    defense: 42,
+                    accuracy: 22
+                },
+                
+                abilities: [
+                    {
+                        name: 'Bola de Fuego Azul',
+                        chakra: 160,
+                        damage: 130,
+                        effect: 'burn',
+                        description: 'Fuego azul que quema 3 turnos'
+                    },
+                    {
+                        name: 'Zarpazo del Gato',
+                        chakra: 120,
+                        damage: 100,
+                        effect: 'bleed',
+                        description: 'Causa sangrado continuo'
+                    },
+                    {
+                        name: 'Esfera Bijuu',
+                        chakra: 220,
+                        damage: 220,
+                        effect: 'pierce',
+                        description: 'Esfera de chakra concentrado'
+                    }
+                ],
+                
+                dropRewards: {
+                    ryo: 35000,
+                    exp: 2200,
+                    item: 'Llama Azul de Matatabi',
+                    specialUnlock: 'Jutsu: Fuego Azul Místico'
+                },
+                
+                captureRequirements: {
+                    level: 13,
+                    hp: 350,
+                    specialItem: 'Sello de Sellado',
+                    difficulty: 'hard'
+                }
+            },
+            
+            isobu: {
+                name: 'Isobu',
+                tails: 3,
+                icon: '🐢',
+                element: 'water',
+                color: '#7FB3D5',
+                jinchuriki: 'Yagura',
+                village: 'kirigakure',
+                location: 'underwater_cavern',
+                
+                stats: {
+                    hp: 2200,
+                    chakra: 2400,
+                    attack: 48,
+                    defense: 55,
+                    accuracy: 18
+                },
+                
+                abilities: [
+                    {
+                        name: 'Tsunami',
+                        chakra: 180,
+                        damage: 140,
+                        effect: 'knockback',
+                        description: 'Ola gigante que empuja'
+                    },
+                    {
+                        name: 'Caparazón Giratorio',
+                        chakra: 140,
+                        damage: 110,
+                        effect: 'defense_up',
+                        description: 'Gira y aumenta defensa'
+                    },
+                    {
+                        name: 'Esfera Bijuu',
+                        chakra: 240,
+                        damage: 240,
+                        effect: 'pierce',
+                        description: 'Esfera acuática'
+                    }
+                ],
+                
+                dropRewards: {
+                    ryo: 40000,
+                    exp: 2400,
+                    item: 'Caparazón de Isobu',
+                    specialUnlock: 'Jutsu: Armadura de Agua'
+                },
+                
+                captureRequirements: {
+                    level: 14,
+                    hp: 400,
+                    specialItem: 'Sello de Sellado',
+                    difficulty: 'very_hard'
+                }
+            },
+            
+            son_goku: {
+                name: 'Son Gokū',
+                tails: 4,
+                icon: '🦍',
+                element: 'fire',
+                color: '#E74C3C',
+                jinchuriki: 'Roshi',
+                village: 'iwagakure',
+                location: 'volcano_peak',
+                
+                stats: {
+                    hp: 2400,
+                    chakra: 2600,
+                    attack: 58,
+                    defense: 50,
+                    accuracy: 24
+                },
+                
+                abilities: [
+                    {
+                        name: 'Lava Cortex',
+                        chakra: 200,
+                        damage: 160,
+                        effect: 'burn_heavy',
+                        description: 'Lava fundida extrema'
+                    },
+                    {
+                        name: 'Puño de Gorila',
+                        chakra: 150,
+                        damage: 140,
+                        effect: 'stun',
+                        description: 'Golpe devastador'
+                    },
+                    {
+                        name: 'Esfera Bijuu',
+                        chakra: 260,
+                        damage: 260,
+                        effect: 'pierce',
+                        description: 'Esfera de lava'
+                    }
+                ],
+                
+                dropRewards: {
+                    ryo: 45000,
+                    exp: 2600,
+                    item: 'Núcleo de Lava',
+                    specialUnlock: 'Jutsu: Estilo Lava'
+                },
+                
+                captureRequirements: {
+                    level: 15,
+                    hp: 450,
+                    specialItem: 'Sello de Sellado',
+                    difficulty: 'very_hard'
+                }
+            },
+            
+            kokuo: {
+                name: 'Kokuō',
+                tails: 5,
+                icon: '🐴',
+                element: 'water',
+                color: '#F8B88B',
+                jinchuriki: 'Han',
+                village: 'iwagakure',
+                location: 'steam_springs',
+                
+                stats: {
+                    hp: 2600,
+                    chakra: 2800,
+                    attack: 55,
+                    defense: 48,
+                    accuracy: 26
+                },
+                
+                abilities: [
+                    {
+                        name: 'Estallido de Vapor',
+                        chakra: 210,
+                        damage: 170,
+                        effect: 'speed_down',
+                        description: 'Vapor hirviente'
+                    },
+                    {
+                        name: 'Carga del Caballo',
+                        chakra: 160,
+                        damage: 150,
+                        effect: 'ram',
+                        description: 'Embestida veloz'
+                    },
+                    {
+                        name: 'Esfera Bijuu',
+                        chakra: 280,
+                        damage: 280,
+                        effect: 'pierce',
+                        description: 'Esfera de vapor'
+                    }
+                ],
+                
+                dropRewards: {
+                    ryo: 50000,
+                    exp: 2800,
+                    item: 'Cuerno de Kokuō',
+                    specialUnlock: 'Jutsu: Boil Release'
+                },
+                
+                captureRequirements: {
+                    level: 16,
+                    hp: 500,
+                    specialItem: 'Sello de Sellado Reforzado',
+                    difficulty: 'extreme'
+                }
+            },
+            
+            saiken: {
+                name: 'Saiken',
+                tails: 6,
+                icon: '🐌',
+                element: 'water',
+                color: '#A8D08D',
+                jinchuriki: 'Utakata',
+                village: 'kirigakure',
+                location: 'acidic_lake',
+                
+                stats: {
+                    hp: 2800,
+                    chakra: 3000,
+                    attack: 52,
+                    defense: 52,
+                    accuracy: 23
+                },
+                
+                abilities: [
+                    {
+                        name: 'Ácido Corrosivo',
+                        chakra: 220,
+                        damage: 180,
+                        effect: 'corrode',
+                        description: 'Derrite armadura y defensa'
+                    },
+                    {
+                        name: 'Burbuja Explosiva',
+                        chakra: 170,
+                        damage: 160,
+                        effect: 'poison',
+                        description: 'Burbujas venenosas'
+                    },
+                    {
+                        name: 'Esfera Bijuu',
+                        chakra: 300,
+                        damage: 300,
+                        effect: 'pierce',
+                        description: 'Esfera ácida'
+                    }
+                ],
+                
+                dropRewards: {
+                    ryo: 55000,
+                    exp: 3000,
+                    item: 'Baba de Saiken',
+                    specialUnlock: 'Jutsu: Técnica Ácida'
+                },
+                
+                captureRequirements: {
+                    level: 17,
+                    hp: 550,
+                    specialItem: 'Sello de Sellado Reforzado',
+                    difficulty: 'extreme'
+                }
+            },
+            
+            chomei: {
+                name: 'Chōmei',
+                tails: 7,
+                icon: '🦋',
+                element: 'wind',
+                color: '#76D7C4',
+                jinchuriki: 'Fu',
+                village: 'takigakure',
+                location: 'waterfall_canopy',
+                
+                stats: {
+                    hp: 3000,
+                    chakra: 3200,
+                    attack: 60,
+                    defense: 45,
+                    accuracy: 30
+                },
+                
+                abilities: [
+                    {
+                        name: 'Tormenta de Escamas',
+                        chakra: 230,
+                        damage: 190,
+                        effect: 'blind_heavy',
+                        description: 'Escamas cegadoras'
+                    },
+                    {
+                        name: 'Ráfaga de Alas',
+                        chakra: 180,
+                        damage: 170,
+                        effect: 'speed_boost',
+                        description: 'Viento cortante veloz'
+                    },
+                    {
+                        name: 'Esfera Bijuu',
+                        chakra: 320,
+                        damage: 320,
+                        effect: 'pierce',
+                        description: 'Esfera de viento'
+                    }
+                ],
+                
+                dropRewards: {
+                    ryo: 60000,
+                    exp: 3200,
+                    item: 'Ala de Chōmei',
+                    specialUnlock: 'Jutsu: Vuelo de Insecto'
+                },
+                
+                captureRequirements: {
+                    level: 18,
+                    hp: 600,
+                    specialItem: 'Sello de Sellado Reforzado',
+                    difficulty: 'nightmare'
+                }
+            },
+            
+            gyuki: {
+                name: 'Gyūki',
+                tails: 8,
+                icon: '🐙',
+                element: 'water',
+                color: '#8B4513',
+                jinchuriki: 'Killer B',
+                village: 'kumogakure',
+                location: 'thunder_bay',
+                
+                stats: {
+                    hp: 3500,
+                    chakra: 3500,
+                    attack: 65,
+                    defense: 58,
+                    accuracy: 28
+                },
+                
+                abilities: [
+                    {
+                        name: 'Tinta Cegadora',
+                        chakra: 240,
+                        damage: 200,
+                        effect: 'blind_total',
+                        description: 'Tinta que ciega completamente'
+                    },
+                    {
+                        name: 'Látigo de Tentáculos',
+                        chakra: 190,
+                        damage: 180,
+                        effect: 'multi_hit',
+                        description: 'Golpea 3 veces'
+                    },
+                    {
+                        name: 'Esfera Bijuu',
+                        chakra: 350,
+                        damage: 350,
+                        effect: 'pierce',
+                        description: 'Esfera de pulpo'
+                    },
+                    {
+                        name: 'Estilo Rap de B',
+                        chakra: 220,
+                        damage: 170,
+                        effect: 'confuse',
+                        description: 'Rap confunde al enemigo'
+                    }
+                ],
+                
+                dropRewards: {
+                    ryo: 70000,
+                    exp: 3500,
+                    item: 'Tentáculo de Gyūki',
+                    specialUnlock: 'Jutsu: Estilo Pulpo'
+                },
+                
+                captureRequirements: {
+                    level: 19,
+                    hp: 700,
+                    specialItem: 'Sello Avanzado de Jinchuriki',
+                    difficulty: 'nightmare'
+                }
+            },
+            
+            kurama: {
+                name: 'Kurama',
+                tails: 9,
+                icon: '🦊',
+                element: 'fire',
+                color: '#FF6B35',
+                jinchuriki: 'Naruto Uzumaki',
+                village: 'konoha',
+                location: 'sealed_cave',
+                
+                stats: {
+                    hp: 5000,
+                    chakra: 5000,
+                    attack: 80,
+                    defense: 65,
+                    accuracy: 35
+                },
+                
+                abilities: [
+                    {
+                        name: 'Esfera Bijuu Masiva',
+                        chakra: 400,
+                        damage: 500,
+                        effect: 'devastate',
+                        description: 'Destrucción absoluta'
+                    },
+                    {
+                        name: 'Rugido del Zorro',
+                        chakra: 300,
+                        damage: 300,
+                        effect: 'fear',
+                        description: 'Aterroriza al enemigo'
+                    },
+                    {
+                        name: 'Zarpazo de las Nueve Colas',
+                        chakra: 250,
+                        damage: 280,
+                        effect: 'bleed_heavy',
+                        description: 'Garras devastadoras'
+                    },
+                    {
+                        name: 'Modo Kurama (Transformación)',
+                        chakra: 500,
+                        damage: 0,
+                        effect: 'transform',
+                        description: '+100 todos stats por 5 turnos'
+                    },
+                    {
+                        name: 'Rasen-Shuriken Bijuu',
+                        chakra: 450,
+                        damage: 600,
+                        effect: 'ultimate',
+                        description: 'Ataque definitivo'
+                    }
+                ],
+                
+                dropRewards: {
+                    ryo: 100000,
+                    exp: 5000,
+                    item: 'Chakra de Kurama',
+                    specialUnlock: 'Modo Kurama (transformación permanente)'
+                },
+                
+                captureRequirements: {
+                    level: 20,
+                    hp: 1000,
+                    specialItem: 'Sello Maestro de Jinchuriki',
+                    difficulty: 'LEGENDARY'
+                }
+            }
+        },
+
+        // ========== SISTEMA DE JINCHURIKIS EN ALDEAS ==========
+        jinchurikis: {
+            gaara: {
+                name: 'Gaara',
+                village: 'sunagakure',
+                bijuu: 'shukaku',
+                rank: 'Kazekage',
+                level: 18,
+                
+                stats: {
+                    hp: 800,
+                    chakra: 1200,
+                    attack: 45,
+                    defense: 60,
+                    accuracy: 25
+                },
+                
+                location: 'kazekage_office',
+                availability: 'always', // Siempre en su oficina
+                
+                abilities: [
+                    'Defensa Absoluta de Arena',
+                    'Féretro de Arena',
+                    'Tsunami de Arena',
+                    'Transformación Parcial de Shukaku'
+                ],
+                
+                encounter: {
+                    peaceful: true, // No te ataca automáticamente
+                    dialogue: [
+                        "Soy Gaara, el Kazekage de Sunagakure.",
+                        "El poder de Shukaku ya no me controla.",
+                        "¿En qué puedo ayudarte, ninja viajero?"
+                    ],
+                    
+                    interactions: [
+                        {
+                            option: '💬 Hablar sobre Shukaku',
+                            response: 'Es una carga pesada, pero también un gran poder.',
+                            unlocks: 'lore_shukaku'
+                        },
+                        {
+                            option: '⚔️ Desafiar a duelo',
+                            response: 'Acepto. Veamos tu fuerza.',
+                            triggers: 'boss_fight',
+                            requirements: { level: 15, reputation: 50 }
+                        },
+                        {
+                            option: '🎁 Ofrecer alianza',
+                            response: 'Konoha y Suna siempre serán aliados.',
+                            gives: 'alliance_seal'
+                        },
+                        {
+                            option: '🔥 Intentar extraer Bijuu (RENEGADO)',
+                            response: '¡No permitiré que toques a Shukaku!',
+                            triggers: 'extraction_battle',
+                            requirements: { isRenegade: true, level: 18 }
+                        }
+                    ]
+                },
+                
+                dropIfDefeated: {
+                    ryo: 10000,
+                    exp: 1000,
+                    item: 'Arena del Kazekage',
+                    reputation: -100 // en Suna
+                }
+            },
+            
+            yugito: {
+                name: 'Yugito Nii',
+                village: 'kumogakure',
+                bijuu: 'matatabi',
+                rank: 'Jonin',
+                level: 16,
+                
+                stats: {
+                    hp: 700,
+                    chakra: 1000,
+                    attack: 50,
+                    defense: 45,
+                    accuracy: 28
+                },
+                
+                location: 'kumo_barracks',
+                availability: 'random', // 50% de estar allí
+                
+                abilities: [
+                    'Llama Azul del Gato',
+                    'Transformación de Matatabi',
+                    'Zarpazo Místico'
+                ],
+                
+                encounter: {
+                    peaceful: true,
+                    dialogue: [
+                        "Soy Yugito, portadora de las Dos Colas.",
+                        "Matatabi y yo somos uno."
+                    ],
+                    
+                    interactions: [
+                        {
+                            option: '💬 Preguntar sobre Matatabi',
+                            response: 'Es como tener un espíritu felino dentro.',
+                            unlocks: 'lore_matatabi'
+                        },
+                        {
+                            option: '⚔️ Solicitar entrenamiento',
+                            response: 'Te enseñaré el estilo de las llamas azules.',
+                            gives: 'training_blue_flames',
+                            cost: 5000
+                        },
+                        {
+                            option: '🔥 Atacar para extraer Bijuu',
+                            response: '¡Error fatal!',
+                            triggers: 'extraction_battle'
+                        }
+                    ]
+                }
+            },
+            
+            yagura: {
+                name: 'Yagura',
+                village: 'kirigakure',
+                bijuu: 'isobu',
+                rank: 'Ex-Mizukage (Controlado)',
+                level: 17,
+                
+                stats: {
+                    hp: 900,
+                    chakra: 1100,
+                    attack: 48,
+                    defense: 65,
+                    accuracy: 22
+                },
+                
+                location: 'mist_ruins',
+                availability: 'rare', // Difícil de encontrar
+                
+                note: 'Está bajo control de Obito - será hostil',
+                
+                encounter: {
+                    peaceful: false, // SIEMPRE ataca
+                    autoAttack: true,
+                    dialogue: [
+                        "......", // Está siendo controlado
+                        "*Ojos rojos de Sharingan brillan*"
+                    ],
+                    
+                    specialMechanic: 'genjutsu_control',
+                    mustBreakControl: true // Debes romper el genjutsu primero
+                }
+            },
+            
+            roshi: {
+                name: 'Rōshi',
+                village: 'iwagakure',
+                bijuu: 'son_goku',
+                rank: 'Jinchuriki Errante',
+                level: 17,
+                
+                stats: {
+                    hp: 850,
+                    chakra: 1150,
+                    attack: 58,
+                    defense: 50,
+                    accuracy: 24
+                },
+                
+                location: 'volcano_wanderer', // Se mueve
+                availability: 'event', // Aparece en eventos
+                
+                note: 'Abandonó Iwa, viaja el mundo',
+                
+                encounter: {
+                    peaceful: true,
+                    dialogue: [
+                        "Dejé mi aldea hace años.",
+                        "Son Gokū y yo buscamos iluminación."
+                    ],
+                    
+                    interactions: [
+                        {
+                            option: '💬 Preguntar por qué dejó Iwa',
+                            response: 'No era libre allí. Ahora lo soy.',
+                            unlocks: 'lore_roshi'
+                        },
+                        {
+                            option: '🔥 Entrenar Estilo Lava',
+                            response: 'Te enseñaré los secretos de la lava.',
+                            gives: 'lava_release_training',
+                            cost: 10000
+                        },
+                        {
+                            option: '⚔️ Batalla amistosa',
+                            response: 'Veamos tu espíritu de lucha.',
+                            triggers: 'friendly_spar'
+                        }
+                    ]
+                }
+            },
+            
+            han: {
+                name: 'Han',
+                village: 'iwagakure',
+                bijuu: 'kokuo',
+                rank: 'Jonin',
+                level: 16,
+                
+                stats: {
+                    hp: 800,
+                    chakra: 1050,
+                    attack: 55,
+                    defense: 48,
+                    accuracy: 26
+                },
+                
+                location: 'iwa_steam_plant',
+                availability: 'always',
+                
+                encounter: {
+                    peaceful: true,
+                    dialogue: [
+                        "Soy Han, el Jinchuriki de las Cinco Colas.",
+                        "Mi armadura de vapor es impenetrable."
+                    ],
+                    
+                    interactions: [
+                        {
+                            option: '💬 Hablar de Kokuō',
+                            response: 'Es poderoso y sabio.',
+                            unlocks: 'lore_kokuo'
+                        },
+                        {
+                            option: '⚔️ Probar armadura de vapor',
+                            response: 'Adelante, intenta atravesarla.',
+                            triggers: 'defense_test_battle',
+                            reward: 'boil_release_scroll'
+                        }
+                    ]
+                }
+            },
+            
+            utakata: {
+                name: 'Utakata',
+                village: 'kirigakure',
+                bijuu: 'saiken',
+                rank: 'Desertor',
+                level: 16,
+                
+                stats: {
+                    hp: 750,
+                    chakra: 1100,
+                    attack: 52,
+                    defense: 52,
+                    accuracy: 23
+                },
+                
+                location: 'hidden_grove', // Escondido
+                availability: 'rare',
+                
+                note: 'Desertó de Kiri, se esconde',
+                
+                encounter: {
+                    peaceful: true,
+                    cautious: true, // Desconfía
+                    dialogue: [
+                        "¿Quién eres? ¿Kirigakure te envió?",
+                        "No volveré a esa aldea."
+                    ],
+                    
+                    interactions: [
+                        {
+                            option: '💬 Asegurar que no eres enemigo',
+                            response: 'Está bien... pero mantén distancia.',
+                            unlocks: 'friendship_utakata'
+                        },
+                        {
+                            option: '🎁 Ofrecer ayuda',
+                            response: 'Gracias... necesito suministros.',
+                            gives: 'quest_help_utakata',
+                            reward: 'acid_jutsu_training'
+                        },
+                        {
+                            option: '⚔️ Capturar para Kiri',
+                            response: '¡Sabía que no podía confiar!',
+                            triggers: 'desperate_battle'
+                        }
+                    ]
+                }
+            },
+            
+            fu: {
+                name: 'Fū',
+                village: 'takigakure',
+                bijuu: 'chomei',
+                rank: 'Genin',
+                level: 14,
+                
+                stats: {
+                    hp: 650,
+                    chakra: 950,
+                    attack: 45,
+                    defense: 40,
+                    accuracy: 30
+                },
+                
+                location: 'taki_village_square',
+                availability: 'always',
+                
+                personality: 'cheerful', // Muy amigable
+                
+                encounter: {
+                    peaceful: true,
+                    friendly: true,
+                    dialogue: [
+                        "¡Hola! ¡Soy Fū!",
+                        "¡Chōmei y yo somos mejores amigas!",
+                        "¿Quieres ser mi amigo?"
+                    ],
+                    
+                    interactions: [
+                        {
+                            option: '💬 Ser su amigo',
+                            response: '¡Genial! ¡Seremos grandes amigos!',
+                            unlocks: 'friendship_fu',
+                            gives: 'fu_companion_unlock'
+                        },
+                        {
+                            option: '⚔️ Entrenar juntos',
+                            response: '¡Sí! ¡Te enseñaré a volar!',
+                            gives: 'wind_flight_training',
+                            cost: 3000
+                        },
+                        {
+                            option: '🎁 Dar regalo',
+                            response: '¡Para mí! ¡Gracias!',
+                            increases: 'friendship_level',
+                            accepts: ['flowers', 'food', 'accessories']
+                        },
+                        {
+                            option: '🔥 Atacar (RENEGADO)',
+                            response: '¿Por... por qué? Pensé que éramos amigos...',
+                            triggers: 'betrayal_battle',
+                            consequence: 'karma_-50'
+                        }
+                    ]
+                }
+            },
+            
+            killer_b: {
+                name: 'Killer B',
+                village: 'kumogakure',
+                bijuu: 'gyuki',
+                rank: 'Jonin / Rapper',
+                level: 19,
+                
+                stats: {
+                    hp: 1000,
+                    chakra: 1300,
+                    attack: 65,
+                    defense: 58,
+                    accuracy: 28
+                },
+                
+                location: 'kumo_training_island',
+                availability: 'always',
+                
+                personality: 'rapper', // Habla en rap
+                
+                encounter: {
+                    peaceful: true,
+                    speaks_in_rhymes: true,
+                    dialogue: [
+                        "Yo, soy el Killer B, ¡el mejor MC!",
+                        "Con Gyūki a mi lado, nadie puede vencerme, ¡yeah!",
+                        "¿Quieres rapear conmigo o pelear? ¡Tú decides, baby!"
+                    ],
+                    
+                    interactions: [
+                        {
+                            option: '🎤 Batalla de Rap',
+                            response: '¡Yeeeah! ¡Vamos a rapear!',
+                            triggers: 'rap_battle_minigame',
+                            reward: 'killer_b_respect',
+                            unlocks: 'rap_jutsu'
+                        },
+                        {
+                            option: '⚔️ Combate amistoso',
+                            response: 'Okaaay, te mostraré mi poder, ¡yeah!',
+                            triggers: 'friendly_battle',
+                            reward: 'lightning_blade_training'
+                        },
+                        {
+                            option: '💬 Aprender control de Bijuu',
+                            response: 'La amistad es la clave, bro!',
+                            gives: 'perfect_jinchuriki_training',
+                            cost: 15000,
+                            requirements: { hasJinchuriki: true }
+                        },
+                        {
+                            option: '🔥 Intentar capturar Gyūki',
+                            response: '¡Bakayaro! ¡Konoyaro! ¡Te aplastaré!',
+                            triggers: 'killer_b_serious_mode',
+                            difficulty: 'extreme'
+                        }
+                    ]
+                }
+            },
+            
+            naruto: {
+                name: 'Naruto Uzumaki',
+                village: 'konoha',
+                bijuu: 'kurama',
+                rank: 'Hokage',
+                level: 20,
+                
+                stats: {
+                    hp: 1500,
+                    chakra: 2000,
+                    attack: 80,
+                    defense: 65,
+                    accuracy: 35
+                },
+                
+                location: 'hokage_office',
+                availability: 'always',
+                
+                isMC: true, // Personaje principal del canon
+                
+                encounter: {
+                    peaceful: true,
+                    inspirational: true,
+                    dialogue: [
+                        "¡Dattebayo! Soy Naruto Uzumaki, el Séptimo Hokage!",
+                        "Kurama y yo somos compañeros, ¡no solo Jinchuriki y Bijuu!",
+                        "¡Nunca te rindas! ¡Ese es mi camino ninja!"
+                    ],
+                    
+                    interactions: [
+                        {
+                            option: '💬 Hablar sobre el camino ninja',
+                            response: '¡Nunca te rindas! ¡Protege a tus nakama!',
+                            unlocks: 'naruto_philosophy',
+                            gives: 'willpower_boost'
+                        },
+                        {
+                            option: '⚔️ Pedir entrenamiento',
+                            response: '¡Claro! ¡Te enseñaré el Rasengan!',
+                            gives: 'rasengan_training',
+                            cost: 20000,
+                            unlocks: 'rasengan_jutsu'
+                        },
+                        {
+                            option: '🦊 Preguntar sobre Kurama',
+                            response: 'Fue difícil al principio, pero ahora somos amigos.',
+                            unlocks: 'kurama_lore',
+                            gives: 'friendship_seal_technique'
+                        },
+                        {
+                            option: '🎁 Ofrecer Ramen',
+                            response: '¡¡¡RAMEN!!! ¡¡¡MI FAVORITO!!!',
+                            increases: 'friendship_massively',
+                            gives: 'naruto_best_friend_status'
+                        },
+                        {
+                            option: '⚔️ Desafío del Hokage',
+                            response: 'Acepto. Te mostraré el poder de un Hokage.',
+                            triggers: 'hokage_challenge',
+                            requirements: { level: 20, reputation: 100 },
+                            reward: 'hokage_blessing'
+                        },
+                        {
+                            option: '🔥 Atacar (RENEGADO EXTREMO)',
+                            response: '¿Por qué haces esto? ¡No te dejaré!',
+                            triggers: 'naruto_full_power',
+                            difficulty: 'IMPOSSIBLE',
+                            consequence: 'all_villages_hunt_you'
+                        }
+                    ]
+                },
+                
+                specialEvents: [
+                    {
+                        name: 'Cumpleaños de Naruto',
+                        date: { day: 10, month: 10 },
+                        effect: 'village_celebration',
+                        reward: 'special_ramen_ticket'
+                    },
+                    {
+                        name: 'Aniversario Hokage',
+                        triggers: 'ceremony',
+                        reward: 'hokage_scroll'
+                    }
+                ]
+            }
+        },
+
+        // ========== SISTEMA DE EXTRACCIÓN DE BIJUU ==========
+        bijuuExtraction: {
+            
+            requirements: {
+                general: {
+                    isRenegade: true,
+                    level: 15,
+                    specialItem: 'Estatua Gedo',
+                    organization: 'akatsuki' // O ser independiente muy fuerte
+                },
+                
+                perBijuu: {
+                    shukaku: { level: 15, membersNeeded: 2 },
+                    matatabi: { level: 16, membersNeeded: 2 },
+                    isobu: { level: 16, membersNeeded: 3 },
+                    son_goku: { level: 17, membersNeeded: 3 },
+                    kokuo: { level: 17, membersNeeded: 3 },
+                    saiken: { level: 18, membersNeeded: 4 },
+                    chomei: { level: 18, membersNeeded: 4 },
+                    gyuki: { level: 19, membersNeeded: 5 },
+                    kurama: { level: 20, membersNeeded: 7 } // El más difícil
+                }
+            },
+            
+            process: {
+                phase1: {
+                    name: 'Localizar Jinchuriki',
+                    description: 'Usa inteligencia para encontrar al portador',
+                    mechanics: 'investigation_quest',
+                    cost: 5000 // Ryo para información
+                },
+                
+                phase2: {
+                    name: 'Capturar Jinchuriki',
+                    description: 'Derrota al Jinchuriki en combate',
+                    mechanics: 'boss_battle',
+                    difficulty: 'extreme',
+                    mustCapture: true // No matar, capturar vivo
+                },
+                
+                phase3: {
+                    name: 'Ritual de Extracción',
+                    description: 'Extrae el Bijuu del Jinchuriki',
+                    mechanics: 'timed_ritual',
+                    duration: '3 días de juego',
+                    vulnerable: true, // Pueden interrumpirte
+                    
+                    interruptions: [
+                        {
+                            event: 'Rescate de la Aldea',
+                            chance: 70,
+                            enemies: 'rescue_squad'
+                        },
+                        {
+                            event: 'Ataque de Hunter-Nin',
+                            chance: 50,
+                            enemies: 'anbu_squad'
+                        },
+                        {
+                            event: 'Intervención de otro Jinchuriki',
+                            chance: 30,
+                            enemies: 'friendly_jinchuriki'
+                        }
+                    ]
+                },
+                
+                phase4: {
+                    name: 'Sellado en Estatua',
+                    description: 'Sella el Bijuu en la Estatua Gedo',
+                    mechanics: 'sealing_minigame',
+                    membersRequired: true, // Necesitas equipo Akatsuki
+                    
+                    onSuccess: {
+                        bijuuSealed: true,
+                        jinchurikiDies: true, // El Jinchuriki muere
+                        allVillagesAlerted: true,
+                        bountyIncreases: 50000,
+                        karmaLoss: -50,
+                        organizationRankUp: true
+                    },
+                    
+                    onFailure: {
+                        bijuuEscapes: true,
+                        jinchurikiRevives: true,
+                        teamInjured: true,
+                        mustRetry: true
+                    }
+                }
+            },
+            
+            consequences: {
+                immediate: [
+                    'Jinchuriki muere (evento trágico)',
+                    'Aldea del Jinchuriki te declara enemigo #1',
+                    'Todas las aldeas te cazan',
+                    'Nivel de búsqueda = 5 estrellas',
+                    'ANBU atacan cada día'
+                ],
+                
+                longTerm: [
+                    'Desbloqueas poder del Bijuu',
+                    'Puedes usar chakra del Bijuu',
+                    'Organización te valora más',
+                    'Misiones más peligrosas disponibles',
+                    'Eventos de "caza al renegado" aumentan'
+                ]
+            }
+        },
+
+        // ========== SISTEMA PARA CONVERTIRSE EN JINCHURIKI ==========
+        becomeJinchuriki: {
+            
+            methods: [
+                {
+                    method: 'Captura y Sellado Personal',
+                    description: 'Captura un Bijuu salvaje y séllalo en ti',
+                    
+                    requirements: {
+                        level: 18,
+                        hasItem: 'Pergamino de Sellado Maestro',
+                        maxHp: 800,
+                        maxChakra: 1000,
+                        knownJutsus: 15,
+                        specificJutsu: 'Técnica de Sellado de 4 Símbolos'
+                    },
+                    
+                    process: [
+                        '1. Localizar Bijuu salvaje',
+                        '2. Derrotar al Bijuu en combate (HP < 20%)',
+                        '3. Ritual de sellado (3 horas de juego)',
+                        '4. Sobrevivir la fusión (prueba de voluntad)'
+                    ],
+                    
+                    risks: [
+                        '60% de morir durante el sellado',
+                        'Bijuu puede rebelarse',
+                        'Chakra inestable por 7 días',
+                        'Puede volverse loco si falla'
+                    ],
+                    
+                    onSuccess: {
+                        becomesJinchuriki: true,
+                        bijuuHostile: true, // Al principio te odia
+                        newAbilities: 'bijuu_cloak_level_1',
+                        statBoosts: {
+                            maxHp: '+500',
+                            maxChakra: '+800',
+                            attack: '+20',
+                            defense: '+15'
+                        }
+                    }
+                },
+                
+                {
+                    method: 'Extracción de Akatsuki (Renegado)',
+                    description: 'Akatsuki extrae un Bijuu y te lo sella',
+                    
+                    requirements: {
+                        isRenegade: true,
+                        organization: 'akatsuki',
+                        organizationRank: 3,
+                        contribution: 100000 // Puntos de contribución
+                    },
+                    
+                    process: [
+                        '1. Solicitar Bijuu a líder',
+                        '2. Completar misión de captura',
+                        '3. Ritual de Akatsuki',
+                        '4. Sellado con Estatua Gedo'
+                    ],
+                    
+                    benefit: 'Menos riesgoso, 80% de éxito'
+                },
+                
+                {
+                    method: 'Robo de Jinchuriki',
+                    description: 'Mata a un Jinchuriki y extrae su Bijuu',
+                    
+                    requirements: {
+                        level: 20,
+                        hasItem: 'Sello de Transferencia',
+                        kinjutsu: 'Técnica de Extracción'
+                    },
+                    
+                    process: [
+                        '1. Derrotar Jinchuriki',
+                        '2. Extraer Bijuu (mata al Jinchuriki)',
+                        '3. Sellado inmediato en ti',
+                        '4. Luchar contra perseguidores'
+                    ],
+                    
+                    consequences: [
+                        'Jinchuriki objetivo muere',
+                        'Aldea te persigue eternamente',
+                        'Karma: -100',
+                        'Todos los Jinchurikis te odian',
+                        'Evento único: "Venganza de los Jinchuriki"'
+                    ]
+                }
+            ],
+            
+            // Relación con tu Bijuu
+            bijuuRelationship: {
+                states: [
+                    {
+                        level: 'Hostile',
+                        range: '0-20',
+                        description: 'El Bijuu te odia y se resiste',
+                        effects: {
+                            chakraLeaks: true,
+                            randomRampage: 10, // % de chance por día
+                            canUse: ['bijuu_cloak_0']
+                        }
+                    },
+                    {
+                        level: 'Wary',
+                        range: '21-40',
+                        description: 'El Bijuu tolera tu presencia',
+                        effects: {
+                            chakraStable: true,
+                            randomRampage: 3,
+                            canUse: ['bijuu_cloak_1', 'partial_transformation']
+                        }
+                    },
+                    {
+                        level: 'Neutral',
+                        range: '41-60',
+                        description: 'Coexisten sin conflicto',
+                        effects: {
+                            noRampage: true,
+                            canUse: ['bijuu_cloak_2', 'bijuu_arms']
+                        }
+                    },
+                    {
+                        level: 'Friendly',
+                        range: '61-80',
+                        description: 'Comienzan a cooperar',
+                        effects: {
+                            chakraBoost: 20,
+                            canUse: ['bijuu_mode', 'shared_vision']
+                        }
+                    },
+                    {
+                        level: 'Partners',
+                        range: '81-100',
+                        description: 'Perfecta armonía, como Naruto y Kurama',
+                        effects: {
+                            fullPower: true,
+                            canUse: ['bijuu_mode_perfect', 'bijuu_sage_mode', 'bijuu_rasengan'],
+                            specialAbility: 'bijuu_ultimate_form'
+                        }
+                    }
+                ],
+                
+                improveRelationship: [
+                    'Hablar con el Bijuu (meditar)',
+                    'Usar su poder responsablemente',
+                    'No abusar de su chakra',
+                    'Alimentar al Bijuu (consumir chakra ajeno)',
+                    'Completar misiones del Bijuu',
+                    'Tiempo juntos (pasa automáticamente)'
+                ]
+            }
         },
 
         shopItems: {

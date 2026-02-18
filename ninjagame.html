@@ -114,17 +114,70 @@
         </div>
 
         <div id="academy-tab" class="tab-content">
-            <h3 style="color: #ff8c00;">🎓 Academia Ninja</h3>
-            <p style="margin: 10px 0;">Aprende nuevos jutsus pagando con Ryo. Los jutsus más poderosos requieren un rango ninja más alto.</p>
-            
-            <div class="tabs" style="margin-top: 20px;">
-                <button class="tab-btn active" onclick="game.showJutsuRank('genin')">Genin</button>
-                <button class="tab-btn" onclick="game.showJutsuRank('chunin')">Chunin</button>
-                <button class="tab-btn" onclick="game.showJutsuRank('jonin')">Jonin</button>
-                <button class="tab-btn" onclick="game.showJutsuRank('master')">Maestros</button>
+            <div class="academy-header">
+                <h3>🎓 Academia Ninja</h3>
+                <p>Aprende nuevos jutsus pagando con Ryo. Los jutsus más poderosos requieren un rango ninja más alto.</p>
             </div>
             
-            <div class="jutsu-academy-list" id="academy-jutsu-list"></div>
+            <!-- SECCIÓN: JUTSUS POR RANGO -->
+            <div class="academy-section">
+                <div class="section-title">
+                    <span class="section-icon">📊</span>
+                    <h4>Jutsus por Rango</h4>
+                </div>
+                <div class="tabs tabs-inline">
+                    <button class="tab-btn active" onclick="game.showJutsuRank('genin')">Genin</button>
+                    <button class="tab-btn" onclick="game.showJutsuRank('chunin')">Chunin</button>
+                    <button class="tab-btn" onclick="game.showJutsuRank('jonin')">Jonin</button>
+                    <button class="tab-btn" onclick="game.showJutsuRank('master')">Maestros</button>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: ESPECIALIDADES -->
+            <div class="academy-section">
+                <div class="section-title">
+                    <span class="section-icon">⚔️</span>
+                    <h4>Especialidades</h4>
+                </div>
+                <div class="tabs tabs-inline">
+                    <button class="tab-btn" onclick="game.showJutsuRank('taijutsu')">🥋 Taijutsu</button>
+                    <button class="tab-btn" onclick="game.showJutsuRank('genjutsu')">🎭 Genjutsu</button>
+                    <button class="tab-btn" onclick="game.showJutsuRank('escape')">🏃 Escape</button>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: ELEMENTOS -->
+            <div class="academy-section">
+                <div class="section-title">
+                    <span class="section-icon">🌀</span>
+                    <h4>Elementos Chakra</h4>
+                </div>
+                <div class="tabs tabs-inline">
+                    <button class="tab-btn" onclick="game.showJutsuRank('katon')">🔥 Katon</button>
+                    <button class="tab-btn" onclick="game.showJutsuRank('suiton')">💧 Suiton</button>
+                    <button class="tab-btn" onclick="game.showJutsuRank('futon')">🌪️ Futon</button>
+                    <button class="tab-btn" onclick="game.showJutsuRank('doton')">⛰️ Doton</button>
+                    <button class="tab-btn" onclick="game.showJutsuRank('raiton')">⚡ Raiton</button>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: KEKKEI GENKAI -->
+            <div class="academy-section">
+                <div class="section-title">
+                    <span class="section-icon">✨</span>
+                    <h4>Kekkei Genkai</h4>
+                </div>
+                <div class="tabs tabs-inline">
+                    <button class="tab-btn" onclick="game.showJutsuRank('sharingan')">👁️ Sharingan</button>
+                    <button class="tab-btn" onclick="game.showJutsuRank('byakugan')">🔮 Byakugan</button>
+                    <button class="tab-btn" onclick="game.showJutsuRank('rinnegan')">🌀 Rinnegan</button>
+                    <button class="tab-btn" onclick="game.showJutsuRank('bijuu')">🦊 Bijuu</button>
+                </div>
+            </div>
+
+            <div class="academy-jutsus-container">
+                <div class="jutsu-academy-list" id="academy-jutsu-list"></div>
+            </div>
         </div>
 
         <div id="shop-tab" class="tab-content">

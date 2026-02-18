@@ -106,8 +106,10 @@ rollDice(sides = 20) {
                 kekkeiGenkai: null,
                 kekkeiLevel: 0,
                 kekkeiExp: 0,
+                totalExp: 0,
                 permanentBonuses: {},
                 combatsWon: 0,
+                unlockedJutsus: [],
 
                 // Mundo / calendario
                 location: 'konoha',
@@ -2782,6 +2784,8 @@ rollDice(sides = 20) {
 
             const expGain = didWin ? 80 : 40;
             this.player.exp += expGain;
+            this.player.totalExp = (this.player.totalExp || 0) + expGain;
+            this.checkJutsuUnlocks(this.player);
             if (this.player.exp >= this.player.expToNext) {
                 this.levelUp();
             }
@@ -3234,30 +3238,249 @@ rollDice(sides = 20) {
                 return;
             }
             
-            const jutsusAll = this.academyJutsus[rank] || [];
+            let jutsusAll;
+            
+            // Especial para Taijutsu: usar taijutsuAcademy en lugar de academyJutsus
+            if (rank === 'taijutsu') {
+                jutsusAll = this.taijutsuAcademy || [];
+            } else if (rank === 'genjutsu') {
+                // Especial para Genjutsu: usar genjutsuAcademy
+                jutsusAll = this.genjutsuAcademy || [];
+            } else if (rank === 'escape') {
+                // Especial para Escape: usar escapeAcademy
+                jutsusAll = this.escapeAcademy || [];
+            } else if (rank === 'katon') {
+                // Especial para Katon: usar katonAcademy
+                jutsusAll = this.katonAcademy || [];
+            } else if (rank === 'suiton') {
+                // Especial para Suiton: usar suitonAcademy
+                jutsusAll = this.suitonAcademy || [];
+            } else if (rank === 'futon') {
+                // Especial para Futon: usar futonAcademy
+                jutsusAll = this.futonAcademy || [];
+            } else if (rank === 'doton') {
+                // Especial para Doton: usar dotonAcademy
+                jutsusAll = this.dotonAcademy || [];
+            } else if (rank === 'raiton') {
+                // Especial para Raiton: usar raitonAcademy
+                jutsusAll = this.raitonAcademy || [];
+            } else if (rank === 'sharingan') {
+                // Especial para Sharingan: usar sharinganAcademy
+                jutsusAll = this.sharinganAcademy || [];
+            } else if (rank === 'byakugan') {
+                // Especial para Byakugan: usar byakuganAcademy
+                jutsusAll = this.byakuganAcademy || [];
+            } else if (rank === 'rinnegan') {
+                // Especial para Rinnegan: usar rinneganAcademy
+                jutsusAll = this.rinneganAcademy || [];
+            } else if (rank === 'bijuu') {
+                // Especial para Bijuu: usar bijuuAcademy
+                jutsusAll = this.bijuuAcademy || [];
+            } else {
+                jutsusAll = this.academyJutsus[rank] || [];
+            }
+            
+            // Para academy jutsus: filtrar por elemento del jugador
             const playerElement = this.player.element;
-            const jutsus = jutsusAll.filter(j => (j.element == null) || (playerElement && j.element === playerElement));
+            let jutsus;
+            
+            if (rank === 'taijutsu' || rank === 'genjutsu' || rank === 'escape' || rank === 'katon' || rank === 'suiton' || rank === 'futon' || rank === 'doton' || rank === 'raiton' || rank === 'sharingan' || rank === 'byakugan' || rank === 'rinnegan' || rank === 'bijuu') {
+                // Taijutsu, Genjutsu, Escape, elementos y Kekkei Genkai no se filtran por elemento, mostrar todos
+                // (Los elementos se filtran por tener element requerido en los requirements)
+                // (Sharingan/Byakugan/Rinnegan/Bijuu se filtran por tener kekkei_genkai y niveles requeridos en los requirements)
+                jutsus = jutsusAll;
+            } else {
+                // Academy jutsus: filtrar por elemento (nulos + del jugador)
+                jutsus = jutsusAll.filter(j => (j.element == null) || (playerElement && j.element === playerElement));
+            }
             
             jutsus.forEach(jutsu => {
                 const isLearned = this.player.learnedJutsus.some(j => j.name === jutsu.name);
-                const finalPrice = this.applyPriceDiscount(jutsu.price);
+                const isUnlocked = this.player.unlockedJutsus.some(j => j.name === jutsu.name);
+                const meetsReq = this.meetsJutsuRequirements(this.player, jutsu.requirements);
                 
                 const card = document.createElement('div');
-                card.className = isLearned ? 'learned-jutsu' : 'jutsu-card';
+                
+                let statusText = '✅ APRENDIDO';
+                let statusColor = '#2ecc71';
+                let statusIcon = '✅';
+                let statusBadge = 'learned';
+                let isClickable = false;
                 
                 if (!isLearned) {
+                    if (isUnlocked || meetsReq) {
+                        // Mostrar como disponible para aprender
+                        card.className = 'jutsu-card unlocked';
+                        statusText = '📖 DISPONIBLE';
+                        statusColor = '#3498db';
+                        statusIcon = '📖';
+                        statusBadge = 'unlocked';
+                        isClickable = true;
+                    } else {
+                        // Mostrar como bloqueado
+                        card.className = 'jutsu-card locked';
+                        statusText = '🔒 BLOQUEADO';
+                        statusColor = '#e74c3c';
+                        statusIcon = '🔒';
+                        statusBadge = 'locked';
+                        isClickable = false;
+                    }
+                } else {
+                    card.className = 'jutsu-card learned';
+                }
+                
+                if (isClickable) {
                     card.onclick = () => this.learnJutsu(jutsu);
                 }
                 
+                let reqInfo = '';
+                if (!isLearned && !isUnlocked && !meetsReq && jutsu.requirements) {
+                    const req = jutsu.requirements;
+                    const missingReqs = [];
+                    
+                    if (req.level && this.player.level < req.level) {
+                        missingReqs.push(`Nivel: ${this.player.level}/${req.level}`);
+                    }
+                    if (req.stats?.ninjutsu && this.player.ninjutsu < req.stats.ninjutsu) {
+                        missingReqs.push(`Ninjutsu: ${this.player.ninjutsu}/${req.stats.ninjutsu}`);
+                    }
+                    if (req.stats?.taijutsu && this.player.taijutsu < req.stats.taijutsu) {
+                        missingReqs.push(`Taijutsu: ${this.player.taijutsu}/${req.stats.taijutsu}`);
+                    }
+                    if (req.exp && (this.player.totalExp || 0) < req.exp) {
+                        missingReqs.push(`Exp: ${(this.player.totalExp || 0)}/${req.exp}`);
+                    }
+                    
+                    if (missingReqs.length > 0) {
+                        reqInfo = `<div style="font-size: 12px; color: #95a5a6; margin-top: 8px;">Requisitos: ${missingReqs.join(' • ')}</div>`;
+                    }
+                }
+                
+                // Info especial para jutsus de escape
+                let specialInfo = '';
+                if (jutsu.type === 'escape') {
+                    specialInfo = `<div style="font-size: 11px; color: #f39c12; margin-top: 8px;">
+                        📊 Éxito: ${jutsu.escapeChance}% | 💔 Rep: -${jutsu.reputationLoss}
+                    </div>`;
+                }
+                
+                // Info especial para jutsus de Sharingan (Kekkei Genkai)
+                if (jutsu.type === 'kekkei' && jutsu.requirements && jutsu.requirements.kekkei_genkai === 'sharingan') {
+                    const kgLevel = jutsu.requirements.KG_level || 1;
+                    let levelName = '';
+                    if (kgLevel === 1) levelName = '1 Aspa';
+                    else if (kgLevel === 2) levelName = '2 Aspas';
+                    else if (kgLevel === 3) levelName = '3 Aspas';
+                    else if (kgLevel >= 4) levelName = 'Mangekyō';
+                    
+                    let extraInfo = '';
+                    if (jutsu.specialEffect) {
+                        if (jutsu.specialEffect.passive) extraInfo = ' | 🔄 Pasivo';
+                        else if (jutsu.specialEffect.usesPerBattle) extraInfo = ` | 🎯 ${jutsu.specialEffect.usesPerBattle} usos/batalla`;
+                    }
+                    
+                    specialInfo = `<div style="font-size: 11px; color: #e74c3c; margin-top: 8px;">
+                        👁️ Requiere: ${levelName}${extraInfo}
+                    </div>`;
+                }
+                
+                // Info especial para jutsus de Byakugan (Kekkei Genkai)
+                if (jutsu.type === 'kekkei' && jutsu.requirements && jutsu.requirements.kekkei_genkai === 'byakugan') {
+                    const kgLevel = jutsu.requirements.KG_level || 1;
+                    let levelName = '';
+                    if (kgLevel === 1) levelName = 'Básico';
+                    else if (kgLevel === 2) levelName = 'Intermedio';
+                    else if (kgLevel === 3) levelName = 'Avanzado';
+                    else if (kgLevel >= 4) levelName = 'Tenseigan';
+                    
+                    let extraInfo = '';
+                    if (jutsu.specialEffect) {
+                        if (jutsu.specialEffect.passive) extraInfo = ' | 🔄 Pasivo';
+                        else if (jutsu.specialEffect.hits) extraInfo = ` | 👊 ${jutsu.specialEffect.hits} golpes`;
+                        else if (jutsu.specialEffect.chakraDrain) extraInfo = ` | 💙 -${jutsu.specialEffect.chakraDrain} chakra`;
+                    }
+                    
+                    specialInfo = `<div style="font-size: 11px; color: #9b59b6; margin-top: 8px;">
+                        🔮 Requiere: Byakugan ${levelName}${extraInfo}
+                    </div>`;
+                }
+                
+                // Info especial para jutsus de Rinnegan (Kekkei Genkai - ULTRA RARO)
+                if (jutsu.type === 'kekkei' && jutsu.requirements && jutsu.requirements.kekkei_genkai === 'rinnegan') {
+                    const kgLevel = jutsu.requirements.KG_level || 1;
+                    let levelName = '';
+                    if (kgLevel === 1) levelName = 'Seis Caminos';
+                    else if (kgLevel >= 2) levelName = 'Completo';
+                    
+                    let extraInfo = '';
+                    if (jutsu.specialEffect) {
+                        if (jutsu.specialEffect.usesPerBattle) extraInfo = ` | 🎯 ${jutsu.specialEffect.usesPerBattle} uso/batalla`;
+                        else if (jutsu.specialEffect.absorbNext) extraInfo = ' | 🌀 Absorbe jutsu';
+                        else if (jutsu.specialEffect.canRevive) extraInfo = ' | ❤️ Revivir';
+                        else if (jutsu.specialEffect.reviveAll) extraInfo = ' | ☠️ PROHIBIDO';
+                    }
+                    
+                    specialInfo = `<div style="font-size: 11px; color: #8e44ad; margin-top: 8px;">
+                        🌀 Requiere: Rinnegan ${levelName}${extraInfo}
+                    </div>`;
+                }
+                
+                // Info especial para jutsus de Bijuu (Jinchurikis)
+                if (jutsu.type === 'kekkei' && jutsu.requirements && jutsu.requirements.kekkei_genkai === 'bijuu') {
+                    const relation = jutsu.requirements.bijuu_relation || 0;
+                    let phaseName = '';
+                    let phaseColor = '';
+                    
+                    if (relation <= 25) {
+                        phaseName = 'Hostil';
+                        phaseColor = '#e74c3c';
+                    } else if (relation <= 50) {
+                        phaseName = 'Tolerado';
+                        phaseColor = '#e67e22';
+                    } else if (relation <= 75) {
+                        phaseName = 'Neutral';
+                        phaseColor = '#f39c12';
+                    } else {
+                        phaseName = 'Armonía';
+                        phaseColor = '#f1c40f';
+                    }
+                    
+                    let extraInfo = '';
+                    if (jutsu.specialEffect) {
+                        if (jutsu.specialEffect.loseControlChance) extraInfo = ` | ⚠️ ${jutsu.specialEffect.loseControlChance}% riesgo`;
+                        else if (jutsu.specialEffect.usesPerBattle) extraInfo = ` | 🎯 ${jutsu.specialEffect.usesPerBattle} uso/batalla`;
+                        else if (jutsu.specialEffect.hpRegen) extraInfo = ` | 💚 Regenera ${jutsu.specialEffect.hpRegen}% HP/turno`;
+                        else if (jutsu.specialEffect.doubleAttack) extraInfo = ' | ⚔️⚔️ Ataque doble';
+                    }
+                    
+                    specialInfo = `<div style="font-size: 11px; color: ${phaseColor}; margin-top: 8px;">
+                        🦊 Relación: ${relation}% (${phaseName})${extraInfo}
+                    </div>`;
+                }
+                
                 card.innerHTML = `
-                    <h4>${isLearned ? '✅' : '📖'} ${jutsu.name} [${jutsu.rank}]</h4>
-                    <p>${jutsu.description}</p>
-                    <p style="margin-top: 5px;">💙 ${jutsu.chakra} Chakra | ${jutsu.damage > 0 ? `⚔️ ${jutsu.damage} daño` : '🌀 Efecto especial'}</p>
-                    <p style="color: ${isLearned ? '#2ecc71' : '#ffd700'}; margin-top: 8px;">
-                        ${isLearned ? 'APRENDIDO' : `💰 ${finalPrice} Ryo`}
-                    </p>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                            <div style="flex: 1;">
+                                <h4>${statusIcon} ${jutsu.name}</h4>
+                                <div style="margin-bottom: 8px;">
+                                    <span class="jutsu-type-badge type-${jutsu.rank === 'master' ? 'master' : (jutsu.rank || 'genin').toLowerCase()}">${jutsu.rank?.toUpperCase() || 'RANGO'}</span>
+                                </div>
+                                <p style="font-size: 0.9em; margin-bottom: 8px;">${jutsu.description}</p>
+                                <p style="font-size: 0.85em; margin-bottom: 8px;">💙 ${jutsu.chakra} Chakra | ${jutsu.damage > 0 ? `⚔️ ${jutsu.damage} daño` : '🌀 Efecto especial'}</p>
+                                ${specialInfo}
+                            </div>
+                            <span class="jutsu-card-status status-${statusBadge}">${statusText}</span>
+                        </div>
+                        ${reqInfo}
+                    </div>
+                    ${isClickable ? `<button class="btn btn-small" style="margin-top: 10px;">Aprender</button>` : ''}
                 `;
                 
+                if (isClickable) {
+                    card.onclick = () => this.learnJutsu(jutsu);
+                }
+
                 jutsuList.appendChild(card);
             });
 
@@ -3311,22 +3534,22 @@ rollDice(sides = 20) {
                 return;
             }
 
-            let finalPrice = this.applyPriceDiscount(jutsu.price);
-            if (this.player.visitingMasterToday) {
-                finalPrice = 0;
-                this.player.visitingMasterToday = false;
-                alert('👤 Maestro visitante: aprendés este jutsu gratis (una vez).');
-            }
-
-            if (this.player.ryo < finalPrice) {
-                alert('¡No tienes suficiente Ryo!');
-                return;
+            // NUEVO SISTEMA: Verificar requisitos en lugar de Ryo
+            if (jutsu.requirements) {
+                const meetsRequirements = this.meetsJutsuRequirements(this.player, jutsu.requirements);
+                if (!meetsRequirements) {
+                    alert(`❌ No cumples los requisitos para aprender ${jutsu.name}.\nRequisitos: Niv ${jutsu.requirements.level}, Exp mínima ${jutsu.requirements.exp}, Stats: ${JSON.stringify(jutsu.requirements.stats)}`);
+                    return;
+                }
             }
             
-            this.player.ryo -= finalPrice;
+            // Aprender jutsu sin costo
             this.player.learnedJutsus.push(jutsu);
             
-            alert(`¡Has aprendido ${jutsu.name}!`);
+            // Remover de desbloqueados si estaba allí
+            this.player.unlockedJutsus = this.player.unlockedJutsus.filter(j => j.name !== jutsu.name);
+            
+            alert(`✅ ¡Has aprendido ${jutsu.name}!`);
             this.updateVillageUI();
 
             // Refrescar la academia en el rango activo
@@ -3511,6 +3734,9 @@ rollDice(sides = 20) {
                 this.player.maxHp += gain;
                 this.player.hp += gain;
             }
+            
+            // Verificar desbloqueos de jutsus cuando subes stats
+            this.checkJutsuUnlocks(this.player);
             
             alert(`¡Entrenamiento completado! ${item.name}`);
             this.updateVillageUI();
@@ -4177,6 +4403,7 @@ rollDice(sides = 20) {
             const ryoPerEnemy = Math.floor(this.currentMission.ryo / this.totalWaves);
             
             this.player.exp += expPerEnemy;
+            this.player.totalExp = (this.player.totalExp || 0) + expPerEnemy;
             this.player.ryo += ryoPerEnemy;
             this.player.combatsWon++;
 
@@ -4318,6 +4545,9 @@ rollDice(sides = 20) {
             } else {
                 kekkeiExpDiv.innerHTML = '';
             }
+
+            // Verificar desbloqueos de jutsus después de combate
+            this.checkJutsuUnlocks(this.player);
             
             this.saveGame();
             
@@ -4338,6 +4568,9 @@ rollDice(sides = 20) {
             this.player.taijutsu += 2;
             this.player.ninjutsu += 2;
             this.player.genjutsu += 2;
+            
+            // Verificar desbloqueos de jutsus cuando subes de nivel
+            this.checkJutsuUnlocks(this.player);
             
             alert(`¡NIVEL ${this.player.level}! Todos tus stats han aumentado.`);
         },
@@ -4406,6 +4639,9 @@ rollDice(sides = 20) {
             document.getElementById('load-btn').style.display = 'none';
         }
     };
+
+    // Transformar jutsus al cargar el juego
+    game.normalizeAcademyJutsus();
 
     return game;
 }
