@@ -100,7 +100,7 @@
         
         <!-- HEADER fijo arriba -->
         <header id="game-header">
-            <button id="menu-toggle" onclick="game.toggleSidebar()">☰</button>
+            <button id="menu-toggle">☰</button>
             <div id="header-player-info">
                 <span id="header-name">👤 Ninja</span>
                 <span id="header-ryo">💰 0</span>
@@ -112,32 +112,32 @@
         </header>
 
         <!-- SIDEBAR OVERLAY -->
-        <div id="sidebar-overlay" onclick="game.closeSidebar()"></div>
+        <div id="sidebar-overlay"></div>
 
         <!-- SIDEBAR / MENÚ LATERAL -->
         <nav id="sidebar">
             <div class="sidebar-header">
                 <h2>🍥 Menú</h2>
-                <button class="sidebar-close" onclick="game.closeSidebar()">✕</button>
+                <button class="sidebar-close" id="sidebar-close-btn">✕</button>
             </div>
             <div class="sidebar-nav">
-                <button class="sidebar-nav-item active" data-section="home" onclick="game.navigateFromSidebar('home')">
+                <button class="sidebar-nav-item active" data-section="home">
                     <span class="nav-icon">🏠</span>
                     <span>Inicio</span>
                 </button>
-                <button class="sidebar-nav-item" data-section="world" onclick="game.navigateFromSidebar('world')">
+                <button class="sidebar-nav-item" data-section="world">
                     <span class="nav-icon">🗺️</span>
                     <span>Mundo</span>
                 </button>
-                <button class="sidebar-nav-item" data-section="inventory" onclick="game.navigateFromSidebar('inventory')">
+                <button class="sidebar-nav-item" data-section="inventory">
                     <span class="nav-icon">🎒</span>
                     <span>Inventario</span>
                 </button>
-                <button class="sidebar-nav-item" data-section="shop" onclick="game.navigateFromSidebar('shop')">
+                <button class="sidebar-nav-item" data-section="shop">
                     <span class="nav-icon">🏪</span>
                     <span>Tienda</span>
                 </button>
-                <button class="sidebar-nav-item" data-section="statspage" onclick="game.navigateFromSidebar('statspage')">
+                <button class="sidebar-nav-item" data-section="statspage">
                     <span class="nav-icon">⚙️</span>
                     <span>Stats & Config</span>
                 </button>
@@ -334,6 +334,7 @@
                 <h3 style="color: #ff8c00; margin-bottom: 15px;">💪 Centro de Entrenamiento</h3>
                 <div class="shop-grid" id="training-list"></div>
             </div>
+            </div>
         </div>
 
         <!-- 🏪 SECCIÓN TIENDA -->
@@ -359,11 +360,11 @@
 
     <!-- BARRA DE NAVEGACIÓN INFERIOR (siempre visible excepto en combate) -->
     <nav id="bottom-nav">
-        <button class="nav-btn active" data-tab="home" onclick="game.showSection('home')">🏠<span>Inicio</span></button>
-        <button class="nav-btn" data-tab="world" onclick="game.showSection('world')">🗺️<span>Mundo</span></button>
-        <button class="nav-btn" data-tab="inventory" onclick="game.showSection('inventory')">🎒<span>Inventario</span></button>
-        <button class="nav-btn" data-tab="shop" onclick="game.showSection('shop')">🏪<span>Tienda</span></button>
-        <button class="nav-btn" data-tab="statspage" onclick="game.showSection('statspage')">⚙️<span>Stats</span></button>
+        <button class="nav-btn active" data-tab="home">🏠<span>Inicio</span></button>
+        <button class="nav-btn" data-tab="world">🗺️<span>Mundo</span></button>
+        <button class="nav-btn" data-tab="inventory">🎒<span>Inventario</span></button>
+        <button class="nav-btn" data-tab="shop">🏪<span>Tienda</span></button>
+        <button class="nav-btn" data-tab="statspage">⚙️<span>Stats</span></button>
     </nav>
 
     <!-- Combate -->
@@ -457,6 +458,78 @@
         </div>
     </div>
 </div>
+
+<!-- Script de navegación (NO módulo, carga antes que main.js) -->
+<script>
+    // Funciones globales de navegación que esperan a que game esté listo
+    function safeShowSection(name) {
+        if (typeof game !== 'undefined' && game.showSection) {
+            game.showSection(name);
+        } else {
+            console.warn('Game not ready yet, retrying...');
+            setTimeout(() => safeShowSection(name), 100);
+        }
+    }
+    
+    // Configurar event listeners cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+        // Bottom nav buttons
+        document.querySelectorAll('#bottom-nav .nav-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tab = this.getAttribute('data-tab');
+                safeShowSection(tab);
+            });
+        });
+        
+        // Sidebar nav buttons
+        document.querySelectorAll('#sidebar .sidebar-nav-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const section = this.getAttribute('data-section');
+                if (typeof game !== 'undefined') {
+                    game.navigateFromSidebar(section);
+                } else {
+                    safeShowSection(section);
+                }
+            });
+        });
+        
+        // Sidebar close button
+        const closeBtn = document.getElementById('sidebar-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                if (typeof game !== 'undefined' && game.closeSidebar) {
+                    game.closeSidebar();
+                } else {
+                    document.getElementById('sidebar').classList.remove('open');
+                }
+            });
+        }
+        
+        // Menu toggle button
+        const menuToggle = document.getElementById('menu-toggle');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', function() {
+                if (typeof game !== 'undefined' && game.toggleSidebar) {
+                    game.toggleSidebar();
+                } else {
+                    document.getElementById('sidebar').classList.toggle('open');
+                }
+            });
+        }
+        
+        // Sidebar overlay
+        const overlay = document.getElementById('sidebar-overlay');
+        if (overlay) {
+            overlay.addEventListener('click', function() {
+                if (typeof game !== 'undefined' && game.closeSidebar) {
+                    game.closeSidebar();
+                } else {
+                    document.getElementById('sidebar').classList.remove('open');
+                }
+            });
+        }
+    });
+</script>
 
 <script type="module" src="js/main.js"></script>
 </body>

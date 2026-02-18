@@ -672,6 +672,9 @@ body {
     border-radius: var(--radius-md);
     padding: 16px;
     transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+    z-index: 5;
 }
 
 .mission-card:hover, .mission-item:hover {
@@ -752,6 +755,8 @@ body {
 .mission-rank-content {
     padding: 12px 16px;
     background: rgba(0,0,0,0.2);
+    position: relative;
+    z-index: 1;
 }
 
 .mission-grid {

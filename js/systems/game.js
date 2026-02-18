@@ -4029,18 +4029,28 @@ export function createGame() {
                         card.style.opacity = '0.6';
                         card.style.cursor = 'not-allowed';
                         card.style.borderColor = 'rgba(255, 100, 100, 0.3)';
+                        card.style.position = 'relative';
+                        card.style.zIndex = '5';
                         card.innerHTML = `
                             <h4 style="color: #888;">🔒 ${mission.name}</h4>
                             <p style="color: #666;">${mission.description}</p>
                             <p style="color: #ff6b6b; margin-top: 8px; font-weight: bold;">⛔ BLOQUEADO - ${lockStatus.reason}</p>
                             <p style="opacity: 0.5; margin-top: 6px;">⏱️ Tiempo: ${turns} turno(s)</p>
                         `;
-                        card.onclick = () => {
+                        card.onclick = (e) => {
+                            e.stopPropagation();
                             alert(`🔒 Misión bloqueada: ${lockStatus.reason}`);
                         };
                     } else {
                         // Misión disponible
-                        card.onclick = () => this.startMission(mission);
+                        card.style.cursor = 'pointer';
+                        card.style.position = 'relative';
+                        card.style.zIndex = '5';
+                        card.onclick = (e) => {
+                            e.stopPropagation();
+                            console.log('Mission card clicked:', mission.name);
+                            this.startMission(mission);
+                        };
                         card.innerHTML = `
                             <h4>📜 ${mission.name}</h4>
                             <p>${mission.description}</p>
@@ -4137,7 +4147,12 @@ export function createGame() {
         renderMissionCard(container, mission, opts = {}) {
             const card = document.createElement('div');
             card.className = 'mission-card';
-            card.onclick = () => this.startMission(mission);
+            card.style.cursor = 'pointer';
+            card.onclick = (e) => {
+                e.stopPropagation();
+                console.log('Renegade mission clicked:', mission.name);
+                this.startMission(mission);
+            };
 
             const rank = (mission.rank || '').toUpperCase();
             const turnCostByRank = { D: 1, C: 2, B: 3, A: 4, S: 4 };
@@ -4840,6 +4855,7 @@ export function createGame() {
         },
 
         startMission(mission) {
+            console.log('startMission called with:', mission);
             // Guardar la misión pendiente para mostrar el briefing
             this.pendingMission = mission;
             this.showMissionBriefing(mission);
