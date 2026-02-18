@@ -1075,12 +1075,56 @@ export function createGame() {
                 hpAtStart: this.player.hp,
                 chakraAtStart: this.player.chakra,
                 fatigueAtStart: fatigueAtStart,
-                maxDurationMs: this.REAL_TURN_MS * 2, // 1 hora (60 min) = 2 turnos de 30 min
+                maxDurationMs: this.REAL_TURN_MS * 2, // 2 turnos = 10 minutos
             };
             this.saveGame();
             
-            // Mostrar UI de "durmiendo..."
-            alert('💤 ¡A descansar! Recuperarás energía durante la próxima hora (o antes si te llenas).');
+            // Mostrar overlay de sueño
+            this.showSleepOverlay();
+        },
+
+        showSleepOverlay() {
+            const overlay = document.getElementById('sleep-status-overlay');
+            if (overlay) {
+                overlay.classList.remove('hidden');
+            }
+            this.updateSleepOverlay();
+        },
+
+        hideSleepOverlay() {
+            const overlay = document.getElementById('sleep-status-overlay');
+            if (overlay) {
+                overlay.classList.add('hidden');
+            }
+        },
+
+        updateSleepOverlay() {
+            if (!this.player?.sleepState) {
+                this.hideSleepOverlay();
+                return;
+            }
+
+            const s = this.player.sleepState;
+            const elapsed = Date.now() - s.startedAt;
+            const pct = Math.min(elapsed / s.maxDurationMs, 1);
+            const remaining = Math.max(0, s.maxDurationMs - elapsed);
+            
+            // Tiempo restante
+            const secs = Math.ceil(remaining / 1000);
+            const min = Math.floor(secs / 60);
+            const sec = secs % 60;
+            const timeStr = `${min}:${sec.toString().padStart(2, '0')}`;
+            
+            // Actualizar elementos
+            const progressFill = document.getElementById('sleep-progress-fill');
+            const timeDisplay = document.getElementById('sleep-time-remaining');
+            const hpDisplay = document.getElementById('sleep-hp-display');
+            const chakraDisplay = document.getElementById('sleep-chakra-display');
+            
+            if (progressFill) progressFill.style.width = `${pct * 100}%`;
+            if (timeDisplay) timeDisplay.textContent = timeStr;
+            if (hpDisplay) hpDisplay.textContent = `${this.player.hp}/${this.player.maxHp}`;
+            if (chakraDisplay) chakraDisplay.textContent = `${this.player.chakra}/${this.player.maxChakra}`;
         },
 
         processSleepRegen() {
@@ -1090,7 +1134,7 @@ export function createGame() {
             const elapsed = Date.now() - s.startedAt;          // ms transcurridos
             const pct = Math.min(elapsed / s.maxDurationMs, 1); // 0.0 → 1.0
 
-            // Recuperación: 100% en 1 hora
+            // Recuperación: 100% en la duración completa
             const regenPct = pct;
 
             this.player.hp = Math.min(
@@ -1102,10 +1146,12 @@ export function createGame() {
                 s.chakraAtStart + Math.floor(this.player.maxChakra * regenPct)
             );
             
-            // Reducir fatiga gradualmente durante el descanso (50% en 1 hora)
+            // Reducir fatiga gradualmente durante el descanso (50%)
             const fatigueReduction = Math.floor((s.fatigueAtStart * 0.5) * regenPct);
             this.player.fatigue = Math.max(0, s.fatigueAtStart - fatigueReduction);
 
+            // Actualizar overlay
+            this.updateSleepOverlay();
             this.updateVillageUI();
 
             // Cancelar automáticamente si HP y Chakra están llenos
@@ -1116,26 +1162,47 @@ export function createGame() {
                 return;
             }
 
-            // Cancelar si se cumplió la duración (1 hora)
+            // Cancelar si se cumplió la duración
             if (elapsed >= s.maxDurationMs) {
                 this.endSleep('complete');
             }
+        },
+
+        wakeUp() {
+            this.endSleep('manual');
         },
 
         endSleep(reason = 'manual') {
             if (!this.player.sleepState) return;
 
             // Aplicar regen final
-            this.processSleepRegen();
+            const s = this.player.sleepState;
+            const elapsed = Date.now() - s.startedAt;
+            const pct = Math.min(elapsed / s.maxDurationMs, 1);
+            const regenPct = pct;
+
+            this.player.hp = Math.min(
+                this.player.maxHp,
+                s.hpAtStart + Math.floor(this.player.maxHp * regenPct)
+            );
+            this.player.chakra = Math.min(
+                this.player.maxChakra,
+                s.chakraAtStart + Math.floor(this.player.maxChakra * regenPct)
+            );
+            const fatigueReduction = Math.floor((s.fatigueAtStart * 0.5) * regenPct);
+            this.player.fatigue = Math.max(0, s.fatigueAtStart - fatigueReduction);
 
             delete this.player.sleepState;
             this.saveGame();
 
+            // Ocultar overlay
+            this.hideSleepOverlay();
+
             const msg = reason === 'auto'
-                ? '✅ Te despertaste al recuperar energía.'
+                ? '✅ Te despertaste al recuperar energía completa.'
                 : reason === 'complete'
                     ? '💤 Descansaste completamente (2 turnos).'
-                    : '⏰ Descanso cancelado.';
+                    : '⏰ Despertaste antes de tiempo.';
 
             alert(msg);
             this.updateVillageUI();
@@ -2024,8 +2091,6 @@ export function createGame() {
                     <div id="hud-events" style="margin-top:6px; font-size:0.95em;"></div>
                 </div>
                 <div style="margin-top:12px; text-align:center;">
-                    <button class="btn btn-small" onclick="game.restInVillage()">Descansar (instantáneo)</button>
-                    <button class="btn btn-small btn-secondary" onclick="game.sleepInVillage()">Dormir (1 hora real)</button>
                     <button class="btn btn-small" onclick="game.toggleTravelPanel()">Viajar</button>
                     <button class="btn btn-small" onclick="game.showSection('world')">Misión</button>
                     <button class="btn btn-small" onclick="game.showSection('inventory')">Entrenar</button>
@@ -4587,17 +4652,6 @@ export function createGame() {
             `;
         },
 
-        restInVillage() {
-            if (!this.player) return;
-            // Descanso rápido - no avanza tiempo artificialmente
-            this.player.hp = this.player.maxHp;
-            this.player.chakra = this.player.maxChakra;
-            this.reduceFatigue(15);
-            this.saveGame();
-            this.updateVillageUI();
-            alert('😌 Descansaste. HP/Chakra restaurados y fatiga reducida.');
-        },
-
         saveGame() {
             try {
                 localStorage.setItem('ninjaRPGSave', JSON.stringify(this.player));
@@ -4640,6 +4694,12 @@ export function createGame() {
                     this.updateVillageUI();
                     this.showMissions();
                 }
+                
+                // Mostrar overlay de sueño si estaba durmiendo
+                if (this.player?.sleepState) {
+                    this.showSleepOverlay();
+                }
+                
                 alert('¡Partida cargada!');
             } catch(e) {
                 console.error('Error cargando:', e);

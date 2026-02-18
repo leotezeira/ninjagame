@@ -163,6 +163,25 @@
 
         <!-- MAIN: contenedor de secciones -->
         <main id="game-main">
+            <!-- SLEEP STATUS OVERLAY -->
+            <div id="sleep-status-overlay" class="sleep-overlay hidden">
+                <div class="sleep-overlay-content">
+                    <div class="sleep-icon">💤</div>
+                    <div class="sleep-title">Descansando...</div>
+                    <div class="sleep-progress">
+                        <div class="sleep-progress-bar">
+                            <div class="sleep-progress-fill" id="sleep-progress-fill"></div>
+                        </div>
+                        <div class="sleep-time" id="sleep-time-remaining">00:00</div>
+                    </div>
+                    <div class="sleep-stats">
+                        <span>❤️ <span id="sleep-hp-display">100/100</span></span>
+                        <span>💙 <span id="sleep-chakra-display">100/100</span></span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="game.wakeUp()">⏰ Despertar</button>
+                </div>
+            </div>
+
             <!-- 🏠 SECCIÓN INICIO -->
         <div id="section-home" class="section-content active">
             <div class="player-info">
@@ -214,7 +233,6 @@
 
             <div style="display: flex; gap: 10px; margin-top: 16px;">
                 <button class="btn-small btn-secondary" onclick="game.saveGame()" style="flex: 1;">💾 Guardar</button>
-                <button class="btn-small" onclick="game.sleepInVillage()" style="flex: 1;">💤 Dormir</button>
             </div>
         </div>
 
