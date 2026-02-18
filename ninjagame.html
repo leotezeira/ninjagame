@@ -462,7 +462,7 @@
             <h2>🎉 ¡MISIÓN COMPLETADA! 🎉</h2>
             <p id="mission-victory-text"></p>
             <div id="kekkei-exp-gain" style="margin-top: 15px;"></div>
-            <button class="btn" onclick="game.returnToVillage()">Regresar a la Aldea</button>
+            <button id="return-to-village-btn" class="btn">Regresar a la Aldea</button>
         </div>
     </div>
 
@@ -472,7 +472,7 @@
             <h2>💀 HAS CAÍDO EN BATALLA 💀</h2>
             <p>El camino del ninja es difícil...</p>
             <p style="margin-top: 15px;">Tu personaje ha muerto. Debes crear uno nuevo.</p>
-            <button class="btn" onclick="game.deleteCharacterAndRestart()">Crear Nuevo Personaje</button>
+            <button id="delete-character-btn" class="btn">Crear Nuevo Personaje</button>
         </div>
     </div>
 
@@ -482,7 +482,7 @@
             <h2 style="color:#ffd700;">🎯 Examen Ninja</h2>
             <div id="exam-content"></div>
             <div style="text-align:center; margin-top: 14px;">
-                <button class="btn btn-secondary" onclick="game.abandonExam()">Abandonar</button>
+                <button id="abandon-exam-btn" class="btn btn-secondary">Abandonar</button>
             </div>
         </div>
     </div>
@@ -604,6 +604,36 @@
             wakeUpBtn.addEventListener('click', function() {
                 if (typeof game !== 'undefined' && game.wakeUp) {
                     game.wakeUp();
+                }
+            });
+        }
+        
+        // Return to village button (victory screen)
+        const returnToVillageBtn = document.getElementById('return-to-village-btn');
+        if (returnToVillageBtn) {
+            returnToVillageBtn.addEventListener('click', function() {
+                if (typeof game !== 'undefined' && game.returnToVillage) {
+                    game.returnToVillage();
+                }
+            });
+        }
+        
+        // Delete character button (defeat screen)
+        const deleteCharacterBtn = document.getElementById('delete-character-btn');
+        if (deleteCharacterBtn) {
+            deleteCharacterBtn.addEventListener('click', function() {
+                if (typeof game !== 'undefined' && game.deleteCharacterAndRestart) {
+                    game.deleteCharacterAndRestart();
+                }
+            });
+        }
+        
+        // Abandon exam button (exam screen)
+        const abandonExamBtn = document.getElementById('abandon-exam-btn');
+        if (abandonExamBtn) {
+            abandonExamBtn.addEventListener('click', function() {
+                if (typeof game !== 'undefined' && game.abandonExam) {
+                    game.abandonExam();
                 }
             });
         }
