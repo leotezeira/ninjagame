@@ -4,7 +4,7 @@ export function createGame() {
     const game = {
         ...BASE_GAME,
 
-rollDice(sides = 20) {
+        rollDice(sides = 20) {
             return Math.floor(Math.random() * sides) + 1;
         },
 
