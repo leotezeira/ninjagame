@@ -1794,7 +1794,8 @@ body {
   font-size: 2.5rem;
   font-weight: bold;
   background: linear-gradient(90deg, #ff9800, #ffd700);
-  -webkit-background-clip: text;
+    -webkit-background-clip: text;
+    background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 8px;
 }

@@ -6086,5 +6086,5 @@ export function createGame() {
         }[v] || '🏘️';
     }
 
+
     return game;
-}
