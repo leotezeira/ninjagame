@@ -3901,11 +3901,12 @@ export function createGame() {
                 || document.querySelector('#section-world .mission-list');
             
             if (!missionList) {
-                console.error('mission-list element not found in DOM');
+                console.error('❌ mission-list element not found in DOM');
                 return;
             }
             
-            console.log('showMissions: missionList found', missionList);
+            console.log('✅ showMissions: missionList found', missionList);
+            console.log('🎮 Player:', this.player ? this.player.name : 'NO PLAYER');
             missionList.innerHTML = '';
 
             if (this.player.urgentMission) {
@@ -3915,7 +3916,15 @@ export function createGame() {
                 urgentCard.className = 'mission-card';
                 urgentCard.style.borderLeftColor = '#c0392b';
                 urgentCard.style.background = 'rgba(192, 57, 43, 0.18)';
-                urgentCard.onclick = () => this.startUrgentMission();
+                urgentCard.style.cursor = 'pointer';
+                urgentCard.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🚨 Urgent mission clicked');
+                    if (typeof game !== 'undefined' && game.startUrgentMission) {
+                        game.startUrgentMission();
+                    }
+                };
                 urgentCard.innerHTML = `
                     <h4>🚨 ${this.player.urgentMission.name} [URGENTE]</h4>
                     <p>Tiempo límite: ${daysLeft} día(s) · Recompensa x${this.player.urgentMission.ryoMultiplier || 2}</p>
@@ -4054,11 +4063,22 @@ export function createGame() {
                         card.style.cursor = 'pointer';
                         card.style.position = 'relative';
                         card.style.zIndex = '5';
-                        card.onclick = (e) => {
+                        
+                        // Asignar onclick con función flecha que captura el valor de mission
+                        const missionData = mission; // Capturar referencia
+                        card.onclick = function(e) {
+                            e.preventDefault();
                             e.stopPropagation();
-                            console.log('Mission card clicked:', mission.name);
-                            this.startMission(mission);
+                            console.log('🎯 Mission card clicked:', missionData.name);
+                            console.log('🎮 Game object:', typeof game !== 'undefined' ? 'available' : 'NOT FOUND');
+                            if (typeof game !== 'undefined' && game.startMission) {
+                                game.startMission(missionData);
+                            } else {
+                                console.error('❌ game.startMission not found!');
+                                alert('Error: El juego no está listo. Recarga la página.');
+                            }
                         };
+                        
                         card.innerHTML = `
                             <h4>📜 ${mission.name}</h4>
                             <p>${mission.description}</p>
@@ -4072,7 +4092,8 @@ export function createGame() {
                 content.appendChild(missionGrid);
 
                 // Toggle del acordeón
-                header.onclick = () => {
+                header.onclick = (e) => {
+                    e.stopPropagation(); // Evitar que el click se propague
                     const isExpanded = content.style.display !== 'none';
                     content.style.display = isExpanded ? 'none' : 'block';
                     
@@ -4156,10 +4177,17 @@ export function createGame() {
             const card = document.createElement('div');
             card.className = 'mission-card';
             card.style.cursor = 'pointer';
-            card.onclick = (e) => {
+            
+            const missionData = mission; // Capturar referencia
+            card.onclick = function(e) {
+                e.preventDefault();
                 e.stopPropagation();
-                console.log('Renegade mission clicked:', mission.name);
-                this.startMission(mission);
+                console.log('🎯 Renegade mission clicked:', missionData.name);
+                if (typeof game !== 'undefined' && game.startMission) {
+                    game.startMission(missionData);
+                } else {
+                    console.error('❌ game.startMission not found!');
+                }
             };
 
             const rank = (mission.rank || '').toUpperCase();
@@ -4863,18 +4891,11 @@ export function createGame() {
         },
 
         startMission(mission) {
-            console.log('startMission called with:', mission);
+            console.log('🔔 startMission called with:', mission);
             
-            // Mostrar modal de confirmación
-            const modal = document.getElementById('mission-confirm-modal');
-            const titleEl = document.getElementById('mission-confirm-title');
-            const descEl = document.getElementById('mission-confirm-description');
-            const rankEl = document.getElementById('mission-confirm-rank');
-            const ryoEl = document.getElementById('mission-confirm-ryo');
-            const expEl = document.getElementById('mission-confirm-exp');
-            
-            if (!modal) {
-                console.error('mission-confirm-modal not found');
+            if (!mission) {
+                console.error('❌ No mission provided');
+                alert('Error: Misión no encontrada');
                 return;
             }
             
@@ -4884,40 +4905,18 @@ export function createGame() {
             const estRyo = Math.floor(mission.ryo * (team.missionRyoMult || 1) * nightRyoMult);
             const estExp = Math.floor(mission.exp * (team.missionExpMult || 1));
             
-            titleEl.textContent = `📜 ${mission.name}`;
-            descEl.textContent = mission.description || mission.narrator || 'Una misión te espera.';
-            rankEl.textContent = mission.rank || 'D';
-            ryoEl.textContent = `${estRyo} Ryo`;
-            expEl.textContent = `${estExp} EXP`;
+            // Construir mensaje de confirmación
+            const message = `📜 ${mission.name}\n\n${mission.description || mission.narrator || 'Una misión te espera.'}\n\n🎖️ Rango: ${mission.rank || 'D'}\n💰 Recompensa: ${estRyo} Ryo\n✨ Experiencia: ${estExp} EXP\n\n¿Aceptar esta misión?`;
             
-            // Guardar misión pendiente
-            this.pendingMission = mission;
+            console.log('💬 Showing confirmation dialog');
             
-            // Mostrar modal
-            modal.style.display = 'flex';
-            console.log('Mission modal displayed');
-        },
-        
-        acceptMissionFromModal() {
-            console.log('Mission accepted from modal');
-            const modal = document.getElementById('mission-confirm-modal');
-            if (modal) modal.style.display = 'none';
-            
-            if (!this.pendingMission) {
-                console.warn('No pending mission');
-                return;
+            // Usar confirm nativo del navegador (siempre funciona)
+            if (confirm(message)) {
+                console.log('✅ Mission accepted');
+                this._executeMission(mission);
+            } else {
+                console.log('❌ Mission rejected');
             }
-            
-            const mission = this.pendingMission;
-            this.pendingMission = null;
-            this._executeMission(mission);
-        },
-        
-        rejectMissionFromModal() {
-            console.log('Mission rejected from modal');
-            const modal = document.getElementById('mission-confirm-modal');
-            if (modal) modal.style.display = 'none';
-            this.pendingMission = null;
         },
 
         showMissionBriefing(mission) {
