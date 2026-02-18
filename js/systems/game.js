@@ -19,9 +19,22 @@ export function createGame() {
             this.showScreen('name-screen');
             setTimeout(() => {
                 const input = document.getElementById('player-name-input');
+                const hint = document.getElementById('name-screen-hint');
                 if (input) {
-                    input.value = '';
-                    input.focus();
+                    if (this.authProfile?.username) {
+                        input.value = this.authProfile.username;
+                        input.setAttribute('readonly', 'readonly');
+                        if (hint) {
+                            hint.textContent = 'Tu nombre fue registrado en el acceso. No se puede cambiar.';
+                        }
+                    } else {
+                        input.removeAttribute('readonly');
+                        input.value = '';
+                        input.focus();
+                        if (hint) {
+                            hint.textContent = 'Antes de elegir tu clan, escribe el nombre que sera recordado en el mundo ninja.';
+                        }
+                    }
                 }
                 const err = document.getElementById('name-error');
                 if (err) {
@@ -34,9 +47,9 @@ export function createGame() {
         validateAndSaveName() {
             const input = document.getElementById('player-name-input');
             const err = document.getElementById('name-error');
-            const raw = (input?.value || '').trim();
+            const raw = (this.authProfile?.username || input?.value || '').trim();
 
-            const valid = raw.length > 0 && raw.length <= 20 && /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(raw);
+            const valid = raw.length > 0 && raw.length <= 20 && /^[A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(raw);
             if (!valid) {
                 if (err) {
                     err.style.display = 'block';
@@ -526,9 +539,104 @@ export function createGame() {
                 elementDisplay.innerHTML = `<span class="element-badge element-${this.player.element}">${elem.icon} ${elem.name}</span>`;
             }
 
+            this.updateOnlinePlayers();
+
             this.ensureWorldHUD();
             this.updateWorldHUD();
             this.showExamCountdown();
+        },
+
+        async updateOnlinePlayers(force = false) {
+            if (!this.supabase || !this.player?.village) return;
+            if (!force && !this.isVillageScreenActive()) return;
+
+            const now = Date.now();
+            if (!force && this._lastOnlineFetch && (now - this._lastOnlineFetch) < 15000) return;
+            this._lastOnlineFetch = now;
+
+            const listEl = document.getElementById('village-online-list');
+            const countEl = document.getElementById('village-online-count');
+            if (!listEl || !countEl) return;
+
+            listEl.innerHTML = '<div class="online-pill"><strong>Buscando...</strong></div>';
+            countEl.textContent = '...';
+
+            const { data, error } = await this.supabase
+                .from('players')
+                .select('id,username,rank,level,village')
+                .eq('village', this.player.village)
+                .eq('is_online', true)
+                .order('level', { ascending: false })
+                .limit(30);
+
+            if (error) {
+                listEl.innerHTML = '<div class="online-pill"><strong>Error al cargar</strong></div>';
+                countEl.textContent = '0';
+                return;
+            }
+
+            const players = Array.isArray(data) ? data : [];
+            const visiblePlayers = players.filter(p => p.id && p.id !== this.authUser?.id);
+            countEl.textContent = String(visiblePlayers.length);
+            if (!visiblePlayers.length) {
+                listEl.innerHTML = '<div class="online-pill"><strong>Nadie en linea</strong></div>';
+                return;
+            }
+
+            listEl.innerHTML = visiblePlayers.map(p => {
+                const safeName = (p.username || 'Ninja');
+                const rank = p.rank || 'Genin';
+                const level = Number.isFinite(p.level) ? p.level : 1;
+                return `
+                    <div class="online-pill">
+                        <strong>${safeName}</strong>
+                        <span>${rank} · Lv ${level}</span>
+                        <button class="btn-utility online-challenge" data-player-id="${p.id}" data-player-name="${safeName}">Desafiar</button>
+                    </div>
+                `;
+            }).join('');
+
+            listEl.querySelectorAll('.online-challenge').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const playerId = button.getAttribute('data-player-id');
+                    const playerName = button.getAttribute('data-player-name');
+                    this.challengePlayer(playerId, playerName);
+                });
+            });
+        },
+
+        async challengePlayer(playerId, playerName) {
+            if (!this.supabase || !this.authUser?.id) return;
+            if (!playerId || playerId === this.authUser.id) return;
+
+            this._lastChallengeAt = this._lastChallengeAt || {};
+            const lastSent = this._lastChallengeAt[playerId] || 0;
+            if (Date.now() - lastSent < 10000) {
+                alert('Ya enviaste un desafio hace poco.');
+                return;
+            }
+
+            const confirmed = confirm(`¿Desafiar a ${playerName || 'este ninja'}?`);
+            if (!confirmed) return;
+
+            const { error } = await this.supabase
+                .from('pvp_challenges')
+                .insert({
+                    challenger_id: this.authUser.id,
+                    challenged_id: playerId,
+                    status: 'pending',
+                    battle_state: null
+                });
+
+            if (error) {
+                alert('No se pudo enviar el desafio.');
+                return;
+            }
+
+            this._lastChallengeAt[playerId] = Date.now();
+
+            alert(`Desafio enviado a ${playerName || 'jugador'}.`);
         },
 
         updateBar(elementId, current, max) {
@@ -896,6 +1004,10 @@ export function createGame() {
             // Procesar sueño si está activo
             if (this.player.sleepState) {
                 this.processSleepRegen();
+            }
+
+            if (this.isVillageScreenActive()) {
+                this.updateOnlinePlayers();
             }
         },
 
@@ -4266,6 +4378,20 @@ export function createGame() {
             try {
                 localStorage.setItem('ninjaRPGSave', JSON.stringify(this.player));
                 console.log('Partida guardada');
+                if (this.supabase && this.authUser?.id) {
+                    this.supabase
+                        .from('players')
+                        .update({
+                            game_state: this.player,
+                            last_seen: new Date().toISOString(),
+                            is_online: true,
+                            village: this.player.village || 'unknown',
+                            clan: this.player.clan || null,
+                            level: this.player.level,
+                            rank: this.player.rank
+                        })
+                        .eq('id', this.authUser.id);
+                }
             } catch(e) {
                 console.error('Error guardando:', e);
             }

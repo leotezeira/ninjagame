@@ -468,6 +468,62 @@
         font-weight: 600;
     }
 
+    .online-panel {
+        margin-top: 16px;
+        padding: 12px;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(74, 85, 131, 0.45);
+        grid-column: 1 / -1;
+    }
+
+    .online-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.9em;
+        color: var(--muted);
+        margin-bottom: 10px;
+    }
+
+    .online-header span:last-child {
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    .online-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 8px;
+    }
+
+    .online-pill {
+        background: rgba(74, 85, 131, 0.25);
+        border: 1px solid rgba(74, 85, 131, 0.5);
+        border-radius: 8px;
+        padding: 8px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.85em;
+    }
+
+    .online-pill strong {
+        color: var(--accent);
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+    .online-pill span {
+        color: var(--muted);
+        font-size: 0.8em;
+    }
+
+    .online-pill .online-challenge {
+        align-self: flex-start;
+        margin-top: 6px;
+    }
+
     .combat-area {
         background: rgba(20, 20, 40, 0.72);
         padding: 20px;
@@ -911,6 +967,20 @@
         background: rgba(0, 0, 0, 0.45);
     }
 
+    .text-input[readonly] {
+        opacity: 0.85;
+        cursor: default;
+    }
+
+    .auth-actions {
+        text-align: center;
+        margin-top: 18px;
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
     #name-error {
         background: rgba(231, 76, 60, 0.15);
         border: 1px solid rgba(231, 76, 60, 0.4);
@@ -1114,6 +1184,15 @@
             text-align: center;
         }
 
+        .online-list {
+            grid-template-columns: 1fr;
+        }
+
+        .online-pill .online-challenge {
+            width: 100%;
+            text-align: center;
+        }
+
         #name-screen .player-info {
             max-width: 100% !important;
         }
@@ -1124,6 +1203,15 @@
         }
 
         #name-screen .player-info .btn {
+            width: 100%;
+        }
+
+        .auth-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .auth-actions .btn {
             width: 100%;
         }
 
