@@ -26,7 +26,6 @@ export function createGame() {
                     input.focus();
                     if (hint) {
                         hint.textContent = 'Elige el nombre que sera recordado en el mundo ninja.';
-                        }
                     }
                 }
                 const err = document.getElementById('name-error');
