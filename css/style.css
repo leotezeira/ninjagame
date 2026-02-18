@@ -400,32 +400,37 @@
         overflow: hidden;
         border: 1px solid rgba(255, 255, 255, 0.12);
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35) inset;
+        position: relative;
     }
 
     .health-fill {
         height: 100%;
         background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
         transition: width 0.5s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-        font-size: 0.85em;
-        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+        border-radius: 14px;
     }
 
     .chakra-fill {
         height: 100%;
         background: linear-gradient(90deg, #3498db 0%, #2980b9 100%);
         transition: width 0.5s;
+        border-radius: 14px;
+    }
+
+    .bar-text {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
         font-weight: bold;
         font-size: 0.85em;
-        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.9);
+        pointer-events: none;
     }
 
     .info-grid {
@@ -572,6 +577,17 @@
         background: rgba(255, 140, 0, 0.5);
     }
 
+    #combat-screen .combat-area > div[style*="text-align: center"] {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    #combat-screen .combat-area > div[style*="text-align: center"] .btn-small {
+        width: 100%;
+        justify-content: center;
+    }
+
     .log-entry {
         padding: 6px;
         margin: 4px 0;
@@ -696,6 +712,11 @@
         margin: 6px 0;
     }
 
+    .mission-card p {
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
     /* NUEVO: Estados visuales de jutsu */
     .jutsu-card.learned {
         border-left-color: #2ecc71;
@@ -792,6 +813,80 @@
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 10px;
         margin-top: 15px;
+    }
+
+    .jutsu-quick-bar {
+        margin: 12px 0 6px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(74, 85, 131, 0.45);
+    }
+
+    .jutsu-quick-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 0.85em;
+        color: var(--muted);
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+    }
+
+    .jutsu-quick-header span:last-child {
+        color: var(--accent);
+    }
+
+    .jutsu-quick-slots {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .jutsu-quick-slot {
+        background: rgba(74, 85, 131, 0.2);
+        border: 1px solid rgba(74, 85, 131, 0.5);
+        border-radius: 8px;
+        padding: 8px;
+        font-size: 0.8em;
+        color: var(--text);
+        text-align: center;
+        cursor: pointer;
+        position: relative;
+        min-height: 56px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+    }
+
+    .jutsu-quick-slot.selected {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px rgba(255, 140, 0, 0.4);
+        background: rgba(255, 140, 0, 0.08);
+    }
+
+    .jutsu-quick-slot .slot-clear {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        font-size: 0.75em;
+        color: rgba(240, 240, 240, 0.7);
+        cursor: pointer;
+    }
+
+    .jutsu-quick-slot .slot-clear:hover {
+        color: var(--accent);
+    }
+
+    .jutsu-entry {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .jutsu-assign-btn {
+        align-self: flex-start;
     }
 
     .jutsu-btn {
@@ -1250,12 +1345,24 @@
             transform: none;
         }
 
+        .mission-card h4 {
+            font-size: 0.95em;
+        }
+
+        .mission-card p {
+            font-size: 0.85em;
+        }
+
         .shop-grid {
             grid-template-columns: 1fr;
         }
 
         .jutsu-grid {
             grid-template-columns: 1fr;
+        }
+
+        .jutsu-quick-slots {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         .npc-list {
@@ -1318,6 +1425,10 @@
         .mission-card,
         .jutsu-card {
             padding: 12px;
+        }
+
+        .jutsu-quick-slots {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         .text-input {

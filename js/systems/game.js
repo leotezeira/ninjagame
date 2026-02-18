@@ -21,18 +21,11 @@ export function createGame() {
                 const input = document.getElementById('player-name-input');
                 const hint = document.getElementById('name-screen-hint');
                 if (input) {
-                    if (this.authProfile?.username) {
-                        input.value = this.authProfile.username;
-                        input.setAttribute('readonly', 'readonly');
-                        if (hint) {
-                            hint.textContent = 'Tu nombre fue registrado en el acceso. No se puede cambiar.';
-                        }
-                    } else {
-                        input.removeAttribute('readonly');
-                        input.value = '';
-                        input.focus();
-                        if (hint) {
-                            hint.textContent = 'Antes de elegir tu aldea, confirma el nombre que sera recordado en el mundo ninja.';
+                    input.removeAttribute('readonly');
+                    input.value = '';
+                    input.focus();
+                    if (hint) {
+                        hint.textContent = 'Elige el nombre que sera recordado en el mundo ninja.';
                         }
                     }
                 }
@@ -97,10 +90,10 @@ export function createGame() {
                 
                 card.innerHTML = `
                     <div class="clan-card-header" style="background: linear-gradient(135deg, ${this.getClanColor(clanKey, true)}, ${this.getClanColor(clanKey, false)})">
-                        <h3 style="margin: 0;">${clan.icon} ${clan.name}</h3>
-                        <div class="clan-stat-pill">❤️ ${clan.hp}</div>
-                        <div class="clan-stat-pill">💙 ${clan.chakra}</div>
-                        <div class="clan-stat-pill">${topStatName.split(' ')[0]} ${topStat}</div>
+                        <h3 style="margin: 0; color: #000;">${clan.icon} ${clan.name}</h3>
+                        <div class="clan-stat-pill" style="color: #000;">❤️ ${clan.hp}</div>
+                        <div class="clan-stat-pill" style="color: #000;">💙 ${clan.chakra}</div>
+                        <div class="clan-stat-pill" style="color: #000;">${topStatName.split(' ')[0]} ${topStat}</div>
                     </div>
                     <div class="clan-card-body">
                         <div class="clan-stats">
@@ -152,13 +145,13 @@ export function createGame() {
 
         getClanColor(clanKey, light = true) {
             const colors = {
-                'uchiha': { light: 'rgba(231, 76, 60, 0.2)', dark: 'rgba(192, 57, 43, 0.2)' },
-                'hyuga': { light: 'rgba(52, 152, 219, 0.2)', dark: 'rgba(41, 128, 185, 0.2)' },
-                'nara': { light: 'rgba(46, 204, 113, 0.2)', dark: 'rgba(39, 174, 96, 0.2)' },
-                'yamanaka': { light: 'rgba(155, 89, 182, 0.2)', dark: 'rgba(142, 68, 173, 0.2)' },
-                'akimichi': { light: 'rgba(230, 126, 34, 0.2)', dark: 'rgba(211, 84, 0, 0.2)' },
+                'uchiha': { light: 'rgba(231, 76, 60, 0.65)', dark: 'rgba(192, 57, 43, 0.55)' },
+                'hyuga': { light: 'rgba(52, 152, 219, 0.65)', dark: 'rgba(41, 128, 185, 0.55)' },
+                'nara': { light: 'rgba(46, 204, 113, 0.65)', dark: 'rgba(39, 174, 96, 0.55)' },
+                'yamanaka': { light: 'rgba(155, 89, 182, 0.65)', dark: 'rgba(142, 68, 173, 0.55)' },
+                'akimichi': { light: 'rgba(230, 126, 34, 0.65)', dark: 'rgba(211, 84, 0, 0.55)' },
             };
-            const color = colors[clanKey] || { light: 'rgba(74, 85, 131, 0.2)', dark: 'rgba(45, 53, 97, 0.2)' };
+            const color = colors[clanKey] || { light: 'rgba(74, 85, 131, 0.65)', dark: 'rgba(45, 53, 97, 0.55)' };
             return light ? color.light : color.dark;
         },
 
@@ -173,9 +166,9 @@ export function createGame() {
                 card.onclick = () => this.selectVillage(villageKey);
                 
                 card.innerHTML = `
-                    <div class="clan-card-header" style="background: linear-gradient(135deg, ${village.color}, ${village.color}88)">
-                        <h3 style="margin: 0;">${village.icon} ${village.name}</h3>
-                        <p style="margin: 8px 0 0 0; font-size: 0.85em; font-style: italic;">${village.kage}</p>
+                    <div class="clan-card-header" style="background: linear-gradient(135deg, ${village.color}AA, ${village.color}88)">
+                        <h3 style="margin: 0; color: #000;">${village.icon} ${village.name}</h3>
+                        <p style="margin: 8px 0 0 0; font-size: 0.85em; font-style: italic; color: #000;">${village.kage}</p>
                     </div>
                     <div class="clan-card-body">
                         <p style="margin: 12px 0; font-size: 0.95em; color: var(--muted);">${village.description}</p>
@@ -220,6 +213,7 @@ export function createGame() {
                 element: clan.element,
                 inventory: [],
                 learnedJutsus: [],
+                quickJutsus: Array(5).fill(null),
                 kekkeiGenkai: null,
                 kekkeiLevel: 0,
                 kekkeiExp: 0,
@@ -628,10 +622,19 @@ export function createGame() {
             alert(`Desafio enviado a ${playerName || 'jugador'}.`);
         },
 
-        updateBar(elementId, current, max) {
+        updateBar(elementId, current, max, label) {
             const bar = document.getElementById(elementId);
             const percentage = (current / max) * 100;
             bar.style.width = Math.max(0, Math.min(100, percentage)) + '%';
+            
+            // Actualizar texto si existe
+            if (label) {
+                const textId = elementId.replace('-bar', '-text');
+                const textElement = document.getElementById(textId);
+                if (textElement) {
+                    textElement.textContent = `${label}: ${Math.max(0, Math.floor(current))}/${Math.floor(max)}`;
+                }
+            }
         },
 
         // -----------------------------
@@ -761,6 +764,10 @@ export function createGame() {
 
             if (!Array.isArray(this.player.blackMarketInventory)) this.player.blackMarketInventory = [];
             if (!Array.isArray(this.player.kinjutsuLearned)) this.player.kinjutsuLearned = [];
+            if (!Array.isArray(this.player.quickJutsus)) this.player.quickJutsus = [];
+            if (this.player.quickJutsus.length !== 5) {
+                this.player.quickJutsus = Array.from({ length: 5 }, (_, i) => this.player.quickJutsus[i] || null);
+            }
             this.player.hasDailyIzanagi = !!this.player.hasDailyIzanagi;
             this.player.dailyIzanagiReady = !!this.player.dailyIzanagiReady;
             this.player.izanagiAvailable = !!this.player.izanagiAvailable;
@@ -4620,14 +4627,68 @@ export function createGame() {
 
         loadJutsuList() {
             const jutsuList = document.getElementById('jutsu-list');
+            const slotsEl = document.getElementById('quick-jutsu-slots');
+            const hintEl = document.getElementById('quick-jutsu-hint');
             jutsuList.innerHTML = '';
+            if (slotsEl) slotsEl.innerHTML = '';
             
             if (this.player.learnedJutsus.length === 0) {
                 jutsuList.innerHTML = '<p>No has aprendido jutsus. Ve a la Academia.</p>';
                 return;
             }
+
+            if (!Array.isArray(this.player.quickJutsus)) {
+                this.player.quickJutsus = Array(5).fill(null);
+            }
+            if (this.player.quickJutsus.length !== 5) {
+                this.player.quickJutsus = Array.from({ length: 5 }, (_, i) => this.player.quickJutsus[i] || null);
+            }
+
+            this.selectedJutsuSlot = Number.isInteger(this.selectedJutsuSlot) ? this.selectedJutsuSlot : null;
+            if (hintEl) {
+                hintEl.textContent = this.selectedJutsuSlot === null
+                    ? 'Selecciona un slot y asigna abajo'
+                    : `Slot ${this.selectedJutsuSlot + 1} seleccionado`;
+            }
+
+            if (slotsEl) {
+                this.player.quickJutsus.forEach((name, index) => {
+                    const jutsu = this.player.learnedJutsus.find(j => j.name === name);
+                    const slot = document.createElement('button');
+                    slot.className = `jutsu-quick-slot${this.selectedJutsuSlot === index ? ' selected' : ''}`;
+                    slot.type = 'button';
+                    slot.innerHTML = jutsu
+                        ? `<strong>${jutsu.name}</strong><span>💙 ${jutsu.chakra}</span><span class="slot-clear" data-slot="${index}">✖</span>`
+                        : `<strong>Slot ${index + 1}</strong><span>Vacío</span>`;
+
+                    slot.addEventListener('click', () => {
+                        if (jutsu) {
+                            this.useJutsu(jutsu);
+                            return;
+                        }
+                        this.selectedJutsuSlot = index;
+                        this.loadJutsuList();
+                    });
+
+                    slotsEl.appendChild(slot);
+                });
+
+                slotsEl.querySelectorAll('.slot-clear').forEach(clearBtn => {
+                    clearBtn.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        const slotIndex = Number(clearBtn.getAttribute('data-slot'));
+                        if (!Number.isInteger(slotIndex)) return;
+                        this.player.quickJutsus[slotIndex] = null;
+                        this.saveGame();
+                        this.loadJutsuList();
+                    });
+                });
+            }
             
             this.player.learnedJutsus.forEach(jutsu => {
+                const entry = document.createElement('div');
+                entry.className = 'jutsu-entry';
+
                 const btn = document.createElement('button');
                 btn.className = 'jutsu-btn';
                 btn.disabled = this.player.chakra < jutsu.chakra;
@@ -4639,8 +4700,29 @@ export function createGame() {
                     <p style="color: #3498db; margin-top: 5px;">💙 ${jutsu.chakra} Chakra</p>
                     ${jutsu.damage > 0 ? `<p style="color: #e74c3c;">⚔️ ${jutsu.damage} daño</p>` : ''}
                 `;
-                
-                jutsuList.appendChild(btn);
+
+                const assignBtn = document.createElement('button');
+                assignBtn.className = 'btn-utility jutsu-assign-btn';
+                assignBtn.textContent = 'Asignar a slot';
+                assignBtn.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    let targetIndex = Number.isInteger(this.selectedJutsuSlot) ? this.selectedJutsuSlot : -1;
+                    if (targetIndex === -1) {
+                        targetIndex = this.player.quickJutsus.findIndex(slot => !slot);
+                    }
+                    if (targetIndex === -1) {
+                        alert('Selecciona un slot para reemplazar.');
+                        return;
+                    }
+                    this.player.quickJutsus[targetIndex] = jutsu.name;
+                    this.selectedJutsuSlot = targetIndex;
+                    this.saveGame();
+                    this.loadJutsuList();
+                });
+
+                entry.appendChild(btn);
+                entry.appendChild(assignBtn);
+                jutsuList.appendChild(entry);
             });
         },
 
@@ -5244,6 +5326,14 @@ export function createGame() {
         },
 
         returnToVillage() {
+            // Limpiar variables de combate/misión
+            this.currentMission = null;
+            this.currentEnemy = null;
+            this.enemyQueue = [];
+            this.combatLog = [];
+            this.totalWaves = 0;
+            this.currentWave = 0;
+            
             this.showScreen('village-screen');
             this.updateVillageUI();
             this.showMissions();

@@ -34,7 +34,7 @@
     <div id="name-screen" class="screen">
         <div class="story-text">
             <h2>🥷 Crea tu Ninja</h2>
-            <p id="name-screen-hint">Antes de elegir tu aldea, confirma el nombre que sera recordado en el mundo ninja.</p>
+            <p id="name-screen-hint">Elige el nombre que sera recordado en el mundo ninja.</p>
         </div>
         <div class="player-info" style="max-width: 560px; margin: 0 auto; border-top: none;">
             <label for="player-name-input" style="display:block; margin-bottom: 12px; color:#ff8c00; font-weight: bold; text-transform: uppercase; font-size: 0.9em; letter-spacing: 0.5px;">Tu Nombre Ninja</label>
@@ -260,12 +260,14 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
                     <div class="health-bar">
-                        <div class="health-fill" id="combat-player-health-bar">HP: 100/100</div>
+                        <div class="health-fill" id="combat-player-health-bar"></div>
+                        <div class="bar-text" id="combat-player-health-text">HP: 100/100</div>
                     </div>
                 </div>
                 <div>
                     <div class="chakra-bar">
-                        <div class="chakra-fill" id="combat-player-chakra-bar">Chakra: 100/100</div>
+                        <div class="chakra-fill" id="combat-player-chakra-bar"></div>
+                        <div class="bar-text" id="combat-player-chakra-text">Chakra: 100/100</div>
                     </div>
                 </div>
             </div>
@@ -275,7 +277,8 @@
             <div class="enemy-info">
                 <h3 id="enemy-name">Enemigo</h3>
                 <div class="health-bar">
-                    <div class="health-fill" id="enemy-health-bar" style="background: linear-gradient(90deg, #8b0000 0%, #660000 100%);">HP: 50/50</div>
+                    <div class="health-fill" id="enemy-health-bar" style="background: linear-gradient(90deg, #8b0000 0%, #660000 100%);"></div>
+                    <div class="bar-text" id="enemy-health-text">HP: 50/50</div>
                 </div>
                 <p id="enemy-stats"></p>
             </div>
@@ -293,6 +296,13 @@
 
             <div id="jutsu-selection" style="display: none; margin-top: 15px;">
                 <h4 style="color: #3498db;">Selecciona un Jutsu:</h4>
+                <div class="jutsu-quick-bar">
+                    <div class="jutsu-quick-header">
+                        <span>⚡ Accesos rapidos (5)</span>
+                        <span id="quick-jutsu-hint">Selecciona un slot y asigna abajo</span>
+                    </div>
+                    <div id="quick-jutsu-slots" class="jutsu-quick-slots"></div>
+                </div>
                 <div class="jutsu-grid" id="jutsu-list"></div>
             </div>
 
