@@ -1086,7 +1086,99 @@
             grid-template-columns: 1fr;
         }
 
+        .player-info {
+            grid-template-columns: 1fr;
+            gap: 16px;
+            padding: 18px;
+        }
+
+        .player-info h2,
+        .player-info-clan {
+            grid-column: 1;
+        }
+
+        .player-bars {
+            grid-column: 1;
+            grid-row: auto;
+        }
+
+        .info-grid {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .info-item {
+            flex: 1 1 45%;
+            justify-content: center;
+            white-space: normal;
+            text-align: center;
+        }
+
+        #name-screen .player-info {
+            max-width: 100% !important;
+        }
+
+        #name-screen .player-info > div[style*="display: flex"] {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        #name-screen .player-info .btn {
+            width: 100%;
+        }
+
+        #stats-display .stat {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        #stats-display .stat-bar {
+            width: 100%;
+            margin-left: 0;
+        }
+
+        .combat-area {
+            padding: 16px;
+        }
+
+        .combat-log {
+            max-height: 200px;
+        }
+
+        #combat-screen .combat-area > div[style*="text-align: center"] {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        #combat-screen .combat-area .btn-small {
+            flex: 1 1 46%;
+        }
+
+        .mission-card:hover,
+        .jutsu-card:hover {
+            transform: none;
+        }
+
         .shop-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .jutsu-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .npc-list {
+            grid-template-columns: 1fr;
+        }
+
+        .mission-briefing-content {
+            padding: 20px;
+        }
+
+        .briefing-details {
             grid-template-columns: 1fr;
         }
 
@@ -1111,6 +1203,47 @@
         .jutsu-card-status {
             padding: 2px 6px;
             font-size: 0.7em;
+        }
+    }
+
+    @media (max-width: 480px) {
+        body {
+            padding: 10px;
+        }
+
+        .game-container {
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        h1 {
+            font-size: 1.5em;
+            letter-spacing: 1.5px;
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            padding: 8px 10px;
+            font-size: 0.85em;
+        }
+
+        .mission-card,
+        .jutsu-card {
+            padding: 12px;
+        }
+
+        .text-input {
+            padding: 12px 14px;
+            font-size: 1em;
+        }
+
+        #name-screen label[for="player-name-input"] {
+            font-size: 0.8em;
+        }
+
+        .kekkei-genkai-notification {
+            padding: 24px 16px;
+            font-size: 1.05em;
         }
     }
 
