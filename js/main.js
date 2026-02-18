@@ -14,6 +14,7 @@ const authUsername = document.getElementById('auth-username');
 const authPassword = document.getElementById('auth-password');
 const authLoginBtn = document.getElementById('auth-login-btn');
 const authRegisterBtn = document.getElementById('auth-register-btn');
+const authSessionKey = 'ninjaAuthUserId';
 
 const setAuthError = (message) => {
     if (!authError) return;
@@ -28,11 +29,15 @@ const setAuthError = (message) => {
 
 const normalizeUsername = (value) => {
     const raw = (value || '').trim();
-    const slug = raw
-        .toLowerCase()
-        .replace(/\s+/g, '.')
-        .replace(/[^a-z0-9._-]/g, '');
-    return { raw, slug };
+    return { raw };
+};
+
+const hashPassword = async (value) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(value);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 };
 
 const fetchProfile = async (userId) => {
@@ -53,30 +58,26 @@ const markOnline = async (userId) => {
 };
 
 const initAuthSession = async () => {
-    const { data: sessionData, error } = await supabase.auth.getSession();
-    if (error) {
-        console.error('Supabase session error:', error);
+    const userId = localStorage.getItem(authSessionKey);
+    if (!userId) {
         game.showScreen('auth-screen');
         return;
     }
-    const session = sessionData?.session;
-    if (!session?.user) {
+    const profile = await fetchProfile(userId);
+    if (!profile) {
+        localStorage.removeItem(authSessionKey);
         game.showScreen('auth-screen');
         return;
     }
-
-    const profile = await fetchProfile(session.user.id);
-    game.authUser = session.user;
+    game.authUser = { id: userId };
     game.authProfile = profile;
-    if (profile) {
-        await markOnline(session.user.id);
-    }
+    await markOnline(userId);
     game.showScreen('start-screen');
 };
 
 const handleRegister = async () => {
     setAuthError('');
-    const { raw, slug } = normalizeUsername(authUsername?.value);
+    const { raw } = normalizeUsername(authUsername?.value);
     const password = (authPassword?.value || '').trim();
 
     if (!raw || raw.length < 3) {
@@ -95,41 +96,33 @@ const handleRegister = async () => {
         setAuthError('Contrasena muy corta (minimo 6).');
         return;
     }
-    if (!slug) {
-        setAuthError('Nombre invalido.');
+
+    const { data: existing, error: lookupError } = await supabase
+        .from('players')
+        .select('id,username')
+        .eq('username', raw)
+        .limit(1);
+    if (lookupError) {
+        setAuthError('No se pudo validar el nombre.');
         return;
     }
-
-    const { data: existing } = await supabase
-        .from('players')
-        .select('id')
-        .ilike('username', raw)
-        .limit(1);
     if (existing && existing.length) {
         setAuthError('Ese nombre ya esta en uso.');
         return;
     }
 
-    const email = `${slug}@ninjagame.local`;
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) {
-        setAuthError(error.message);
-        return;
-    }
-    const user = data?.user;
-    if (!user) {
-        setAuthError('No se pudo crear el usuario.');
-        return;
-    }
+    const passwordHash = await hashPassword(password);
+    const userId = crypto.randomUUID();
 
     const { error: insertError } = await supabase.from('players').insert({
-        id: user.id,
+        id: userId,
         username: raw,
         village: 'unknown',
         clan: null,
         level: 1,
         rank: 'Genin',
         game_state: null,
+        password_hash: passwordHash,
         is_online: true
     });
 
@@ -138,16 +131,17 @@ const handleRegister = async () => {
         return;
     }
 
-    game.authUser = user;
-    game.authProfile = await fetchProfile(user.id);
+    localStorage.setItem(authSessionKey, userId);
+    game.authUser = { id: userId };
+    game.authProfile = await fetchProfile(userId);
     game.showScreen('start-screen');
 };
 
 const handleLogin = async () => {
     setAuthError('');
-    const { raw, slug } = normalizeUsername(authUsername?.value);
+    const { raw } = normalizeUsername(authUsername?.value);
     const password = (authPassword?.value || '').trim();
-    if (!raw || !slug) {
+        if (!raw) {
         setAuthError('Ingresa tu nombre de personaje.');
         return;
     }
@@ -155,20 +149,25 @@ const handleLogin = async () => {
         setAuthError('Ingresa tu contrasena.');
         return;
     }
-    const email = `${slug}@ninjagame.local`;
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
+    const { data, error } = await supabase
+        .from('players')
+        .select('id,username,password_hash')
+        .eq('username', raw)
+        .maybeSingle();
+    if (error || !data) {
         setAuthError('Credenciales incorrectas.');
         return;
     }
-    const user = data?.user;
-    if (!user) {
-        setAuthError('No se pudo iniciar sesion.');
+    const passwordHash = await hashPassword(password);
+    if (passwordHash !== data.password_hash) {
+        setAuthError('Credenciales incorrectas.');
         return;
     }
-    game.authUser = user;
-    game.authProfile = await fetchProfile(user.id);
-    await markOnline(user.id);
+
+    localStorage.setItem(authSessionKey, data.id);
+    game.authUser = { id: data.id };
+    game.authProfile = await fetchProfile(data.id);
+    await markOnline(data.id);
     game.showScreen('start-screen');
 };
 
