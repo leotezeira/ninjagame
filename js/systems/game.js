@@ -1129,10 +1129,11 @@ export function createGame() {
             const elapsed = Date.now() - this.player.lastRecoveryTime;
             const elapsedMinutes = elapsed / 60000; // Convertir a minutos
 
-            // Recuperar 10% por minuto
+            // Recuperar 10% por minuto y reducir fatiga 10 por minuto
             if (elapsedMinutes >= 1) {
-                const recoveryPct = 0.10 * Math.floor(elapsedMinutes);
-                
+                const minutes = Math.floor(elapsedMinutes);
+                const recoveryPct = 0.10 * minutes;
+
                 this.player.hp = Math.min(
                     this.player.maxHp,
                     this.player.hp + Math.floor(this.player.maxHp * recoveryPct)
@@ -1142,6 +1143,9 @@ export function createGame() {
                     this.player.maxChakra,
                     this.player.chakra + Math.floor(this.player.maxChakra * recoveryPct)
                 );
+
+                // Reducir fatiga 10 por minuto
+                this.reduceFatigue(10 * minutes);
 
                 // Actualizar timestamp
                 this.player.lastRecoveryTime = Date.now();
