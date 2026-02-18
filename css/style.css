@@ -1191,7 +1191,7 @@ body {
 /* ============================================
    MISSION BRIEFING
    ============================================ */
-#mission-briefing-screen {
+#mission-briefing-screen.active {
     display: flex;
     align-items: center;
     justify-content: center;
