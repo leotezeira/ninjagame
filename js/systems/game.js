@@ -3921,26 +3921,16 @@ export function createGame() {
                 return;
             }
 
-            let availableMissions = [];
-
-            if (this.player.rank === 'Genin') {
-                const baForGenin = Array.isArray(this.missions.chunin)
-                    ? this.missions.chunin.filter(m => ['B', 'A'].includes((m.rank || '').toUpperCase()))
-                    : [];
-                availableMissions = [...this.missions.genin, ...baForGenin];
-            } else if (this.player.rank === 'Chunin') {
-                const sForChunin = Array.isArray(this.missions.jonin)
-                    ? this.missions.jonin.filter(m => (m.rank || '').toUpperCase() === 'S')
-                    : [];
-                availableMissions = [...this.missions.chunin, ...sForChunin];
-            } else if (this.player.rank === 'Jonin') {
-                availableMissions = this.missions.jonin;
-            } else if (this.player.rank === 'ANBU' || this.player.rank === 'Kage') {
-                availableMissions = this.missions.kage;
-            }
+            // Recopilar TODAS las misiones de todos los grupos
+            const allMissions = [
+                ...(this.missions.genin || []),
+                ...(this.missions.chunin || []),
+                ...(this.missions.jonin || []),
+                ...(this.missions.kage || [])
+            ];
 
             // Agrupar misiones por rango
-            const missionsByRank = this.groupMissionsByRank(availableMissions);
+            const missionsByRank = this.groupMissionsByRank(allMissions);
 
             // Definir orden de rangos
             const rankOrder = ['D', 'C', 'B', 'A', 'S', 'U', 'F'];
@@ -3953,56 +3943,37 @@ export function createGame() {
                 // Contenedor del acordeón
                 const rankContainer = document.createElement('div');
                 rankContainer.className = 'mission-rank-accordion';
-                rankContainer.style.marginBottom = '12px';
-                rankContainer.style.border = '1px solid rgba(255,140,0,0.2)';
-                rankContainer.style.borderRadius = '6px';
-                rankContainer.style.overflow = 'hidden';
+
+                // Contar misiones disponibles vs bloqueadas
+                const availableCount = missionsInRank.filter(m => !this.isMissionLocked(m) || !this.isMissionLocked(m).locked).length;
+                const lockedCount = missionsInRank.length - availableCount;
 
                 // Botón de acordeón (header)
                 const header = document.createElement('button');
-                header.style.width = '100%';
-                header.style.padding = '12px 16px';
-                header.style.background = `rgba(255,140,0,0.1)`;
-                header.style.border = 'none';
-                header.style.borderBottom = '1px solid rgba(255,140,0,0.2)';
-                header.style.cursor = 'pointer';
-                header.style.display = 'flex';
-                header.style.justifyContent = 'space-between';
-                header.style.alignItems = 'center';
-                header.style.fontSize = '1em';
-                header.style.fontWeight = 'bold';
-                header.style.color = '#ff8c00';
-                header.style.transition = '0.2s';
                 
                 // Ícono de rango y cantidad
                 const rankLabel = `${this.getRankEmoji(rank)} Rango ${rank}`;
-                const countLabel = `(${missionsInRank.length} misión${missionsInRank.length !== 1 ? 'es' : ''})`;
+                const countLabel = availableCount > 0 
+                    ? `(${availableCount} disponible${availableCount !== 1 ? 's' : ''}${lockedCount > 0 ? `, ${lockedCount} 🔒` : ''})`
+                    : `(${lockedCount} 🔒 bloqueada${lockedCount !== 1 ? 's' : ''})`;
                 
                 header.innerHTML = `
                     <span>${rankLabel} ${countLabel}</span>
-                    <span class="accordion-arrow" style="display: inline-block; transition: transform 0.3s;">▼</span>
+                    <span class="accordion-arrow" style="transition: transform 0.3s;">▼</span>
                 `;
 
                 // Contenedor de contenido
                 const content = document.createElement('div');
                 content.className = 'mission-rank-content';
                 content.style.display = 'none';
-                content.style.padding = '12px 16px';
-                content.style.background = 'rgba(0,0,0,0.2)';
-                content.style.maxHeight = '1000px';
-                content.style.overflowY = 'auto';
 
                 // Agregar misiones dentro del contenido
                 const missionGrid = document.createElement('div');
-                missionGrid.style.display = 'grid';
-                missionGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
-                missionGrid.style.gap = '12px';
+                missionGrid.className = 'mission-grid';
 
                 missionsInRank.forEach(mission => {
                     const card = document.createElement('div');
                     card.className = 'mission-card';
-                    card.onclick = () => this.startMission(mission);
-                    card.style.margin = '0';
 
                     const rankMission = (mission.rank || '').toUpperCase();
                     const turnCostByRank = { D: 1, C: 2, B: 3, A: 4, S: 4, U: 5, F: 6 };
@@ -4013,12 +3984,34 @@ export function createGame() {
                     const estRyo = Math.floor(mission.ryo * (team.missionRyoMult || 1) * nightRyoMult);
                     const estExp = Math.floor(mission.exp * (team.missionExpMult || 1));
                     
-                    card.innerHTML = `
-                        <h4>📜 ${mission.name}</h4>
-                        <p>${mission.description}</p>
-                        <p style="color: #ffd700; margin-top: 8px;">Recompensa: ${estRyo} Ryo | ${estExp} EXP</p>
-                        <p style="opacity: 0.85; margin-top: 6px;">⏱️ Tiempo: ${turns} turno(s)</p>
-                    `;
+                    // Verificar si la misión está bloqueada
+                    const lockStatus = this.isMissionLocked(mission);
+                    
+                    if (lockStatus && lockStatus.locked) {
+                        // Misión bloqueada
+                        card.classList.add('mission-locked');
+                        card.style.opacity = '0.6';
+                        card.style.cursor = 'not-allowed';
+                        card.style.borderColor = 'rgba(255, 100, 100, 0.3)';
+                        card.innerHTML = `
+                            <h4 style="color: #888;">🔒 ${mission.name}</h4>
+                            <p style="color: #666;">${mission.description}</p>
+                            <p style="color: #ff6b6b; margin-top: 8px; font-weight: bold;">⛔ BLOQUEADO - ${lockStatus.reason}</p>
+                            <p style="opacity: 0.5; margin-top: 6px;">⏱️ Tiempo: ${turns} turno(s)</p>
+                        `;
+                        card.onclick = () => {
+                            alert(`🔒 Misión bloqueada: ${lockStatus.reason}`);
+                        };
+                    } else {
+                        // Misión disponible
+                        card.onclick = () => this.startMission(mission);
+                        card.innerHTML = `
+                            <h4>📜 ${mission.name}</h4>
+                            <p>${mission.description}</p>
+                            <p style="color: #ffd700; margin-top: 8px;">Recompensa: ${estRyo} Ryo | ${estExp} EXP</p>
+                            <p style="opacity: 0.85; margin-top: 6px;">⏱️ Tiempo: ${turns} turno(s)</p>
+                        `;
+                    }
                     missionGrid.appendChild(card);
                 });
 
@@ -4055,6 +4048,41 @@ export function createGame() {
                 grouped[rank].push(mission);
             });
             return grouped;
+        },
+
+        // Verificar si una misión está bloqueada por nivel o rango
+        isMissionLocked(mission) {
+            if (!this.player) return true;
+            
+            const missionRank = (mission.rank || 'D').toUpperCase();
+            const playerRank = this.player.rank || 'Genin';
+            const playerLevel = this.player.level || 1;
+            
+            // Definir requisitos mínimos de nivel por rango de misión
+            const rankRequirements = {
+                'D': { minLevel: 1, allowedRanks: ['Genin', 'Chunin', 'Jonin', 'ANBU', 'Kage'] },
+                'C': { minLevel: 2, allowedRanks: ['Genin', 'Chunin', 'Jonin', 'ANBU', 'Kage'] },
+                'B': { minLevel: 5, allowedRanks: ['Chunin', 'Jonin', 'ANBU', 'Kage'] },
+                'A': { minLevel: 8, allowedRanks: ['Chunin', 'Jonin', 'ANBU', 'Kage'] },
+                'S': { minLevel: 12, allowedRanks: ['Jonin', 'ANBU', 'Kage'] },
+                'U': { minLevel: 18, allowedRanks: ['ANBU', 'Kage'] },
+                'F': { minLevel: 25, allowedRanks: ['Kage'] }
+            };
+            
+            const req = rankRequirements[missionRank];
+            if (!req) return false;
+            
+            // Verificar nivel
+            if (playerLevel < req.minLevel) {
+                return { locked: true, reason: `Nivel ${req.minLevel} requerido` };
+            }
+            
+            // Verificar rango
+            if (!req.allowedRanks.includes(playerRank)) {
+                return { locked: true, reason: `Rango ${req.allowedRanks[0]} requerido` };
+            }
+            
+            return false;
         },
 
         getRankEmoji(rank) {
@@ -4441,38 +4469,83 @@ export function createGame() {
 
         showShop() {
             const shopList = document.getElementById('shop-list');
+            if (!shopList) return;
+            
+            shopList.innerHTML = '';
+            
             if (this.player.isRenegade) {
-                shopList.innerHTML = '<div class="story-text">🚫 Como Renegado, la Tienda de la Aldea no te atenderá.</div>';
+                shopList.innerHTML = '<div class="shop-empty">🚫 Como Renegado, la Tienda de la Aldea no te atenderá.</div>';
                 return;
             }
             if (this.player.location !== 'konoha') {
-                shopList.innerHTML = '<div class="story-text">📍 La Tienda de la Aldea solo está disponible en Konoha.</div>';
+                shopList.innerHTML = '<div class="shop-empty">📍 La Tienda de la Aldea solo está disponible en Konoha.</div>';
                 return;
             }
             if (this.getTimeOfDay() === 3) {
-                shopList.innerHTML = '<div class="story-text">🌙 Es madrugada. La tienda está cerrada.</div>';
+                shopList.innerHTML = '<div class="shop-empty">🌙 Es madrugada. La tienda está cerrada.</div>';
                 return;
             }
 
             const festivalNote = this.isFestivalActive() ? ' (🎉 Festival: -50%)' : '';
-            shopList.innerHTML = `<h4 style="grid-column: 1/-1; color: #ff8c00;">Consumibles${festivalNote}</h4>`;
+            
+            // Consumables header
+            const consumablesHeader = document.createElement('h4');
+            consumablesHeader.className = 'shop-section-header';
+            consumablesHeader.textContent = `Consumibles${festivalNote}`;
+            shopList.appendChild(consumablesHeader);
             
             this.shopItems.consumables.forEach(item => {
                 const card = this.createShopCard(item);
                 shopList.appendChild(card);
             });
             
-            shopList.innerHTML += '<h4 style="grid-column: 1/-1; color: #ff8c00; margin-top: 20px;">Armas</h4>';
+            // Weapons header
+            const weaponsHeader = document.createElement('h4');
+            weaponsHeader.className = 'shop-section-header';
+            weaponsHeader.textContent = 'Armas';
+            shopList.appendChild(weaponsHeader);
+            
             this.shopItems.weapons.forEach(item => {
                 const card = this.createShopCard(item);
                 shopList.appendChild(card);
             });
             
-            shopList.innerHTML += '<h4 style="grid-column: 1/-1; color: #ff8c00; margin-top: 20px;">Armaduras</h4>';
+            // Armor header
+            const armorHeader = document.createElement('h4');
+            armorHeader.className = 'shop-section-header';
+            armorHeader.textContent = 'Armaduras';
+            shopList.appendChild(armorHeader);
+            
             this.shopItems.armor.forEach(item => {
                 const card = this.createShopCard(item);
                 shopList.appendChild(card);
             });
+
+            // Accessories header (nuevo)
+            if (this.shopItems.accessories && this.shopItems.accessories.length > 0) {
+                const accHeader = document.createElement('h4');
+                accHeader.className = 'shop-section-header';
+                accHeader.textContent = 'Accesorios';
+                shopList.appendChild(accHeader);
+                
+                this.shopItems.accessories.forEach(item => {
+                    const card = this.createShopCard(item);
+                    shopList.appendChild(card);
+                });
+            }
+
+            // Scrolls header (nuevo)
+            if (this.shopItems.scrolls && this.shopItems.scrolls.length > 0) {
+                const scrollsHeader = document.createElement('h4');
+                scrollsHeader.className = 'shop-section-header';
+                scrollsHeader.textContent = 'Pergaminos';
+                shopList.appendChild(scrollsHeader);
+                
+                this.shopItems.scrolls.forEach(item => {
+                    const card = this.createShopCard(item);
+                    shopList.appendChild(card);
+                });
+            }
         },
 
         createShopCard(item) {

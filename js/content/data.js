@@ -2777,22 +2777,60 @@ export const BASE_GAME = {
             consumables: [
                 { name: '🍜 Ramen Ichiraku', price: 50, effect: { hp: 30 }, description: 'Recupera 30 HP' },
                 { name: '🍙 Bento', price: 80, effect: { hp: 50 }, description: 'Recupera 50 HP' },
+                { name: '🍡 Dango', price: 40, effect: { hp: 20, chakra: 10 }, description: 'Recupera 20 HP y 10 Chakra' },
+                { name: '🍵 Té Medicinal', price: 60, effect: { hp: 25, fatigue: -5 }, description: 'Recupera 25 HP y reduce fatiga' },
                 { name: '💊 Píldora de Chakra', price: 100, effect: { chakra: 50 }, description: 'Recupera 50 Chakra' },
+                { name: '💊 Píldora de Chakra MAX', price: 200, effect: { chakra: 100 }, description: 'Recupera 100 Chakra' },
                 { name: '💊 Píldora Militar', price: 150, effect: { hp: 80, chakra: 30 }, description: 'Recupera HP y Chakra' },
-                { name: '💊 Píldora 3 Colores', price: 300, effect: { buff: true }, description: '+5 stats por 3 turnos' }
+                { name: '💊 Píldora 3 Colores', price: 300, effect: { buff: true }, description: '+5 stats por 3 turnos' },
+                { name: '🩹 Kit Médico', price: 250, effect: { hp: 100 }, description: 'Recupera 100 HP' },
+                { name: '🧪 Elixir de Vitalidad', price: 400, effect: { hp: 150, chakra: 75 }, description: 'Recupera 150 HP y 75 Chakra' },
+                { name: '💉 Antídoto Universal', price: 120, effect: { curePoison: true }, description: 'Cura cualquier veneno' },
+                { name: '🌿 Hierba Revitalizante', price: 180, effect: { fatigue: -20 }, description: 'Reduce 20 de fatiga' }
             ],
             weapons: [
                 { name: '🗡️ Kunai Básico', price: 100, effect: { taijutsu: 2 }, description: '+2 Taijutsu' },
                 { name: '🗡️ Kunai Explosivo', price: 250, effect: { taijutsu: 4 }, description: '+4 Taijutsu' },
+                { name: '🗡️ Shuriken de Acero', price: 180, effect: { taijutsu: 3, accuracy: 1 }, description: '+3 Taijutsu, +1 Precisión' },
                 { name: '⚔️ Espada Ninja', price: 500, effect: { taijutsu: 6 }, description: '+6 Taijutsu' },
+                { name: '⚔️ Tantō ANBU', price: 750, effect: { taijutsu: 8, speed: 2 }, description: '+8 Taijutsu, +2 Velocidad' },
                 { name: '⚔️ Katana Chakra', price: 1000, effect: { taijutsu: 8, chakraCost: -10 }, description: '+8 Tai, -10% costo chakra' },
-                { name: '🔱 Kubikiribōchō', price: 3000, effect: { taijutsu: 15, lifesteal: true }, description: '+15 Tai, drena HP' }
+                { name: '🔱 Kusarigama', price: 1500, effect: { taijutsu: 10, range: true }, description: '+10 Taijutsu, ataque a distancia' },
+                { name: '🗡️ Espada de 7 Púas', price: 2000, effect: { taijutsu: 12, bleed: true }, description: '+12 Tai, causa sangrado' },
+                { name: '🔱 Kubikiribōchō', price: 3000, effect: { taijutsu: 15, lifesteal: true }, description: '+15 Tai, drena HP' },
+                { name: '⚡ Cuchillas Chakra', price: 2500, effect: { taijutsu: 11, ninjutsu: 5 }, description: '+11 Tai, +5 Ninjutsu' }
             ],
             armor: [
                 { name: '🛡️ Chaleco Genin', price: 200, effect: { maxHp: 10 }, description: '+10 HP máx' },
+                { name: '🛡️ Protectores de Brazo', price: 150, effect: { defense: 3 }, description: '+3% defensa' },
                 { name: '🛡️ Chaleco Chunin', price: 500, effect: { maxHp: 20, defense: 5 }, description: '+20 HP, +5% defensa' },
+                { name: '🛡️ Chaleco Reforzado', price: 800, effect: { maxHp: 30, defense: 8 }, description: '+30 HP, +8% defensa' },
                 { name: '🛡️ Armadura ANBU', price: 1200, effect: { maxHp: 40, defense: 10 }, description: '+40 HP, +10% defensa' },
-                { name: '🛡️ Manto Kage', price: 2500, effect: { maxHp: 60, defense: 15 }, description: '+60 HP, +15% defensa' }
+                { name: '🛡️ Armadura de Malla', price: 1600, effect: { maxHp: 50, kunaiResist: true }, description: '+50 HP, resiste proyectiles' },
+                { name: '🛡️ Manto Kage', price: 2500, effect: { maxHp: 60, defense: 15, chakra: 20 }, description: '+60 HP, +15% def, +20 Chakra' },
+                { name: '🛡️ Capa del Rayo', price: 3500, effect: { maxHp: 80, speed: 5, evasion: 5 }, description: '+80 HP, +5 velocidad, +5% evasión' }
+            ],
+            accessories: [
+                { name: '💎 Anillo de Chakra', price: 400, effect: { maxChakra: 25 }, description: '+25 Chakra máx' },
+                { name: '📿 Collar Protector', price: 350, effect: { maxHp: 15, resistance: 2 }, description: '+15 HP, +2% resistencia' },
+                { name: '🎭 Máscara ANBU', price: 600, effect: { stealth: 10 }, description: '+10 Sigilo' },
+                { name: '🔔 Cascabel de Entrenamiento', price: 250, effect: { expBonus: 5 }, description: '+5% EXP en combate' },
+                { name: '📖 Pergamino de Sellado', price: 500, effect: { inventorySlots: 5 }, description: '+5 slots de inventario' },
+                { name: '🎒 Bolsa Ninja Mejorada', price: 300, effect: { inventorySlots: 3 }, description: '+3 slots de inventario' },
+                { name: '👁️ Lentes de Chakra', price: 800, effect: { accuracy: 5 }, description: '+5 Precisión' },
+                { name: '⏱️ Sello de Velocidad', price: 700, effect: { speed: 5 }, description: '+5 Velocidad' },
+                { name: '🔮 Cristal de Meditación', price: 900, effect: { chakraRegen: 5 }, description: '+5 regeneración de chakra/turno' },
+                { name: '💀 Amuleto de Jashin', price: 1500, effect: { lifesteal: 5 }, description: '+5% robo de vida' }
+            ],
+            scrolls: [
+                { name: '📜 Pergamino de Invocación: Sapos', price: 2000, effect: { summon: 'toad' }, description: 'Invoca un sapo aliado en combate' },
+                { name: '📜 Pergamino de Invocación: Serpientes', price: 2000, effect: { summon: 'snake' }, description: 'Invoca una serpiente aliada' },
+                { name: '📜 Pergamino de Invocación: Perros', price: 1800, effect: { summon: 'dog' }, description: 'Invoca perros ninja rastreadores' },
+                { name: '📜 Pergamino de Teletransporte', price: 3000, effect: { teleport: true }, description: 'Escapa del combate al instante' },
+                { name: '📜 Pergamino de Barrera', price: 1500, effect: { barrier: 50 }, description: 'Absorbe 50 daño' },
+                { name: '📜 Pergamino Explosivo x10', price: 500, effect: { damage: 30, aoe: true }, description: '30 daño a todos los enemigos' },
+                { name: '📜 Pergamino de Curación', price: 800, effect: { healAll: 50 }, description: 'Cura 50 HP a todo el equipo' },
+                { name: '📜 Pergamino de Sellado: Arma', price: 1200, effect: { sealWeapon: true }, description: 'Sella el arma del enemigo 2 turnos' }
             ]
         },
 
