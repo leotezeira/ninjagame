@@ -4751,36 +4751,6 @@ export function createGame() {
                                     <button class="btn btn-small btn-secondary" onclick="game.useInventoryItem(${idx})">Usar</button>
                                 </div>
                             `).join('')}
-                            useInventoryItem(index) {
-                                if (!Array.isArray(this.player.inventory) || index < 0 || index >= this.player.inventory.length) return;
-                                const item = this.player.inventory[index];
-                                let used = false;
-                                if (item.effect?.hp) {
-                                    this.player.hp = Math.min(this.player.maxHp, this.player.hp + item.effect.hp);
-                                    used = true;
-                                }
-                                if (item.effect?.chakra) {
-                                    this.player.chakra = Math.min(this.player.maxChakra, this.player.chakra + item.effect.chakra);
-                                    used = true;
-                                }
-                                if (item.effect?.fatigue) {
-                                    this.player.fatigue = Math.max(0, this.player.fatigue + item.effect.fatigue);
-                                    used = true;
-                                }
-                                if (item.effect?.curePoison) {
-                                    this.player.isPoisoned = false;
-                                    used = true;
-                                }
-                                // Puedes agregar más efectos aquí según el diseño de items
-                                if (used) {
-                                    this.player.inventory.splice(index, 1);
-                                    this.saveGame();
-                                    this.updateVillageUI();
-                                    alert('Item consumido.');
-                                } else {
-                                    alert('Este item no es consumible.');
-                                }
-                            },
                     </div>
                 </div>
             `;
