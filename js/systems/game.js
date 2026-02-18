@@ -4388,6 +4388,8 @@ export function createGame() {
             this.currentEnemy = this.enemyQueue.shift();
             this.startCombat();
         },
+
+        startCombat() {
             this.showScreen('combat-screen');
             this.combatLog = [];
             document.getElementById('combat-log').innerHTML = '';
