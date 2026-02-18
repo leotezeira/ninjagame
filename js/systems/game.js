@@ -3668,10 +3668,6 @@ export function createGame() {
                 'F': '💀'
             };
             return emojis[rank] || '📋';
-        },                `;
-                
-                missionList.appendChild(card);
-            });
         },
 
         renderMissionCard(container, mission, opts = {}) {
