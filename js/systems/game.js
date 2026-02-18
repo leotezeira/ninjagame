@@ -3897,7 +3897,15 @@ export function createGame() {
         },
 
         showMissions() {
-            const missionList = document.getElementById('mission-list');
+            const missionList = document.getElementById('mission-list') 
+                || document.querySelector('#section-world .mission-list');
+            
+            if (!missionList) {
+                console.error('mission-list element not found in DOM');
+                return;
+            }
+            
+            console.log('showMissions: missionList found', missionList);
             missionList.innerHTML = '';
 
             if (this.player.urgentMission) {
@@ -4862,6 +4870,7 @@ export function createGame() {
         },
 
         showMissionBriefing(mission) {
+            console.log('showMissionBriefing called with:', mission);
             const briefingScreen = document.getElementById('mission-briefing-screen');
             const titleEl = document.getElementById('briefing-title');
             const narratorEl = document.getElementById('briefing-narrator-text');
@@ -4869,23 +4878,35 @@ export function createGame() {
             const ryoEl = document.getElementById('briefing-ryo');
             const expEl = document.getElementById('briefing-exp');
 
+            if (!briefingScreen) {
+                console.error('mission-briefing-screen not found');
+                return;
+            }
+
             titleEl.textContent = mission.name;
             narratorEl.textContent = mission.narrator || 'Se requiere completar esta misión. Prepárate para el combate.';
             rankEl.textContent = mission.rank;
             ryoEl.textContent = mission.ryo;
             expEl.textContent = mission.exp;
 
+            console.log('Calling showScreen for mission-briefing-screen');
             this.showScreen('mission-briefing-screen');
         },
 
         acceptMissionFromBriefing() {
-            if (!this.pendingMission) return;
+            console.log('acceptMissionFromBriefing called');
+            if (!this.pendingMission) {
+                console.warn('No pending mission to accept');
+                return;
+            }
             const mission = this.pendingMission;
             this.pendingMission = null;
+            console.log('Executing mission:', mission.name);
             this._executeMission(mission);
         },
 
         cancelMissionBriefing() {
+            console.log('cancelMissionBriefing called');
             this.pendingMission = null;
             this.showScreen('village-screen');
             this.showSection('home');

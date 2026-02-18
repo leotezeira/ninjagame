@@ -88,8 +88,8 @@
                     <div class="briefing-stat"><span>✨ Experiencia:</span> <span id="briefing-exp">0</span> exp</div>
                 </div>
                 <div style="text-align: center; margin-top: 20px;">
-                    <button class="btn" onclick="game.acceptMissionFromBriefing()">✅ Aceptar Misión</button>
-                    <button class="btn btn-secondary" onclick="game.cancelMissionBriefing()">❌ Rechazar</button>
+                    <button class="btn" id="accept-mission-btn">✅ Aceptar Misión</button>
+                    <button class="btn btn-secondary" id="cancel-mission-btn">❌ Rechazar</button>
                 </div>
             </div>
         </div>
@@ -525,6 +525,26 @@
                     game.closeSidebar();
                 } else {
                     document.getElementById('sidebar').classList.remove('open');
+                }
+            });
+        }
+        
+        // Mission briefing buttons
+        const acceptMissionBtn = document.getElementById('accept-mission-btn');
+        const cancelMissionBtn = document.getElementById('cancel-mission-btn');
+        
+        if (acceptMissionBtn) {
+            acceptMissionBtn.addEventListener('click', function() {
+                if (typeof game !== 'undefined' && game.acceptMissionFromBriefing) {
+                    game.acceptMissionFromBriefing();
+                }
+            });
+        }
+        
+        if (cancelMissionBtn) {
+            cancelMissionBtn.addEventListener('click', function() {
+                if (typeof game !== 'undefined' && game.cancelMissionBriefing) {
+                    game.cancelMissionBriefing();
                 }
             });
         }
