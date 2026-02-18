@@ -58,21 +58,64 @@ rollDice(sides = 20) {
             const container = document.getElementById('clan-select');
             container.innerHTML = '';
             
+            const maxStats = {hp: 150, chakra: 120, taijutsu: 100, ninjutsu: 100, genjutsu: 100};
+            
             Object.keys(this.clans).forEach(clanKey => {
                 const clan = this.clans[clanKey];
                 const card = document.createElement('div');
                 card.className = 'clan-card';
                 card.onclick = () => this.selectClan(clanKey);
                 
+                // Calcular stats previsualizados
+                const topStat = Math.max(clan.taijutsu, clan.ninjutsu, clan.genjutsu);
+                const topStatName = clan.taijutsu === topStat ? '👊 Taijutsu' : (clan.ninjutsu === topStat ? '🌀 Ninjutsu' : '👁️ Genjutsu');
+                
                 card.innerHTML = `
-                    <h3>${clan.icon} ${clan.name}</h3>
-                    <p>${clan.description}</p>
-                    <div class="clan-stats">
-                        <div class="stat">❤️ HP: ${clan.hp}</div>
-                        <div class="stat">💙 Chakra: ${clan.chakra}</div>
-                        <div class="stat">👊 Taijutsu: ${clan.taijutsu}</div>
-                        <div class="stat">🌀 Ninjutsu: ${clan.ninjutsu}</div>
-                        <div class="stat">👁️ Genjutsu: ${clan.genjutsu}</div>
+                    <div class="clan-card-header" style="background: linear-gradient(135deg, ${this.getClanColor(clanKey, true)}, ${this.getClanColor(clanKey, false)})">
+                        <h3 style="margin: 0;">${clan.icon} ${clan.name}</h3>
+                        <div class="clan-stat-pill">❤️ ${clan.hp}</div>
+                        <div class="clan-stat-pill">💙 ${clan.chakra}</div>
+                        <div class="clan-stat-pill">${topStatName.split(' ')[0]} ${topStat}</div>
+                    </div>
+                    <div class="clan-card-body">
+                        <div class="clan-stats">
+                            <div class="stat">
+                                <span>❤️ HP</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: ${(clan.hp / maxStats.hp) * 100}%;"></div>
+                                </div>
+                                <span>${clan.hp}</span>
+                            </div>
+                            <div class="stat">
+                                <span>💙 Chakra</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: ${(clan.chakra / maxStats.chakra) * 100}%;"></div>
+                                </div>
+                                <span>${clan.chakra}</span>
+                            </div>
+                            <div class="stat">
+                                <span>👊 Taijutsu</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: ${(clan.taijutsu / maxStats.taijutsu) * 100}%;"></div>
+                                </div>
+                                <span>${clan.taijutsu}</span>
+                            </div>
+                            <div class="stat">
+                                <span>🌀 Ninjutsu</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: ${(clan.ninjutsu / maxStats.ninjutsu) * 100}%;"></div>
+                                </div>
+                                <span>${clan.ninjutsu}</span>
+                            </div>
+                            <div class="stat">
+                                <span>👁️ Genjutsu</span>
+                                <div class="stat-bar">
+                                    <div class="stat-fill" style="width: ${(clan.genjutsu / maxStats.genjutsu) * 100}%;"></div>
+                                </div>
+                                <span>${clan.genjutsu}</span>
+                            </div>
+                            <p style="margin-top: 12px; color: var(--muted); font-size: 0.9em; font-style: italic;">${clan.description}</p>
+                        </div>
                     </div>
                 `;
                 
@@ -81,6 +124,18 @@ rollDice(sides = 20) {
             
             this.showScreen('clan-screen');
         },
+
+        getClanColor(clanKey, light = true) {
+            const colors = {
+                'uchiha': { light: 'rgba(231, 76, 60, 0.2)', dark: 'rgba(192, 57, 43, 0.2)' },
+                'hyuga': { light: 'rgba(52, 152, 219, 0.2)', dark: 'rgba(41, 128, 185, 0.2)' },
+                'nara': { light: 'rgba(46, 204, 113, 0.2)', dark: 'rgba(39, 174, 96, 0.2)' },
+                'yamanaka': { light: 'rgba(155, 89, 182, 0.2)', dark: 'rgba(142, 68, 173, 0.2)' },
+                'akimichi': { light: 'rgba(230, 126, 34, 0.2)', dark: 'rgba(211, 84, 0, 0.2)' },
+            };
+            const color = colors[clanKey] || { light: 'rgba(74, 85, 131, 0.2)', dark: 'rgba(45, 53, 97, 0.2)' };
+            return light ? color.light : color.dark;
+        }
 
         selectClan(clanKey) {
             const clan = this.clans[clanKey];
@@ -201,11 +256,20 @@ rollDice(sides = 20) {
             this.showScreen('kekkei-screen');
 
             const resultDiv = document.getElementById('kekkei-result');
+            const continueBtn = document.getElementById('kekkei-continue-btn');
+            
             if (resultDiv) {
-                resultDiv.style.background = 'linear-gradient(135deg, #ffd700 0%, #ff8c00 100%)';
-                resultDiv.innerHTML = `<h2>🌟 Preparando el destino de tu linaje... 🌟</h2>`;
+                resultDiv.className = 'kekkei-genkai-notification';
+                resultDiv.innerHTML = `<h2>🌟 Realizando Sorteo de Kekkei Genkai... 🌟</h2>`;
+            }
+            
+            if (continueBtn) {
+                continueBtn.disabled = true;
+                continueBtn.style.opacity = '0.4';
+                continueBtn.style.cursor = 'not-allowed';
             }
 
+            // Delay dramático de 1.5 segundos para que se lea el mensaje
             setTimeout(() => {
                 const out = outcome || { kind: 'rolled_lose' };
                 const kg = out.kg || null;
@@ -218,44 +282,51 @@ rollDice(sides = 20) {
                     this.applyKekkeiGenkaiBonuses();
 
                     if (resultDiv) {
+                        resultDiv.className = 'kekkei-genkai-notification granted';
                         resultDiv.innerHTML = `
                             <h2>🌟 ¡KEKKEI GENKAI ANCESTRAL! 🌟</h2>
-                            <h1 style="font-size: 2.5em; margin: 20px 0;">${kg.name}</h1>
-                            <p style="font-size: 1.2em;">${kg.levels?.[0]?.name || ''}</p>
-                            <p style="margin-top: 15px; color: #000;">¡Tu clan posee este poder ancestral!</p>
+                            <div style="font-size: 2.8em; margin: 20px 0; font-weight: 900; letter-spacing: 1px;">${kg.name}</div>
+                            <p style="font-size: 1.3em; font-weight: 600;">${kg.levels?.[0]?.name || ''}</p>
+                            <p style="margin-top: 16px;">¡Tu clan posee este poder ancestral!</p>
                         `;
                     }
-                    return;
-                }
-
-                if (out.kind === 'rolled_win' && kg) {
+                } else if (out.kind === 'rolled_win' && kg) {
                     this.player.kekkeiGenkai = kg;
                     this.player.kekkeiLevel = 1;
                     this.player.kekkeiExp = 0;
                     this.applyKekkeiGenkaiBonuses();
 
                     if (resultDiv) {
+                        resultDiv.className = 'kekkei-genkai-notification granted';
                         resultDiv.innerHTML = `
                             <h2>🌟 ¡KEKKEI GENKAI DESBLOQUEADO! 🌟</h2>
-                            <h1 style="font-size: 2.5em; margin: 20px 0;">${kg.name}</h1>
-                            <p style="font-size: 1.2em;">${kg.levels?.[0]?.name || ''}</p>
-                            <p style="margin-top: 15px; color: #000;">¡Fuiste bendecido! ${chanceText ? `(${chanceText})` : ''}</p>
+                            <div style="font-size: 2.8em; margin: 20px 0; font-weight: 900; letter-spacing: 1px;">${kg.name}</div>
+                            <p style="font-size: 1.3em; font-weight: 600;">${kg.levels?.[0]?.name || ''}</p>
+                            <p style="margin-top: 16px;">¡Fuiste bendecido! ${chanceText ? `(${chanceText} chance)` : ''}</p>
                         `;
                     }
-                    return;
+                } else {
+                    // Lose - no kekkei
+                    if (resultDiv) {
+                        resultDiv.className = 'kekkei-genkai-notification';
+                        resultDiv.style.background = 'linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%)';
+                        resultDiv.innerHTML = `
+                            <h2>🍂 Sorteo de Kekkei Genkai 🍂</h2>
+                            <p style="font-size: 1.3em; margin: 20px 0; font-weight: 600;">No obtuviste Kekkei Genkai.</p>
+                            <p style="margin-bottom: 12px;">Los Kekkei Genkai son extremadamente raros.</p>
+                            <p>Tu determinación y trabajo duro te harán fuerte.</p>
+                            ${chanceText ? `<p style="margin-top: 16px; opacity: 0.85;">Probabilidad: ${chanceText}</p>` : ''}
+                        `;
+                    }
                 }
-
-                // Lose
-                if (resultDiv) {
-                    resultDiv.innerHTML = `
-                        <h2>Sorteo de Kekkei Genkai</h2>
-                        <p style="font-size: 1.2em; margin: 20px 0;">No obtuviste Kekkei Genkai.</p>
-                        <p>Los Kekkei Genkai son extremadamente raros. Tu determinación te hará fuerte.</p>
-                        ${chanceText ? `<p style="margin-top: 12px; color: rgba(0,0,0,0.75)">Probabilidad: ${chanceText}</p>` : ''}
-                    `;
-                    resultDiv.style.background = 'linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%)';
+                
+                // Habilitar botón después de la animación
+                if (continueBtn) {
+                    continueBtn.disabled = false;
+                    continueBtn.style.opacity = '1';
+                    continueBtn.style.cursor = 'pointer';
                 }
-            }, 900);
+            }, 1500);
         },
 
         applyKekkeiGenkaiBonuses() {
@@ -294,13 +365,23 @@ rollDice(sides = 20) {
 
         updateVillageUI() {
             document.getElementById('player-name-village').textContent = `${this.getPlayerDisplayName()}`;
+            
+            const clanDisplay = document.getElementById('player-clan-village');
+            if (clanDisplay && this.player.clanKey) {
+                const clan = this.clans[this.player.clanKey];
+                clanDisplay.textContent = `${clan.icon} ${clan.name}`;
+            }
+            
             document.getElementById('player-rank').textContent = this.player.rank;
             document.getElementById('player-level-village').textContent = this.player.level;
             document.getElementById('player-ryo').textContent = this.player.ryo;
             document.getElementById('player-exp-village').textContent = `${this.player.exp}/${this.player.expToNext}`;
             
-            this.updateBar('village-health-bar', this.player.hp, this.player.maxHp, 'HP');
-            this.updateBar('village-chakra-bar', this.player.chakra, this.player.maxChakra, 'Chakra');
+            document.getElementById('village-health-text').textContent = `${Math.max(0, Math.floor(this.player.hp))}/${this.player.maxHp}`;
+            document.getElementById('village-chakra-text').textContent = `${Math.max(0, Math.floor(this.player.chakra))}/${this.player.maxChakra}`;
+            
+            this.updateBar('village-health-bar', this.player.hp, this.player.maxHp);
+            this.updateBar('village-chakra-bar', this.player.chakra, this.player.maxChakra);
             
             const kekkeiDisplay = document.getElementById('kekkei-display');
             if (this.player.kekkeiGenkai) {
@@ -348,11 +429,10 @@ rollDice(sides = 20) {
             this.showExamCountdown();
         },
 
-        updateBar(elementId, current, max, label) {
+        updateBar(elementId, current, max) {
             const bar = document.getElementById(elementId);
             const percentage = (current / max) * 100;
-            bar.style.width = percentage + '%';
-            bar.textContent = `${label}: ${Math.max(0, Math.floor(current))}/${max}`;
+            bar.style.width = Math.max(0, Math.min(100, percentage)) + '%';
         },
 
         // -----------------------------
