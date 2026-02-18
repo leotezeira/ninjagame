@@ -3075,8 +3075,12 @@ export function createGame() {
         },
 
         showSection(name) {
+            console.log('showSection called with:', name);
+            
             // Quitar clase active de todas las secciones
-            document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.section-content').forEach(s => {
+                s.classList.remove('active');
+            });
             
             // Quitar clase active de botones de sidebar
             document.querySelectorAll('#sidebar .sidebar-nav-item').forEach(b => b.classList.remove('active'));
@@ -3086,10 +3090,14 @@ export function createGame() {
             
             // Activar la sección target
             const target = document.getElementById('section-' + name);
+            console.log('Target element:', target);
+            
             if (target) {
                 target.classList.add('active');
+                console.log('Section activated:', name, target.classList);
             } else {
                 console.error('Section not found: section-' + name);
+                return;
             }
             
             // Activar botón del sidebar
@@ -3114,9 +3122,11 @@ export function createGame() {
                 this.showAcademy('genin');
                 this.showTraining();
             } else if (name === 'shop') {
+                console.log('Calling showShop');
                 this.showShop();
                 this.updateShopRyoDisplay();
             } else if (name === 'statspage') {
+                console.log('Calling showStats');
                 this.showStats();
             }
         },
@@ -4730,10 +4740,20 @@ export function createGame() {
         },
 
         showStats() {
+            console.log('showStats called');
             const statsDisplay = document.getElementById('stats-display');
+            if (!statsDisplay) {
+                console.error('stats-display element not found');
+                return;
+            }
+            if (!this.player) {
+                statsDisplay.innerHTML = '<div class="shop-empty">Error: No hay jugador activo.</div>';
+                return;
+            }
+            console.log('Rendering stats for:', this.player.name);
             statsDisplay.innerHTML = `
                 <div class="player-info">
-                    <h3 style="color: #ff8c00;">${this.getPlayerDisplayName()}</h3>
+                    <h3 style="color: var(--accent-primary);">${this.getPlayerDisplayName()}</h3>
                     <div class="info-grid">
                         <div class="info-item">❤️ HP: ${Math.floor(this.player.hp)}/${this.player.maxHp}</div>
                         <div class="info-item">💙 Chakra: ${Math.floor(this.player.chakra)}/${this.player.maxChakra}</div>
@@ -4746,12 +4766,12 @@ export function createGame() {
                         <div class="info-item">🏆 Combates: ${this.player.combatsWon}</div>
                     </div>
                     <div style="margin-top: 20px;">
-                        <h4 style="color: #ff8c00;">📚 Jutsus Aprendidos (${this.player.learnedJutsus.length})</h4>
+                        <h4 style="color: var(--accent-primary);">📚 Jutsus Aprendidos (${this.player.learnedJutsus.length})</h4>
                         ${this.player.learnedJutsus.length === 0 ? '<p>Ninguno - Ve a la Academia</p>' : 
                             this.player.learnedJutsus.map(jutsu => `<div class="stat">${jutsu.name} [${jutsu.rank}]</div>`).join('')}
                     </div>
                     <div style="margin-top: 20px;">
-                        <h4 style="color: #ff8c00;">🎒 Inventario (${this.player.inventory.length})</h4>
+                        <h4 style="color: var(--accent-primary);">🎒 Inventario (${this.player.inventory.length})</h4>
                         ${this.player.inventory.length === 0 ? '<p>Vacío</p>' : 
                             this.player.inventory.map(item => `<div class="stat">${item.name}</div>`).join('')}
                     </div>

@@ -339,15 +339,20 @@ body {
     bottom: 60px; /* Espacio para el bottom-nav */
     padding: 0 !important;
     padding-top: calc(60px + env(safe-area-inset-top, 0px)) !important;
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     background: var(--bg-dark);
+}
+
+#village-screen.active {
+    display: flex !important;
 }
 
 #game-main {
     flex: 1;
     position: relative;
     overflow: hidden;
+    min-height: 0;
 }
 
 /* ============================================
@@ -355,15 +360,28 @@ body {
    ============================================ */
 .section-content {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     padding: 20px;
     overflow-y: auto;
     display: none;
     background: var(--bg-dark);
+    z-index: 1;
 }
 
 .section-content.active {
-    display: block;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 10;
+}
+
+/* Asegurar que section-shop y section-statspage tengan contenido visible */
+#section-shop.active,
+#section-statspage.active {
+    display: block !important;
 }
 
 .section-content h3 {
