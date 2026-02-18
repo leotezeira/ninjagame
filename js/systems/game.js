@@ -13,7 +13,7 @@ export function createGame() {
             document.getElementById(screenId).classList.add('active');
             
             // Controlar visibilidad de la barra de navegación
-            const bottomNav = document.querySelector('.bottom-nav');
+            const bottomNav = document.getElementById('bottom-nav');
             if (bottomNav) {
                 // Mostrar solo en village-screen
                 bottomNav.style.display = (screenId === 'village-screen') ? 'flex' : 'none';
@@ -445,7 +445,7 @@ export function createGame() {
 
         finishCharacterCreation() {
             this.showScreen('village-screen');
-            this.navigateTo('home');
+            this.showSection('home');
             this.updateVillageUI();
             this.showMissions();
             this.saveGame();
@@ -1644,7 +1644,7 @@ export function createGame() {
                     </div>
                     <div style="margin-top:10px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
                         <button class="btn btn-small btn-secondary" ${org ? '' : 'disabled'} onclick="game.leaveOrganization()">Salir</button>
-                        <button class="btn btn-small" onclick="game.activateVillageTab('missions')">Ver misiones/contratos</button>
+                        <button class="btn btn-small" onclick="game.showSection('world')">Ver misiones/contratos</button>
                     </div>
                 </div>
             `;
@@ -2021,9 +2021,9 @@ export function createGame() {
                     <button class="btn btn-small" onclick="game.restInVillage()">Descansar (instantáneo)</button>
                     <button class="btn btn-small btn-secondary" onclick="game.sleepInVillage()">Dormir (1 hora real)</button>
                     <button class="btn btn-small" onclick="game.toggleTravelPanel()">Viajar</button>
-                    <button class="btn btn-small" onclick="game.activateVillageTab('missions')">Misión</button>
-                    <button class="btn btn-small" onclick="game.activateVillageTab('training')">Entrenar</button>
-                    <button class="btn btn-small" onclick="game.activateVillageTab('shop')">Tienda</button>
+                    <button class="btn btn-small" onclick="game.showSection('world')">Misión</button>
+                    <button class="btn btn-small" onclick="game.showSection('inventory')">Entrenar</button>
+                    <button class="btn btn-small" onclick="game.showSection('shop')">Tienda</button>
                     <button class="btn btn-small" id="desert-btn" style="display:none; background: linear-gradient(135deg, #8b0000 0%, #c0392b 100%);" onclick="game.promptDesertion()">⚠️ Desertar de la Aldea</button>
                 </div>
 
@@ -2038,7 +2038,7 @@ export function createGame() {
                         <div class="info-item">🏴 Organización: <b id="hud-org"></b></div>
                     </div>
                     <div style="margin-top:10px; text-align:center;">
-                        <button class="btn btn-small" onclick="game.activateVillageTab('missions')">Contratos</button>
+                        <button class="btn btn-small" onclick="game.showSection('world')">Contratos</button>
                         <button class="btn btn-small" onclick="game.toggleBlackMarketPanel()">Mercado Negro</button>
                         <button class="btn btn-small" onclick="game.toggleOrganizationPanel()">Organización</button>
                         <button class="btn btn-small btn-secondary" onclick="game.reduceWantedLevel()">Reducir búsqueda</button>
@@ -2381,7 +2381,7 @@ export function createGame() {
         abandonExam() {
             if (!this.player?.examState?.active) {
                 this.showScreen('village-screen');
-                this.navigateTo('home');
+                this.showSection('home');
                 this.updateVillageUI();
                 return;
             }
@@ -2859,7 +2859,7 @@ export function createGame() {
             if (!st?.active) {
                 this.currentMission = null;
                 this.showScreen('village-screen');
-                this.navigateTo('home');
+                this.showSection('home');
                 this.updateVillageUI();
                 return;
             }
@@ -2920,7 +2920,7 @@ export function createGame() {
             if (!st?.active) {
                 this.currentMission = null;
                 this.showScreen('village-screen');
-                this.navigateTo('home');
+                this.showSection('home');
                 this.updateVillageUI();
                 return;
             }
@@ -2955,7 +2955,7 @@ export function createGame() {
             this.player.examState = null;
             this.saveGame();
             this.showScreen('village-screen');
-            this.navigateTo('home');
+            this.showSection('home');
             this.updateVillageUI();
             this.showMissions();
         },
@@ -2973,7 +2973,7 @@ export function createGame() {
             this.saveGame();
             alert('Has fallado el examen. Entrena más y vuelve a intentarlo (180 días).');
             this.showScreen('village-screen');
-            this.navigateTo('home');
+            this.showSection('home');
             this.updateVillageUI();
             this.showMissions();
         },
@@ -3003,39 +3003,29 @@ export function createGame() {
             else if (tabName === 'stats') this.showStats();
         },
 
-        navigateTo(section) {
-            // Ocultar todas las secciones
-            document.querySelectorAll('.nav-section').forEach(sec => sec.classList.remove('active'));
+        showSection(name) {
+            document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('#bottom-nav .nav-btn').forEach(b => b.classList.remove('active'));
             
-            // Mostrar la sección seleccionada
-            const targetSection = document.getElementById(`${section}-section`);
-            if (targetSection) {
-                targetSection.classList.add('active');
-            }
-
-            // Actualizar botones de navegación
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                const btnSection = btn.getAttribute('data-section');
-                if (btnSection === section) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
+            const target = document.getElementById('section-' + name);
+            if (target) target.classList.add('active');
+            
+            const activeBtn = document.querySelector(`#bottom-nav [data-tab="${name}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
 
             // Acciones específicas por sección
-            if (section === 'home') {
+            if (name === 'home') {
                 this.updateVillageUI();
-            } else if (section === 'world') {
+            } else if (name === 'world') {
                 this.updateWorldHUDDisplay();
-                this.showMissions(); // Mostrar misiones por defecto
-            } else if (section === 'inventory') {
+                this.showMissions();
+            } else if (name === 'inventory') {
                 this.showAcademy('genin');
                 this.showTraining();
-            } else if (section === 'shop') {
+            } else if (name === 'shop') {
                 this.showShop();
                 this.updateShopRyoDisplay();
-            } else if (section === 'stats') {
+            } else if (name === 'statspage') {
                 this.showStats();
             }
         },
@@ -3448,7 +3438,7 @@ export function createGame() {
 
             setTimeout(() => {
                 this.showScreen('village-screen');
-                this.navigateTo('world');
+                this.showSection('world');
                 this.updateVillageUI();
                 this.activateVillageTab('npcs');
                 if (npc) {
@@ -4579,7 +4569,7 @@ export function createGame() {
                     this.renderExamFromState();
                 } else {
                     this.showScreen('village-screen');
-                    this.navigateTo('home');
+                    this.showSection('home');
                     this.updateVillageUI();
                     this.showMissions();
                 }
@@ -4628,7 +4618,7 @@ export function createGame() {
         cancelMissionBriefing() {
             this.pendingMission = null;
             this.showScreen('village-screen');
-            this.navigateTo('home');
+            this.showSection('home');
         },
 
         _executeMission(mission) {
@@ -5326,7 +5316,7 @@ export function createGame() {
 
                 setTimeout(() => {
                     this.showScreen('village-screen');
-                    this.navigateTo('home');
+                    this.showSection('home');
                     this.updateVillageUI();
                     if (this.player?.travelState) {
                         this.processNextTravelDay();
@@ -5510,7 +5500,7 @@ export function createGame() {
             this.currentWave = 0;
             
             this.showScreen('village-screen');
-            this.navigateTo('home');
+            this.showSection('home');
             this.updateVillageUI();
             this.showMissions();
         },

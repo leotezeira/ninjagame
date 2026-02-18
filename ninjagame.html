@@ -98,7 +98,7 @@
     <!-- Pantalla Principal (Aldea) -->
     <div id="village-screen" class="screen">
         <!-- 🏠 SECCIÓN INICIO -->
-        <div id="home-section" class="nav-section active">
+        <div id="section-home" class="section-content active">
             <div class="player-info">
                 <h2 id="player-name-village">Ninja</h2>
                 <div class="player-info-clan" id="player-clan-village"></div>
@@ -153,7 +153,7 @@
         </div>
 
         <!-- 🗺️ SECCIÓN MUNDO -->
-        <div id="world-section" class="nav-section">
+        <div id="section-world" class="section-content">
             <h3 style="color: #ff8c00; text-align: center; margin-bottom: 20px;">🗺️ Mundo Ninja</h3>
             <div id="world-hud-display" style="margin-bottom: 20px;"></div>
             
@@ -177,7 +177,7 @@
         </div>
 
         <!-- 🎒 SECCIÓN INVENTARIO/ACADEMIA -->
-        <div id="inventory-section" class="nav-section">
+        <div id="section-inventory" class="section-content">
             <h3 style="color: #ff8c00; text-align: center; margin-bottom: 20px;">🎒 Academia & Entrenamiento</h3>
 
             <div id="academy-tab">
@@ -253,7 +253,7 @@
         </div>
 
         <!-- 🏪 SECCIÓN TIENDA -->
-        <div id="shop-section" class="nav-section">
+        <div id="section-shop" class="section-content">
             <h3 style="color: #ff8c00; text-align: center; margin-bottom: 20px;">🏪 Tienda de la Aldea</h3>
             <div style="text-align: center; margin-bottom: 15px;">
                 <span style="font-size: 1.2em;">💰 Tus Ryo: <span id="shop-ryo-display" style="color: #ffd700;">0</span></span>
@@ -262,34 +262,19 @@
         </div>
 
         <!-- ⚙️ SECCIÓN STATS -->
-        <div id="stats-section" class="nav-section">
+        <div id="section-statspage" class="section-content">
             <h3 style="color: #ff8c00; text-align: center; margin-bottom: 20px;">📊 Estadísticas & Configuración</h3>
             <div id="stats-display"></div>
         </div>
     </div>
 
     <!-- BARRA DE NAVEGACIÓN INFERIOR (siempre visible excepto en combate) -->
-    <nav class="bottom-nav">
-        <button class="nav-btn active" onclick="game.navigateTo('home')" data-section="home">
-            <span class="nav-icon">🏠</span>
-            <span class="nav-label">Inicio</span>
-        </button>
-        <button class="nav-btn" onclick="game.navigateTo('world')" data-section="world">
-            <span class="nav-icon">🗺️</span>
-            <span class="nav-label">Mundo</span>
-        </button>
-        <button class="nav-btn" onclick="game.navigateTo('inventory')" data-section="inventory">
-            <span class="nav-icon">🎒</span>
-            <span class="nav-label">Academia</span>
-        </button>
-        <button class="nav-btn" onclick="game.navigateTo('shop')" data-section="shop">
-            <span class="nav-icon">🏪</span>
-            <span class="nav-label">Tienda</span>
-        </button>
-        <button class="nav-btn" onclick="game.navigateTo('stats')" data-section="stats">
-            <span class="nav-icon">⚙️</span>
-            <span class="nav-label">Stats</span>
-        </button>
+    <nav id="bottom-nav">
+        <button class="nav-btn active" data-tab="home" onclick="game.showSection('home')">🏠<span>Inicio</span></button>
+        <button class="nav-btn" data-tab="world" onclick="game.showSection('world')">🗺️<span>Mundo</span></button>
+        <button class="nav-btn" data-tab="inventory" onclick="game.showSection('inventory')">🎒<span>Inventario</span></button>
+        <button class="nav-btn" data-tab="shop" onclick="game.showSection('shop')">🏪<span>Tienda</span></button>
+        <button class="nav-btn" data-tab="statspage" onclick="game.showSection('statspage')">⚙️<span>Stats</span></button>
     </nav>
 
     <!-- Combate -->
