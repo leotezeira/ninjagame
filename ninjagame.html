@@ -97,10 +97,47 @@
 
     <!-- Pantalla Principal (Aldea) -->
     <div id="village-screen" class="screen">
-        <div class="player-info">
-            <h2 id="player-name-village">Ninja</h2>
-            <div class="player-info-clan" id="player-clan-village"></div>
-            <div id="village-info"></div>
+        <!-- 🏠 SECCIÓN INICIO -->
+        <div id="home-section" class="nav-section active">
+            <div class="player-info">
+                <h2 id="player-name-village">Ninja</h2>
+                <div class="player-info-clan" id="player-clan-village"></div>
+                <div id="village-info"></div>
+                
+                <div class="player-bars">
+                    <div class="bar-container">
+                        <div class="bar-label">
+                            <span>❤️ Salud</span>
+                            <span id="village-health-text">100/100</span>
+                        </div>
+                        <div class="health-bar">
+                            <div class="health-fill" id="village-health-bar" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-label">
+                            <span>💙 Chakra</span>
+                            <span id="village-chakra-text">100/100</span>
+                        </div>
+                        <div class="chakra-bar">
+                            <div class="chakra-fill" id="village-chakra-bar" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-item"><span>🥷</span><span>Rango: <span id="player-rank">Genin</span></span></div>
+                    <div class="info-item"><span>⭐</span><span>Nivel: <span id="player-level-village">1</span></span></div>
+                    <div class="info-item"><span>💰</span><span>Ryo: <span id="player-ryo">100</span></span></div>
+                    <div class="info-item"><span>✨</span><span>EXP: <span id="player-exp-village">0/100</span></span></div>
+                </div>
+
+                <div id="kekkei-display" style="margin-top: 14px;"></div>
+                <div id="element-display" style="margin-top: 8px; text-align: center;"></div>
+            </div>
+
+            <div id="exam-widget"></div>
+
             <div id="village-online" class="online-panel">
                 <div class="online-header">
                     <span>🟢 En linea en tu aldea</span>
@@ -108,69 +145,42 @@
                 </div>
                 <div id="village-online-list" class="online-list"></div>
             </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 16px;">
+                <button class="btn-small btn-secondary" onclick="game.saveGame()" style="flex: 1;">💾 Guardar</button>
+                <button class="btn-small" onclick="game.sleepInVillage()" style="flex: 1;">💤 Dormir</button>
+            </div>
+        </div>
+
+        <!-- 🗺️ SECCIÓN MUNDO -->
+        <div id="world-section" class="nav-section">
+            <h3 style="color: #ff8c00; text-align: center; margin-bottom: 20px;">🗺️ Mundo Ninja</h3>
+            <div id="world-hud-display" style="margin-bottom: 20px;"></div>
             
-            <div class="player-bars">
-                <div class="bar-container">
-                    <div class="bar-label">
-                        <span>❤️ Salud</span>
-                        <span id="village-health-text">100/100</span>
-                    </div>
-                    <div class="health-bar">
-                        <div class="health-fill" id="village-health-bar" style="width: 100%;"></div>
-                    </div>
-                </div>
-                <div class="bar-container">
-                    <div class="bar-label">
-                        <span>💙 Chakra</span>
-                        <span id="village-chakra-text">100/100</span>
-                    </div>
-                    <div class="chakra-bar">
-                        <div class="chakra-fill" id="village-chakra-bar" style="width: 100%;"></div>
-                    </div>
-                </div>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="game.showTab('missions')">📜 Misiones</button>
+                <button class="tab-btn" onclick="game.showTab('npcs')">🧑‍🤝‍🧑 NPCs</button>
             </div>
 
-            <div class="info-grid">
-                <div class="info-item"><span>🥷</span><span>Rango: <span id="player-rank">Genin</span></span></div>
-                <div class="info-item"><span>⭐</span><span>Nivel: <span id="player-level-village">1</span></span></div>
-                <div class="info-item"><span>💰</span><span>Ryo: <span id="player-ryo">100</span></span></div>
-                <div class="info-item"><span>✨</span><span>EXP: <span id="player-exp-village">0/100</span></span></div>
+            <div id="missions-tab" class="tab-content active">
+                <h3 style="color: #ff8c00;">Misiones Disponibles</h3>
+                <div class="mission-list" id="mission-list"></div>
             </div>
 
-            <div id="kekkei-display" style="margin-top: 14px;"></div>
-            <div id="element-display" style="margin-top: 8px; text-align: center;"></div>
+            <div id="npcs-tab" class="tab-content">
+                <h3 style="color: #ff8c00;">🧑‍🤝‍🧑 NPCs</h3>
+                <p style="margin: 10px 0;">Conoce personajes, mejora relaciones, recibe misiones y entrenamientos únicos.</p>
+                <div id="npc-list" class="npc-list"></div>
+
+                <div id="npc-modal" class="npc-modal" style="display:none;"></div>
+            </div>
         </div>
 
-        <div id="exam-widget"></div>
+        <!-- 🎒 SECCIÓN INVENTARIO/ACADEMIA -->
+        <div id="inventory-section" class="nav-section">
+            <h3 style="color: #ff8c00; text-align: center; margin-bottom: 20px;">🎒 Academia & Entrenamiento</h3>
 
-        <div>
-            <button class="btn-small btn-secondary" onclick="game.saveGame()">💾 Guardar</button>
-            <button class="btn-small" onclick="game.restInVillage()">😴 Descansar</button>
-        </div>
-
-        <div class="tabs">
-            <button class="tab-btn active" onclick="game.showTab('missions')">📜 Misiones</button>
-            <button class="tab-btn" onclick="game.showTab('npcs')">🧑‍🤝‍🧑 NPCs</button>
-            <button class="tab-btn" onclick="game.showTab('academy')">🎓 Academia</button>
-            <button class="tab-btn" onclick="game.showTab('shop')">🏪 Tienda</button>
-            <button class="tab-btn" onclick="game.showTab('training')">💪 Entrenamiento</button>
-            <button class="tab-btn" onclick="game.showTab('stats')">📊 Stats</button>
-        </div>
-
-        <div id="missions-tab" class="tab-content active">
-            <h3 style="color: #ff8c00;">Misiones Disponibles</h3>
-            <div class="mission-list" id="mission-list"></div>
-        </div>
-
-        <div id="npcs-tab" class="tab-content">
-            <h3 style="color: #ff8c00;">🧑‍🤝‍🧑 NPCs</h3>
-            <p style="margin: 10px 0;">Conoce personajes, mejora relaciones, recibe misiones y entrenamientos únicos.</p>
-            <div id="npc-list" class="npc-list"></div>
-
-            <div id="npc-modal" class="npc-modal" style="display:none;"></div>
-        </div>
-
-        <div id="academy-tab" class="tab-content">
+            <div id="academy-tab">
             <div class="academy-header">
                 <h3>🎓 Academia Ninja</h3>
                 <p>Aprende nuevos jutsus pagando con Ryo. Los jutsus más poderosos requieren un rango ninja más alto.</p>
@@ -235,22 +245,51 @@
             <div class="academy-jutsus-container">
                 <div class="jutsu-academy-list" id="academy-jutsu-list"></div>
             </div>
+
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid rgba(255,140,0,0.3);">
+                <h3 style="color: #ff8c00; margin-bottom: 15px;">💪 Centro de Entrenamiento</h3>
+                <div class="shop-grid" id="training-list"></div>
+            </div>
         </div>
 
-        <div id="shop-tab" class="tab-content">
-            <h3 style="color: #ff8c00;">Tienda de la Aldea</h3>
+        <!-- 🏪 SECCIÓN TIENDA -->
+        <div id="shop-section" class="nav-section">
+            <h3 style="color: #ff8c00; text-align: center; margin-bottom: 20px;">🏪 Tienda de la Aldea</h3>
+            <div style="text-align: center; margin-bottom: 15px;">
+                <span style="font-size: 1.2em;">💰 Tus Ryo: <span id="shop-ryo-display" style="color: #ffd700;">0</span></span>
+            </div>
             <div class="shop-grid" id="shop-list"></div>
         </div>
 
-        <div id="training-tab" class="tab-content">
-            <h3 style="color: #ff8c00;">Centro de Entrenamiento</h3>
-            <div class="shop-grid" id="training-list"></div>
-        </div>
-
-        <div id="stats-tab" class="tab-content">
-            <h3 style="color: #ff8c00;">Tus Estadísticas</h3>
+        <!-- ⚙️ SECCIÓN STATS -->
+        <div id="stats-section" class="nav-section">
+            <h3 style="color: #ff8c00; text-align: center; margin-bottom: 20px;">📊 Estadísticas & Configuración</h3>
             <div id="stats-display"></div>
         </div>
+
+        <!-- BARRA DE NAVEGACIÓN INFERIOR -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" onclick="game.navigateTo('home')" data-section="home">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Inicio</span>
+            </button>
+            <button class="nav-btn" onclick="game.navigateTo('world')" data-section="world">
+                <span class="nav-icon">🗺️</span>
+                <span class="nav-label">Mundo</span>
+            </button>
+            <button class="nav-btn" onclick="game.navigateTo('inventory')" data-section="inventory">
+                <span class="nav-icon">🎒</span>
+                <span class="nav-label">Academia</span>
+            </button>
+            <button class="nav-btn" onclick="game.navigateTo('shop')" data-section="shop">
+                <span class="nav-icon">🏪</span>
+                <span class="nav-label">Tienda</span>
+            </button>
+            <button class="nav-btn" onclick="game.navigateTo('stats')" data-section="stats">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">Stats</span>
+            </button>
+        </nav>
     </div>
 
     <!-- Combate -->

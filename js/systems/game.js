@@ -438,6 +438,7 @@ export function createGame() {
 
         finishCharacterCreation() {
             this.showScreen('village-screen');
+            this.navigateTo('home');
             this.updateVillageUI();
             this.showMissions();
             this.saveGame();
@@ -990,6 +991,42 @@ export function createGame() {
         onRealTimeTick() {
             if (!this.player) return;
 
+            const { absoluteDay } = this.getRealTimeState();
+
+            // Detectar cambio de día
+            if (!this.player.lastProcessedDay) {
+                this.player.lastProcessedDay = absoluteDay;
+            }
+
+            if (this.player.lastProcessedDay !== absoluteDay) {
+                // Nuevo día - procesar eventos diarios
+                this.player.lastProcessedDay = absoluteDay;
+                this.player.day += 1;
+                this.player.weekday = (this.player.weekday + 1) % 7;
+
+                if (this.player.day > this.daysPerMonth) {
+                    this.player.day = 1;
+                    this.player.month += 1;
+                    if (this.player.month > this.monthsPerYear) {
+                        this.player.month = 1;
+                        this.player.year += 1;
+                    }
+                }
+
+                this.updateSeasonAndWeather(true);
+                this.applyDailyUpkeep();
+                this.checkRandomDailyEvents();
+                this.renegadeDailyTick();
+                this.checkExamDay();
+
+                // Procesar día de viaje si está viajando
+                if (this.player.travelState) {
+                    this.processNextTravelDay();
+                }
+
+                this.saveGame();
+            }
+
             // Actualizar HUD de tiempo
             this.updateWorldHUD();
 
@@ -1019,16 +1056,18 @@ export function createGame() {
             if (this.player.sleepState) return; // ya durmiendo
 
             const now = Date.now();
+            const fatigueAtStart = this.player.fatigue || 0;
             this.player.sleepState = {
                 startedAt: now,
                 hpAtStart: this.player.hp,
                 chakraAtStart: this.player.chakra,
-                maxDurationMs: this.REAL_TURN_MS * 2, // 10 minutos = 2 turnos
+                fatigueAtStart: fatigueAtStart,
+                maxDurationMs: this.REAL_TURN_MS * 2, // 1 hora (60 min) = 2 turnos de 30 min
             };
             this.saveGame();
             
             // Mostrar UI de "durmiendo..."
-            alert('💤 ¡A descansar! Te despertarás en 10 minutos o cuando recuperes energía.');
+            alert('💤 ¡A descansar! Recuperarás energía durante la próxima hora (o antes si te llenas).');
         },
 
         processSleepRegen() {
@@ -1038,7 +1077,7 @@ export function createGame() {
             const elapsed = Date.now() - s.startedAt;          // ms transcurridos
             const pct = Math.min(elapsed / s.maxDurationMs, 1); // 0.0 → 1.0
 
-            // Recuperación: 100% en 10 min → 10% por minuto
+            // Recuperación: 100% en 1 hora
             const regenPct = pct;
 
             this.player.hp = Math.min(
@@ -1049,6 +1088,10 @@ export function createGame() {
                 this.player.maxChakra,
                 s.chakraAtStart + Math.floor(this.player.maxChakra * regenPct)
             );
+            
+            // Reducir fatiga gradualmente durante el descanso (50% en 1 hora)
+            const fatigueReduction = Math.floor((s.fatigueAtStart * 0.5) * regenPct);
+            this.player.fatigue = Math.max(0, s.fatigueAtStart - fatigueReduction);
 
             this.updateVillageUI();
 
@@ -1060,7 +1103,7 @@ export function createGame() {
                 return;
             }
 
-            // Cancelar si se cumplieron los 2 turnos (10 min)
+            // Cancelar si se cumplió la duración (1 hora)
             if (elapsed >= s.maxDurationMs) {
                 this.endSleep('complete');
             }
@@ -1346,7 +1389,7 @@ export function createGame() {
             this.player.ryo -= cost;
             this.increaseWantedLevel(-1);
             this.player.karma = this.clamp((this.player.karma || 0) + 5, -100, 100);
-            this.advanceTurns(4, 'reduce_wanted');
+            // El tiempo avanza naturalmente en el sistema basado en tiempo real
             this.updateVillageUI();
             this.saveGame();
         },
@@ -1968,8 +2011,8 @@ export function createGame() {
                     <div id="hud-events" style="margin-top:6px; font-size:0.95em;"></div>
                 </div>
                 <div style="margin-top:12px; text-align:center;">
-                    <button class="btn btn-small" onclick="game.restInVillage()">Descansar (+1 turno)</button>
-                    <button class="btn btn-small btn-secondary" onclick="game.sleepInVillage()">Dormir (+2 turnos)</button>
+                    <button class="btn btn-small" onclick="game.restInVillage()">Descansar (instantáneo)</button>
+                    <button class="btn btn-small btn-secondary" onclick="game.sleepInVillage()">Dormir (1 hora real)</button>
                     <button class="btn btn-small" onclick="game.toggleTravelPanel()">Viajar</button>
                     <button class="btn btn-small" onclick="game.activateVillageTab('missions')">Misión</button>
                     <button class="btn btn-small" onclick="game.activateVillageTab('training')">Entrenar</button>
@@ -2331,6 +2374,7 @@ export function createGame() {
         abandonExam() {
             if (!this.player?.examState?.active) {
                 this.showScreen('village-screen');
+                this.navigateTo('home');
                 this.updateVillageUI();
                 return;
             }
@@ -2808,6 +2852,7 @@ export function createGame() {
             if (!st?.active) {
                 this.currentMission = null;
                 this.showScreen('village-screen');
+                this.navigateTo('home');
                 this.updateVillageUI();
                 return;
             }
@@ -2868,6 +2913,7 @@ export function createGame() {
             if (!st?.active) {
                 this.currentMission = null;
                 this.showScreen('village-screen');
+                this.navigateTo('home');
                 this.updateVillageUI();
                 return;
             }
@@ -2902,6 +2948,7 @@ export function createGame() {
             this.player.examState = null;
             this.saveGame();
             this.showScreen('village-screen');
+            this.navigateTo('home');
             this.updateVillageUI();
             this.showMissions();
         },
@@ -2919,6 +2966,7 @@ export function createGame() {
             this.saveGame();
             alert('Has fallado el examen. Entrena más y vuelve a intentarlo (180 días).');
             this.showScreen('village-screen');
+            this.navigateTo('home');
             this.updateVillageUI();
             this.showMissions();
         },
@@ -2946,6 +2994,120 @@ export function createGame() {
             else if (tabName === 'shop') this.showShop();
             else if (tabName === 'training') this.showTraining();
             else if (tabName === 'stats') this.showStats();
+        },
+
+        navigateTo(section) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.nav-section').forEach(sec => sec.classList.remove('active'));
+            
+            // Mostrar la sección seleccionada
+            const targetSection = document.getElementById(`${section}-section`);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            // Actualizar botones de navegación
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const btnSection = btn.getAttribute('data-section');
+                if (btnSection === section) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Acciones específicas por sección
+            if (section === 'home') {
+                this.updateVillageUI();
+            } else if (section === 'world') {
+                this.updateWorldHUDDisplay();
+                this.showMissions(); // Mostrar misiones por defecto
+            } else if (section === 'inventory') {
+                this.showAcademy('genin');
+                this.showTraining();
+            } else if (section === 'shop') {
+                this.showShop();
+                this.updateShopRyoDisplay();
+            } else if (section === 'stats') {
+                this.showStats();
+            }
+        },
+
+        updateWorldHUDDisplay() {
+            const display = document.getElementById('world-hud-display');
+            if (!display || !this.player) return;
+
+            const timeOfDay = this.getTimeOfDayLabel();
+            const season = this.player.season || 'primavera';
+            const weather = this.player.weather || 'soleado';
+            const fatigue = this.player.fatigue || 0;
+            const fatiguePercent = Math.min(100, (fatigue / 100) * 100);
+
+            let html = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+                        <div style="color: #ffd700; font-size: 0.85em; margin-bottom: 4px;">📅 Fecha</div>
+                        <div>${this.player.day} ${this.getMonthName(this.player.month)}, Año ${this.player.year}</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+                        <div style="color: #ffd700; font-size: 0.85em; margin-bottom: 4px;">🕐 Hora</div>
+                        <div>${timeOfDay}</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+                        <div style="color: #ffd700; font-size: 0.85em; margin-bottom: 4px;">🌸 Estación</div>
+                        <div>${season.charAt(0).toUpperCase() + season.slice(1)}</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+                        <div style="color: #ffd700; font-size: 0.85em; margin-bottom: 4px;">☀️ Clima</div>
+                        <div>${weather.charAt(0).toUpperCase() + weather.slice(1)}</div>
+                    </div>
+                </div>
+            `;
+
+            if (fatigue > 0) {
+                html += `
+                    <div style="margin-top: 12px; background: rgba(192, 57, 43, 0.2); padding: 10px; border-radius: 8px; border-left: 3px solid #e74c3c;">
+                        <div style="color: #ff7f66; font-size: 0.85em; margin-bottom: 6px;">😰 Fatiga</div>
+                        <div style="background: rgba(0,0,0,0.4); height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #e74c3c, #c0392b); height: 100%; width: ${fatiguePercent}%;"></div>
+                        </div>
+                        <div style="text-align: right; font-size: 0.8em; margin-top: 4px;">${fatigue}/100</div>
+                    </div>
+                `;
+            }
+
+            if (this.player.sleepState) {
+                html += `
+                    <div style="margin-top: 12px; background: rgba(52, 152, 219, 0.2); padding: 10px; border-radius: 8px; border-left: 3px solid #3498db;">
+                        <div style="color: #5dade2;">💤 Descansando...</div>
+                    </div>
+                `;
+            }
+
+            if (this.player.travelState) {
+                const toLoc = this.locations[this.player.travelState.to];
+                html += `
+                    <div style="margin-top: 12px; background: rgba(46, 204, 113, 0.2); padding: 10px; border-radius: 8px; border-left: 3px solid #2ecc71;">
+                        <div style="color: #58d68d;">🧳 Viajando a: ${toLoc?.name || 'Destino'}</div>
+                        <div style="font-size: 0.85em; margin-top: 4px;">Días restantes: ${this.player.travelState.remainingDays}</div>
+                    </div>
+                `;
+            }
+
+            display.innerHTML = html;
+        },
+
+        getMonthName(month) {
+            const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                           'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            return months[month - 1] || 'Mes';
+        },
+
+        updateShopRyoDisplay() {
+            const ryoDisplay = document.getElementById('shop-ryo-display');
+            if (ryoDisplay && this.player) {
+                ryoDisplay.textContent = this.player.ryo || 0;
+            }
         },
 
         // -----------------------------
@@ -3279,6 +3441,7 @@ export function createGame() {
 
             setTimeout(() => {
                 this.showScreen('village-screen');
+                this.navigateTo('world');
                 this.updateVillageUI();
                 this.activateVillageTab('npcs');
                 if (npc) {
@@ -3490,7 +3653,8 @@ export function createGame() {
             const chakraCost = Math.max(1, Math.floor(this.player.maxChakra * 0.10));
             this.player.chakra = Math.max(0, this.player.chakra - chakraCost);
             this.addFatigue(5);
-            this.advanceTurns(this.turnsPerDay, 'travel');
+            // El tiempo avanza naturalmente en el sistema basado en tiempo real
+            // No llamamos a advanceTurns() porque el tiempo es controlado por getRealTimeState()
 
             // Encuentro aleatorio
             const encounterChance = this.getTravelEncounterChance(state.groupTravel);
@@ -3564,12 +3728,12 @@ export function createGame() {
 
         sleepInVillage() {
             if (!this.player) return;
-            // +2 turnos, recupera todo y reduce fatiga 50%
-            this.player.hp = this.player.maxHp;
-            this.player.chakra = this.player.maxChakra;
-            this.player.fatigue = Math.floor(this.player.fatigue * 0.5);
-            this.advanceTurns(2, 'sleep');
-            alert('😴 Dormiste 12 horas. HP/Chakra restaurados y fatiga reducida.');
+            // Iniciar proceso de dormir usando el sistema de tiempo real
+            if (this.player.sleepState) {
+                alert('Ya estás descansando.');
+                return;
+            }
+            this.startSleep();
         },
 
         showTab(tabName) {
@@ -4296,9 +4460,9 @@ export function createGame() {
                 return;
             }
             
-            // +1 turno y fatiga
+            // Fatiga por entrenamiento
             this.addFatigue(8);
-            this.advanceTurns(1, 'training');
+            // El tiempo avanza naturalmente en el sistema basado en tiempo real
 
             this.player.ryo -= finalPrice;
 
@@ -4361,12 +4525,13 @@ export function createGame() {
 
         restInVillage() {
             if (!this.player) return;
-            // +1 turno (6 horas)
+            // Descanso rápido - no avanza tiempo artificialmente
             this.player.hp = this.player.maxHp;
             this.player.chakra = this.player.maxChakra;
             this.reduceFatigue(15);
-            this.advanceTurns(1, 'rest');
-            alert('😌 Descansaste 6 horas. HP/Chakra restaurados y fatiga reducida.');
+            this.saveGame();
+            this.updateVillageUI();
+            alert('😌 Descansaste. HP/Chakra restaurados y fatiga reducida.');
         },
 
         saveGame() {
@@ -4407,6 +4572,7 @@ export function createGame() {
                     this.renderExamFromState();
                 } else {
                     this.showScreen('village-screen');
+                    this.navigateTo('home');
                     this.updateVillageUI();
                     this.showMissions();
                 }
@@ -4455,6 +4621,7 @@ export function createGame() {
         cancelMissionBriefing() {
             this.pendingMission = null;
             this.showScreen('village-screen');
+            this.navigateTo('home');
         },
 
         _executeMission(mission) {
@@ -4469,11 +4636,12 @@ export function createGame() {
                 enemies: Array.isArray(mission.enemies) ? mission.enemies.map(g => ({ ...g })) : []
             };
 
-            // Costo de tiempo (turnos) por complejidad
+            // Costo de tiempo (turnos) por complejidad - solo para cálculo de dificultad
             const rank = (clonedMission.rank || '').toUpperCase();
             const turnCostByRank = { D: 1, C: 2, B: 3, A: 4, S: 4 };
             const turnCost = clonedMission.turns ?? (turnCostByRank[rank] ?? 2);
-            this.advanceTurns(turnCost, 'mission');
+            // El tiempo avanza naturalmente en el sistema basado en tiempo real
+            // No llamamos a advanceTurns() - el tiempo pasa solo
 
             // Bonus por misión nocturna
             const isNight = this.getTimeOfDay() === 2;
@@ -5151,6 +5319,7 @@ export function createGame() {
 
                 setTimeout(() => {
                     this.showScreen('village-screen');
+                    this.navigateTo('home');
                     this.updateVillageUI();
                     if (this.player?.travelState) {
                         this.processNextTravelDay();
@@ -5334,6 +5503,7 @@ export function createGame() {
             this.currentWave = 0;
             
             this.showScreen('village-screen');
+            this.navigateTo('home');
             this.updateVillageUI();
             this.showMissions();
         },
