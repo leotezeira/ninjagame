@@ -90,16 +90,24 @@ Router.resolve = function(path) {
   else showScreen('village-screen');
 };
 
-// --- Lógica de arranque ---
+
+// --- Lógica de arranque: SIEMPRE inicia en login ---
 window.addEventListener('DOMContentLoaded', () => {
-  const user = getCurrentUser();
   Router.init();
-  if (!user) {
-    Router.navigate('/login');
-  } else {
-    Router.navigate('/inicio');
-  }
+  Router.navigate('/login');
 });
+
+// --- Login: tras éxito navega al juego ---
+window.simpleLogin = async function(username, password) {
+  if (!username || !password) throw 'Completa usuario y contraseña';
+  let { data, error } = await supabase.from('players').select('*').eq('username', username).maybeSingle();
+  if (error) throw 'Error de conexión';
+  if (!data) throw 'Usuario no encontrado';
+  if (data.password !== password) throw 'Contraseña incorrecta';
+  localStorage.setItem('ninjaUser', JSON.stringify(data));
+  Router.navigate('/inicio');
+  return data;
+}
 
 // --- Exponer funciones globales para login/register/logout ---
 window.simpleLogin = simpleLogin;
