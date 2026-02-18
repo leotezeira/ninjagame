@@ -333,7 +333,10 @@ body {
    ============================================ */
 #village-screen {
     position: fixed !important;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 60px; /* Espacio para el bottom-nav */
     padding: 0 !important;
     padding-top: calc(60px + env(safe-area-inset-top, 0px)) !important;
     display: flex;
@@ -354,7 +357,6 @@ body {
     position: absolute;
     inset: 0;
     padding: 20px;
-    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     overflow-y: auto;
     display: none;
     background: var(--bg-dark);
@@ -1601,10 +1603,53 @@ body {
 }
 
 /* ============================================
-   BOTTOM NAV - OCULTO (Ya no se usa)
+   BOTTOM NAV - Navegación inferior
    ============================================ */
 #bottom-nav {
-    display: none !important;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border-color);
+    padding: 8px 0;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+#bottom-nav .nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 11px;
+    cursor: pointer;
+    transition: var(--transition);
+    border-radius: var(--radius-sm);
+    min-width: 60px;
+}
+
+#bottom-nav .nav-btn:hover {
+    color: var(--accent-primary);
+    background: rgba(0, 212, 255, 0.1);
+}
+
+#bottom-nav .nav-btn.active {
+    color: var(--accent-primary);
+    background: rgba(0, 212, 255, 0.15);
+}
+
+#bottom-nav .nav-btn span {
+    font-size: 10px;
+    font-weight: 500;
 }
 
 /* ============================================

@@ -3075,14 +3075,30 @@ export function createGame() {
         },
 
         showSection(name) {
+            // Quitar clase active de todas las secciones
             document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
+            
+            // Quitar clase active de botones de sidebar
             document.querySelectorAll('#sidebar .sidebar-nav-item').forEach(b => b.classList.remove('active'));
             
-            const target = document.getElementById('section-' + name);
-            if (target) target.classList.add('active');
+            // Quitar clase active de botones de bottom-nav
+            document.querySelectorAll('#bottom-nav .nav-btn').forEach(b => b.classList.remove('active'));
             
-            const activeBtn = document.querySelector(`#sidebar [data-section="${name}"]`);
-            if (activeBtn) activeBtn.classList.add('active');
+            // Activar la sección target
+            const target = document.getElementById('section-' + name);
+            if (target) {
+                target.classList.add('active');
+            } else {
+                console.error('Section not found: section-' + name);
+            }
+            
+            // Activar botón del sidebar
+            const sidebarBtn = document.querySelector(`#sidebar [data-section="${name}"]`);
+            if (sidebarBtn) sidebarBtn.classList.add('active');
+            
+            // Activar botón del bottom-nav
+            const bottomNavBtn = document.querySelector(`#bottom-nav [data-tab="${name}"]`);
+            if (bottomNavBtn) bottomNavBtn.classList.add('active');
 
             // Actualizar header y sidebar
             this.updateHeader();
@@ -3922,12 +3938,22 @@ export function createGame() {
             }
 
             // Recopilar TODAS las misiones de todos los grupos
+            if (!this.missions) {
+                missionList.innerHTML = '<div class="story-text">Error: No se encontraron datos de misiones.</div>';
+                return;
+            }
+            
             const allMissions = [
                 ...(this.missions.genin || []),
                 ...(this.missions.chunin || []),
                 ...(this.missions.jonin || []),
                 ...(this.missions.kage || [])
             ];
+            
+            if (allMissions.length === 0) {
+                missionList.innerHTML = '<div class="story-text">No hay misiones configuradas.</div>';
+                return;
+            }
 
             // Agrupar misiones por rango
             const missionsByRank = this.groupMissionsByRank(allMissions);
@@ -4469,20 +4495,28 @@ export function createGame() {
 
         showShop() {
             const shopList = document.getElementById('shop-list');
-            if (!shopList) return;
+            if (!shopList) {
+                console.error('shop-list element not found');
+                return;
+            }
             
             shopList.innerHTML = '';
+            
+            // Verificar que el jugador exista
+            if (!this.player) {
+                shopList.innerHTML = '<div class="shop-empty">Error: No hay jugador activo.</div>';
+                return;
+            }
             
             if (this.player.isRenegade) {
                 shopList.innerHTML = '<div class="shop-empty">🚫 Como Renegado, la Tienda de la Aldea no te atenderá.</div>';
                 return;
             }
-            if (this.player.location !== 'konoha') {
-                shopList.innerHTML = '<div class="shop-empty">📍 La Tienda de la Aldea solo está disponible en Konoha.</div>';
-                return;
-            }
-            if (this.getTimeOfDay() === 3) {
-                shopList.innerHTML = '<div class="shop-empty">🌙 Es madrugada. La tienda está cerrada.</div>';
+
+            // Verificar que shopItems exista
+            if (!this.shopItems || !this.shopItems.consumables) {
+                shopList.innerHTML = '<div class="shop-empty">Error: No se encontraron datos de la tienda.</div>';
+                console.error('shopItems not found', this.shopItems);
                 return;
             }
 
