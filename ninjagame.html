@@ -207,6 +207,27 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Modal de Victoria -->
+            <div id="combat-victory-modal" class="modal-overlay" style="display: none; z-index: 6000;">
+                <div class="modal-content" style="text-align: center;">
+                    <h2 style="color: #00ff88;">🎉 ¡VICTORIA! 🎉</h2>
+                    <p id="combat-victory-text" style="margin: 20px 0; font-size: 1.1em;"></p>
+                    <div id="combat-victory-rewards" style="margin: 15px 0;"></div>
+                    <div id="combat-kekkei-exp-gain" style="margin: 15px 0;"></div>
+                    <button id="combat-victory-return-btn" class="btn">Regresar a la Aldea</button>
+                </div>
+            </div>
+
+            <!-- Modal de Derrota -->
+            <div id="combat-defeat-modal" class="modal-overlay" style="display: none; z-index: 6000;">
+                <div class="modal-content" style="text-align: center;">
+                    <h2 style="color: #ff4444;">💀 DERROTA 💀</h2>
+                    <p id="combat-defeat-text" style="margin: 20px 0; font-size: 1.1em;">Has caído en batalla...</p>
+                    <button id="combat-defeat-return-btn" class="btn">Regresar a la Aldea</button>
+                </div>
+            </div>
+
                     <button class="btn btn-secondary" onclick="game.wakeUp()">⏰ Despertar</button>
                 </div>
             </div>
@@ -634,6 +655,26 @@
             abandonExamBtn.addEventListener('click', function() {
                 if (typeof game !== 'undefined' && game.abandonExam) {
                     game.abandonExam();
+                }
+            });
+        }
+        
+        // Combat victory modal return button
+        const combatVictoryReturnBtn = document.getElementById('combat-victory-return-btn');
+        if (combatVictoryReturnBtn) {
+            combatVictoryReturnBtn.addEventListener('click', function() {
+                if (typeof game !== 'undefined' && game.returnToVillageFromCombat) {
+                    game.returnToVillageFromCombat();
+                }
+            });
+        }
+        
+        // Combat defeat modal return button
+        const combatDefeatReturnBtn = document.getElementById('combat-defeat-return-btn');
+        if (combatDefeatReturnBtn) {
+            combatDefeatReturnBtn.addEventListener('click', function() {
+                if (typeof game !== 'undefined' && game.returnToVillageFromCombat) {
+                    game.returnToVillageFromCombat();
                 }
             });
         }

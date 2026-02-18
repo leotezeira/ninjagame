@@ -5866,7 +5866,37 @@ export function createGame() {
             this.saveGame();
             
             setTimeout(() => {
-                this.showScreen('mission-victory-screen');
+                // Mostrar modal de victoria en lugar de pantalla completa
+                const victoryModal = document.getElementById('combat-victory-modal');
+                const victoryTextEl = document.getElementById('combat-victory-text');
+                const victoryRewardsEl = document.getElementById('combat-victory-rewards');
+                const kekkeiExpDiv = document.getElementById('combat-kekkei-exp-gain');
+                
+                if (victoryTextEl) {
+                    victoryTextEl.innerHTML = `¡Misión "${this.currentMission.name}" completada!<br>
+                        Has derrotado a ${this.totalWaves} enemigo(s).`;
+                }
+                
+                if (victoryRewardsEl) {
+                    victoryRewardsEl.innerHTML = `
+                        <div style="color: #00ff88; font-size: 1.1em;">
+                            <p>✨ +${this.currentMission.exp} EXP</p>
+                            <p>💰 +${this.currentMission.ryo} Ryo</p>
+                        </div>
+                    `;
+                }
+                
+                if (kekkeiExpDiv) {
+                    if (this.player.kekkeiGenkai && kekkeiExpGain > 0) {
+                        kekkeiExpDiv.innerHTML = `<p style="color: #ffd700;">⚡ +${kekkeiExpGain} EXP de Kekkei Genkai</p>`;
+                    } else {
+                        kekkeiExpDiv.innerHTML = '';
+                    }
+                }
+                
+                if (victoryModal) {
+                    victoryModal.style.display = 'flex';
+                }
             }, 2000);
         },
 
@@ -5942,6 +5972,49 @@ export function createGame() {
             this.showMissions();
         },
 
+        returnToVillageFromCombat() {
+            console.log('🏠 Regresando a la aldea desde combate...');
+            
+            // Ocultar modales de victoria/derrota
+            const victoryModal = document.getElementById('combat-victory-modal');
+            const defeatModal = document.getElementById('combat-defeat-modal');
+            
+            if (victoryModal) {
+                victoryModal.style.display = 'none';
+            }
+            if (defeatModal) {
+                defeatModal.style.display = 'none';
+            }
+            
+            // Limpiar variables de combate/misión
+            this.currentMission = null;
+            this.currentEnemy = null;
+            this.enemyQueue = [];
+            this.combatLog = [];
+            this.totalWaves = 0;
+            this.currentWave = 0;
+            
+            // Restaurar UI completa
+            const header = document.getElementById('game-header');
+            const bottomNav = document.getElementById('bottom-nav');
+            
+            if (header) {
+                header.style.display = '';
+                header.classList.add('visible');
+            }
+            if (bottomNav) {
+                bottomNav.style.display = '';
+            }
+            
+            console.log('✅ UI restaurada, mostrando village screen');
+            
+            // Volver a la aldea
+            this.showScreen('village-screen');
+            this.showSection('home');
+            this.updateVillageUI();
+            this.showMissions();
+        },
+
         defeat() {
             if (this.currentMission?.isExamFight) {
                 this.handleExamFightDefeat();
@@ -5951,8 +6024,19 @@ export function createGame() {
                 alert('⛓️ Has sido capturado por ANBU. Fin de tu camino renegado.');
                 try { localStorage.removeItem('ninjaRPGSave'); } catch (e) { /* ignore */ }
             }
-            this.showScreen('defeat-screen');
-        }
+            
+            // Mostrar modal de derrota en lugar de pantalla completa
+            const defeatModal = document.getElementById('combat-defeat-modal');
+            const defeatTextEl = document.getElementById('combat-defeat-text');
+            
+            if (defeatTextEl && this.currentMission) {
+                defeatTextEl.innerHTML = `Has caído en batalla durante la misión "${this.currentMission.name}".<br><br>El camino del ninja es difícil...`;
+            }
+            
+            if (defeatModal) {
+                defeatModal.style.display = 'flex';
+            }
+        },
     };
 
     // Check if there's a saved game on load
