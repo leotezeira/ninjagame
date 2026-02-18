@@ -32,7 +32,7 @@ export function createGame() {
                         input.value = '';
                         input.focus();
                         if (hint) {
-                            hint.textContent = 'Antes de elegir tu clan, escribe el nombre que sera recordado en el mundo ninja.';
+                            hint.textContent = 'Antes de elegir tu aldea, confirma el nombre que sera recordado en el mundo ninja.';
                         }
                     }
                 }
@@ -59,7 +59,7 @@ export function createGame() {
             }
 
             this.pendingName = raw.replace(/\s+/g, ' ');
-            this.showClanSelect();
+            this.showVillageSelect();
         },
 
         getPlayerDisplayName() {
@@ -70,10 +70,22 @@ export function createGame() {
         showClanSelect() {
             const container = document.getElementById('clan-select');
             container.innerHTML = '';
+
+            const villageKey = this.pendingVillage || this.player?.village || 'konoha';
+            const clanKeys = Object.keys(this.clans).filter(key => {
+                const clan = this.clans[key];
+                return !clan.village || clan.village === villageKey;
+            });
             
-            const maxStats = {hp: 150, chakra: 120, taijutsu: 100, ninjutsu: 100, genjutsu: 100};
-            
-            Object.keys(this.clans).forEach(clanKey => {
+            const maxStats = {hp: 150, chakra: 170, taijutsu: 25, ninjutsu: 23, genjutsu: 20};
+
+            if (!clanKeys.length) {
+                container.innerHTML = '<div class="story-text">No hay clanes disponibles para esta aldea.</div>';
+                this.showScreen('clan-screen');
+                return;
+            }
+
+            clanKeys.forEach(clanKey => {
                 const clan = this.clans[clanKey];
                 const card = document.createElement('div');
                 card.className = 'clan-card';
@@ -181,63 +193,14 @@ export function createGame() {
         },
 
         selectVillage(villageKey) {
-            if (!this.player) return;
-            
-            const village = this.villages[villageKey];
-            this.player.village = villageKey;
-            this.player.location = villageKey;
-            
-            // Ajustar reputación inicial según aldea
-            // Alta en la propia (~70), media en aliadas, baja en rivales, negativa en enemigas
-            this.player.reputation = {
-                konoha: 0,
-                suna: 0,
-                kiri: 0,
-                iwa: 0,
-                kumo: 0,
-                ame: 0,
-                bosque: 0,
-                olas: 0,
-                valle: 0,
-                nieve: 0
-            };
-            
-            // Reputación inicial en la aldea natal
-            this.player.reputation[villageKey] = 70;
-            
-            // Aliadas: media reputación
-            if (village.allies && Array.isArray(village.allies)) {
-                village.allies.forEach(ally => {
-                    this.player.reputation[ally] = 40;
-                });
-            }
-            
-            // Enemigas: baja/negativa reputación
-            if (village.enemies && Array.isArray(village.enemies)) {
-                village.enemies.forEach(enemy => {
-                    this.player.reputation[enemy] = -30;
-                });
-            }
-            
-            // Rivales (no aliadas, no enemigas): neutral
-            if (village.rivalVillages && Array.isArray(village.rivalVillages)) {
-                village.rivalVillages.forEach(rival => {
-                    this.player.reputation[rival] = 10;
-                });
-            }
-            
-            // Proceder con sorteo de Kekkei
-            const outcome = this.rollKekkeiGenkai(this.player.clanKey);
-            if (outcome.mode === 'skip') {
-                this.finishCharacterCreation();
-                return;
-            }
-
-            this.doKekkeiGenkaiRoll(outcome);
+            this.pendingVillage = villageKey;
+            this.showClanSelect();
         },
 
         selectClan(clanKey) {
             const clan = this.clans[clanKey];
+            const villageKey = this.pendingVillage || 'konoha';
+            const village = this.villages[villageKey];
             this.player = {
                 name: (this.pendingName || '').trim(),
                 clan: clan.name,
@@ -266,8 +229,8 @@ export function createGame() {
                 unlockedJutsus: [],
 
                 // Mundo / calendario
-                location: 'konoha',
-                village: 'konoha', // será actualizado al seleccionar aldea
+                location: villageKey,
+                village: villageKey,
                 day: 1,
                 month: 1,
                 year: 1024,
@@ -281,14 +244,14 @@ export function createGame() {
                 team: [], // hasta 2 NPCs
                 friendship: {}, // npcId -> 0..100
                 reputation: {
-                    konoha: 50,
-                    bosque: 0,
-                    olas: 0,
+                    konoha: 0,
                     suna: 0,
                     kiri: 0,
                     iwa: 0,
                     kumo: 0,
                     ame: 0,
+                    bosque: 0,
+                    olas: 0,
                     valle: 0,
                     nieve: 0
                 },
@@ -316,8 +279,34 @@ export function createGame() {
                 lastWeekProcessedForExpenses: 0
             };
 
-            // Mostrar pantalla de selección de aldea
-            this.showVillageSelect();
+            if (village) {
+                this.player.reputation[villageKey] = 70;
+                if (village.allies && Array.isArray(village.allies)) {
+                    village.allies.forEach(ally => {
+                        this.player.reputation[ally] = 40;
+                    });
+                }
+                if (village.enemies && Array.isArray(village.enemies)) {
+                    village.enemies.forEach(enemy => {
+                        this.player.reputation[enemy] = -30;
+                    });
+                }
+                if (village.rivalVillages && Array.isArray(village.rivalVillages)) {
+                    village.rivalVillages.forEach(rival => {
+                        this.player.reputation[rival] = 10;
+                    });
+                }
+            }
+
+            this.pendingVillage = null;
+
+            const outcome = this.rollKekkeiGenkai(this.player.clanKey);
+            if (outcome.mode === 'skip') {
+                this.finishCharacterCreation();
+                return;
+            }
+
+            this.doKekkeiGenkaiRoll(outcome);
         },
 
         findKekkeiByName(name) {

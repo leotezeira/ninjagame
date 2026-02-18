@@ -72,7 +72,12 @@ const initAuthSession = async () => {
     game.authUser = { id: userId };
     game.authProfile = profile;
     await markOnline(userId);
-    game.showScreen('start-screen');
+    const hasSave = localStorage.getItem('ninjaRPGSave');
+    if (hasSave) {
+        game.loadGame();
+    } else {
+        game.showNameScreen();
+    }
 };
 
 const handleRegister = async () => {
@@ -134,7 +139,7 @@ const handleRegister = async () => {
     localStorage.setItem(authSessionKey, userId);
     game.authUser = { id: userId };
     game.authProfile = await fetchProfile(userId);
-    game.showScreen('start-screen');
+    game.showNameScreen();
 };
 
 const handleLogin = async () => {
@@ -168,14 +173,17 @@ const handleLogin = async () => {
     game.authUser = { id: data.id };
     game.authProfile = await fetchProfile(data.id);
     await markOnline(data.id);
-    game.showScreen('start-screen');
+    const hasSave = localStorage.getItem('ninjaRPGSave');
+    if (hasSave) {
+        game.loadGame();
+    } else {
+        game.showNameScreen();
+    }
 };
 
 window.addEventListener('load', () => {
     try {
-        const hasSave = localStorage.getItem('ninjaRPGSave');
-        const loadBtn = document.getElementById('load-btn');
-        if (!hasSave && loadBtn) loadBtn.style.display = 'none';
+        // no-op
     } catch (e) {
         // ignore
     }

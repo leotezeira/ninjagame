@@ -638,111 +638,107 @@ export const BASE_GAME = {
         ],
         
         clans: {
-            uchiha: {
-                name: 'Uchiha',
-                icon: '🔥',
-                description: 'Clan del fuego',
-                hp: 100, chakra: 120, taijutsu: 12, ninjutsu: 18, genjutsu: 15,
-                element: 'fire'
-            },
-            uzumaki: {
-                name: 'Uzumaki',
-                icon: '🌀',
-                description: 'Vitalidad extrema',
-                hp: 140, chakra: 150, taijutsu: 15, ninjutsu: 14, genjutsu: 8,
-                element: 'wind'
-            },
-            hyuga: {
-                name: 'Hyuga',
-                icon: '👁️',
-                description: 'Visión perfecta',
-                hp: 110, chakra: 100, taijutsu: 20, ninjutsu: 10, genjutsu: 12,
-                element: 'water'
-            },
-            nara: {
-                name: 'Nara',
-                icon: '🦌',
-                description: 'Estrategas',
-                hp: 90, chakra: 110, taijutsu: 10, ninjutsu: 15, genjutsu: 18,
-                element: 'earth'
-            },
-            akimichi: {
-                name: 'Akimichi',
-                icon: '🍖',
-                description: 'Fuerza colosal',
-                hp: 150, chakra: 90, taijutsu: 18, ninjutsu: 12, genjutsu: 8,
-                element: 'earth'
-            },
-            aburame: {
-                name: 'Aburame',
-                icon: '🐛',
-                description: 'Control de insectos',
-                hp: 95, chakra: 115, taijutsu: 11, ninjutsu: 16, genjutsu: 14,
-                element: 'earth'
-            },
-            inuzuka: {
-                name: 'Inuzuka',
-                icon: '🐺',
-                description: 'Vínculo bestial',
-                hp: 115, chakra: 95, taijutsu: 17, ninjutsu: 11, genjutsu: 10,
-                element: 'earth'
-            },
-            yamanaka: {
-                name: 'Yamanaka',
-                icon: '🌸',
-                description: 'Control mental',
-                hp: 85, chakra: 125, taijutsu: 9, ninjutsu: 13, genjutsu: 20,
-                element: 'water'
-            },
-            hatake: {
-                name: 'Hatake',
-                icon: '⚡',
-                description: 'Copistas',
-                hp: 105, chakra: 130, taijutsu: 14, ninjutsu: 17, genjutsu: 13,
-                element: 'lightning'
-            },
-            senju: {
-                name: 'Senju',
-                icon: '🌳',
-                description: 'Equilibrio perfecto',
-                hp: 120, chakra: 120, taijutsu: 15, ninjutsu: 15, genjutsu: 15,
-                element: 'earth'
-            },
-            sarutobi: {
-                name: 'Sarutobi',
-                icon: '🔮',
-                description: 'Maestros elementales',
-                hp: 100, chakra: 140, taijutsu: 12, ninjutsu: 19, genjutsu: 11,
-                element: 'fire'
-            },
-            kaguya: {
-                name: 'Kaguya',
-                icon: '🦴',
-                description: 'Huesos vivientes',
-                hp: 125, chakra: 105, taijutsu: 20, ninjutsu: 10, genjutsu: 8,
-                element: 'earth'
-            },
-            yuki: {
-                name: 'Yuki',
-                icon: '❄️',
-                description: 'Hielo letal',
-                hp: 95, chakra: 130, taijutsu: 10, ninjutsu: 18, genjutsu: 12,
-                element: 'water'
-            },
-            hozuki: {
-                name: 'Hōzuki',
-                icon: '💧',
-                description: 'Cuerpo líquido',
-                hp: 110, chakra: 120, taijutsu: 13, ninjutsu: 16, genjutsu: 10,
-                element: 'water'
-            },
-            rock_lee: {
-                name: 'Sin Clan (Lee)',
-                icon: '👊',
-                description: 'Puro Taijutsu',
-                hp: 130, chakra: 50, taijutsu: 25, ninjutsu: 5, genjutsu: 5,
-                element: null
-            }
+            uchiha: { name: 'Uchiha', icon: '🔥', description: 'Clan de Konoha', hp: 100, chakra: 120, taijutsu: 12, ninjutsu: 18, genjutsu: 15, element: 'fire', village: 'konoha' },
+            uzumaki: { name: 'Uzumaki', icon: '🌀', description: 'Clan de Konoha', hp: 140, chakra: 150, taijutsu: 15, ninjutsu: 14, genjutsu: 8, element: 'wind', village: 'konoha' },
+            hyuga: { name: 'Hyuga', icon: '👁️', description: 'Clan de Konoha', hp: 110, chakra: 100, taijutsu: 20, ninjutsu: 10, genjutsu: 12, element: 'water', village: 'konoha' },
+            nara: { name: 'Nara', icon: '🦌', description: 'Clan de Konoha', hp: 90, chakra: 110, taijutsu: 10, ninjutsu: 15, genjutsu: 18, element: 'earth', village: 'konoha' },
+            akimichi: { name: 'Akimichi', icon: '🍖', description: 'Clan de Konoha', hp: 150, chakra: 90, taijutsu: 18, ninjutsu: 12, genjutsu: 8, element: 'earth', village: 'konoha' },
+            aburame: { name: 'Aburame', icon: '🐛', description: 'Clan de Konoha', hp: 95, chakra: 115, taijutsu: 11, ninjutsu: 16, genjutsu: 14, element: 'earth', village: 'konoha' },
+            inuzuka: { name: 'Inuzuka', icon: '🐺', description: 'Clan de Konoha', hp: 115, chakra: 95, taijutsu: 17, ninjutsu: 11, genjutsu: 10, element: 'earth', village: 'konoha' },
+            yamanaka: { name: 'Yamanaka', icon: '🌸', description: 'Clan de Konoha', hp: 85, chakra: 125, taijutsu: 9, ninjutsu: 13, genjutsu: 20, element: 'water', village: 'konoha' },
+            hatake: { name: 'Hatake', icon: '⚡', description: 'Clan de Konoha', hp: 105, chakra: 130, taijutsu: 14, ninjutsu: 17, genjutsu: 13, element: 'lightning', village: 'konoha' },
+            senju: { name: 'Senju', icon: '🌳', description: 'Clan de Konoha', hp: 120, chakra: 120, taijutsu: 15, ninjutsu: 15, genjutsu: 15, element: 'earth', village: 'konoha' },
+            sarutobi: { name: 'Sarutobi', icon: '🔮', description: 'Clan de Konoha', hp: 100, chakra: 140, taijutsu: 12, ninjutsu: 19, genjutsu: 11, element: 'fire', village: 'konoha' },
+            shimura: { name: 'Shimura', icon: '🩶', description: 'Clan de Konoha', hp: 95, chakra: 105, taijutsu: 13, ninjutsu: 14, genjutsu: 16, element: 'wind', village: 'konoha' },
+            namikaze: { name: 'Namikaze', icon: '💛', description: 'Clan de Konoha', hp: 105, chakra: 135, taijutsu: 16, ninjutsu: 20, genjutsu: 10, element: 'lightning', village: 'konoha' },
+            rock_lee: { name: 'Sin Clan (Lee)', icon: '👊', description: 'Sin clan de Konoha', hp: 130, chakra: 50, taijutsu: 25, ninjutsu: 5, genjutsu: 5, element: null, village: 'konoha' },
+            morino: { name: 'Morino', icon: '🗡️', description: 'Clan de Konoha', hp: 100, chakra: 110, taijutsu: 14, ninjutsu: 12, genjutsu: 17, element: 'wind', village: 'konoha' },
+            gekko: { name: 'Gakkō', icon: '🌙', description: 'Clan de Konoha', hp: 95, chakra: 120, taijutsu: 13, ninjutsu: 15, genjutsu: 15, element: 'water', village: 'konoha' },
+
+            sabaku: { name: 'Sabaku', icon: '🏜️', description: 'Clan de Suna', hp: 120, chakra: 130, taijutsu: 10, ninjutsu: 20, genjutsu: 12, element: 'wind', village: 'suna' },
+            chiyo: { name: 'Chiyo', icon: '🧵', description: 'Clan de Suna', hp: 85, chakra: 140, taijutsu: 8, ninjutsu: 18, genjutsu: 16, element: 'wind', village: 'suna' },
+            kazahana_s: { name: 'Kazahana', icon: '🌬️', description: 'Clan de Suna', hp: 100, chakra: 125, taijutsu: 12, ninjutsu: 17, genjutsu: 13, element: 'wind', village: 'suna' },
+            ryuzetsu: { name: 'Ryūzetsu', icon: '🌵', description: 'Clan de Suna', hp: 110, chakra: 115, taijutsu: 14, ninjutsu: 16, genjutsu: 12, element: 'earth', village: 'suna' },
+            tetsu_s: { name: 'Tetsu', icon: '⚒️', description: 'Clan de Suna', hp: 130, chakra: 90, taijutsu: 19, ninjutsu: 11, genjutsu: 8, element: 'earth', village: 'suna' },
+            fuma: { name: 'Fūma', icon: '🪃', description: 'Clan de Suna', hp: 115, chakra: 100, taijutsu: 18, ninjutsu: 13, genjutsu: 9, element: 'wind', village: 'suna' },
+            karura: { name: 'Karura', icon: '💨', description: 'Clan de Suna', hp: 90, chakra: 145, taijutsu: 9, ninjutsu: 19, genjutsu: 14, element: 'wind', village: 'suna' },
+            pakura_c: { name: 'Pakura', icon: '🔥', description: 'Clan de Suna', hp: 95, chakra: 135, taijutsu: 10, ninjutsu: 18, genjutsu: 15, element: 'fire', village: 'suna' },
+            taiko: { name: 'Taiko', icon: '🥁', description: 'Clan de Suna', hp: 125, chakra: 95, taijutsu: 17, ninjutsu: 12, genjutsu: 9, element: 'earth', village: 'suna' },
+            maki_s: { name: 'Maki', icon: '🎋', description: 'Clan de Suna', hp: 100, chakra: 110, taijutsu: 15, ninjutsu: 14, genjutsu: 13, element: 'wind', village: 'suna' },
+            yatai: { name: 'Yatai', icon: '🌪️', description: 'Clan de Suna', hp: 105, chakra: 120, taijutsu: 13, ninjutsu: 16, genjutsu: 13, element: 'wind', village: 'suna' },
+            kankuro_c: { name: 'Kankurō', icon: '🎭', description: 'Clan de Suna', hp: 90, chakra: 130, taijutsu: 11, ninjutsu: 17, genjutsu: 14, element: 'earth', village: 'suna' },
+            sunagakure_j: { name: 'Jōmae', icon: '☀️', description: 'Clan de Suna', hp: 110, chakra: 105, taijutsu: 16, ninjutsu: 13, genjutsu: 13, element: 'fire', village: 'suna' },
+            ishidate: { name: 'Ishidate', icon: '💎', description: 'Clan de Suna', hp: 120, chakra: 100, taijutsu: 17, ninjutsu: 14, genjutsu: 10, element: 'earth', village: 'suna' },
+            moryo: { name: 'Mōryō', icon: '👁️', description: 'Clan de Suna', hp: 85, chakra: 150, taijutsu: 8, ninjutsu: 20, genjutsu: 15, element: 'wind', village: 'suna' },
+            no_clan_s: { name: 'Sin Clan (Suna)', icon: '🌾', description: 'Sin clan de Suna', hp: 110, chakra: 100, taijutsu: 16, ninjutsu: 13, genjutsu: 9, element: 'wind', village: 'suna' },
+
+            hozuki: { name: 'Hōzuki', icon: '💧', description: 'Clan de Kiri', hp: 110, chakra: 120, taijutsu: 13, ninjutsu: 16, genjutsu: 10, element: 'water', village: 'kiri' },
+            yuki: { name: 'Yuki', icon: '❄️', description: 'Clan de Kiri', hp: 95, chakra: 130, taijutsu: 10, ninjutsu: 18, genjutsu: 12, element: 'water', village: 'kiri' },
+            kaguya: { name: 'Kaguya', icon: '🦴', description: 'Clan de Kiri', hp: 125, chakra: 105, taijutsu: 20, ninjutsu: 10, genjutsu: 8, element: 'earth', village: 'kiri' },
+            momochi: { name: 'Momochi', icon: '🗡️', description: 'Clan de Kiri', hp: 120, chakra: 100, taijutsu: 21, ninjutsu: 11, genjutsu: 7, element: 'water', village: 'kiri' },
+            terumi: { name: 'Terumi', icon: '🌋', description: 'Clan de Kiri', hp: 100, chakra: 135, taijutsu: 11, ninjutsu: 19, genjutsu: 13, element: 'fire', village: 'kiri' },
+            hoshigaki: { name: 'Hoshigaki', icon: '🦈', description: 'Clan de Kiri', hp: 140, chakra: 115, taijutsu: 18, ninjutsu: 15, genjutsu: 6, element: 'water', village: 'kiri' },
+            suigetsu_c: { name: 'Suigetsu', icon: '🌊', description: 'Clan de Kiri', hp: 105, chakra: 125, taijutsu: 14, ninjutsu: 17, genjutsu: 10, element: 'water', village: 'kiri' },
+            ao_c: { name: 'Ao', icon: '🔵', description: 'Clan de Kiri', hp: 90, chakra: 130, taijutsu: 10, ninjutsu: 16, genjutsu: 16, element: 'water', village: 'kiri' },
+            mangetsu: { name: 'Mangetsu', icon: '🌕', description: 'Clan de Kiri', hp: 115, chakra: 120, taijutsu: 17, ninjutsu: 15, genjutsu: 10, element: 'water', village: 'kiri' },
+            jinin: { name: 'Jinin', icon: '💀', description: 'Clan de Kiri', hp: 125, chakra: 95, taijutsu: 20, ninjutsu: 12, genjutsu: 7, element: 'lightning', village: 'kiri' },
+            kushimaru: { name: 'Kushimaru', icon: '🧵', description: 'Clan de Kiri', hp: 110, chakra: 105, taijutsu: 19, ninjutsu: 12, genjutsu: 8, element: 'water', village: 'kiri' },
+            ameyuri: { name: 'Ameyuri', icon: '⚡', description: 'Clan de Kiri', hp: 100, chakra: 125, taijutsu: 15, ninjutsu: 17, genjutsu: 10, element: 'lightning', village: 'kiri' },
+            jinpachi: { name: 'Jinpachi', icon: '💣', description: 'Clan de Kiri', hp: 120, chakra: 110, taijutsu: 17, ninjutsu: 15, genjutsu: 7, element: 'fire', village: 'kiri' },
+            fuguki: { name: 'Fuguki', icon: '🐡', description: 'Clan de Kiri', hp: 135, chakra: 100, taijutsu: 19, ninjutsu: 13, genjutsu: 6, element: 'water', village: 'kiri' },
+            utakata_c: { name: 'Utakata', icon: '🫧', description: 'Clan de Kiri', hp: 100, chakra: 140, taijutsu: 11, ninjutsu: 18, genjutsu: 13, element: 'water', village: 'kiri' },
+            no_clan_k: { name: 'Sin Clan (Kiri)', icon: '🌫️', description: 'Sin clan de Kiri', hp: 120, chakra: 100, taijutsu: 18, ninjutsu: 13, genjutsu: 7, element: 'water', village: 'kiri' },
+
+            kaguya_iwa: { name: 'Kaguya (Iwa)', icon: '🦴', description: 'Clan de Iwa', hp: 130, chakra: 95, taijutsu: 21, ninjutsu: 9, genjutsu: 7, element: 'earth', village: 'iwa' },
+            tsuchikage_c: { name: 'Tsuchikage', icon: '🪨', description: 'Clan de Iwa', hp: 120, chakra: 120, taijutsu: 14, ninjutsu: 18, genjutsu: 10, element: 'earth', village: 'iwa' },
+            akatsuchi: { name: 'Akatsuchi', icon: '🔴', description: 'Clan de Iwa', hp: 145, chakra: 95, taijutsu: 20, ninjutsu: 12, genjutsu: 6, element: 'earth', village: 'iwa' },
+            kurotsuchi: { name: 'Kurotsuchi', icon: '🌋', description: 'Clan de Iwa', hp: 110, chakra: 120, taijutsu: 16, ninjutsu: 17, genjutsu: 10, element: 'fire', village: 'iwa' },
+            deidara_c: { name: 'Deidara', icon: '💥', description: 'Clan de Iwa', hp: 95, chakra: 140, taijutsu: 10, ninjutsu: 22, genjutsu: 8, element: 'wind', village: 'iwa' },
+            gari: { name: 'Gari', icon: '⚡', description: 'Clan de Iwa', hp: 115, chakra: 110, taijutsu: 17, ninjutsu: 15, genjutsu: 8, element: 'lightning', village: 'iwa' },
+            roshi_c: { name: 'Rōshi', icon: '🌋', description: 'Clan de Iwa', hp: 130, chakra: 105, taijutsu: 18, ninjutsu: 14, genjutsu: 7, element: 'fire', village: 'iwa' },
+            han_c: { name: 'Han', icon: '💨', description: 'Clan de Iwa', hp: 140, chakra: 100, taijutsu: 19, ninjutsu: 13, genjutsu: 6, element: 'wind', village: 'iwa' },
+            ishikawa: { name: 'Ishikawa', icon: '⛏️', description: 'Clan de Iwa', hp: 125, chakra: 110, taijutsu: 17, ninjutsu: 15, genjutsu: 8, element: 'earth', village: 'iwa' },
+            sekiei: { name: 'Sekiei', icon: '💎', description: 'Clan de Iwa', hp: 135, chakra: 95, taijutsu: 20, ninjutsu: 12, genjutsu: 6, element: 'earth', village: 'iwa' },
+            kokuyo: { name: 'Kokuyō', icon: '🖤', description: 'Clan de Iwa', hp: 120, chakra: 105, taijutsu: 18, ninjutsu: 14, genjutsu: 8, element: 'earth', village: 'iwa' },
+            tetsu_iwa: { name: 'Tetsu (Iwa)', icon: '🛡️', description: 'Clan de Iwa', hp: 150, chakra: 85, taijutsu: 22, ninjutsu: 10, genjutsu: 5, element: 'earth', village: 'iwa' },
+            kamizuru: { name: 'Kamizuru', icon: '🐝', description: 'Clan de Iwa', hp: 95, chakra: 130, taijutsu: 10, ninjutsu: 18, genjutsu: 14, element: 'earth', village: 'iwa' },
+            minami: { name: 'Minami', icon: '🔩', description: 'Clan de Iwa', hp: 110, chakra: 115, taijutsu: 15, ninjutsu: 16, genjutsu: 11, element: 'earth', village: 'iwa' },
+            hayabusa: { name: 'Hayabusa', icon: '🌪️', description: 'Clan de Iwa', hp: 100, chakra: 120, taijutsu: 14, ninjutsu: 17, genjutsu: 11, element: 'wind', village: 'iwa' },
+            no_clan_iwa: { name: 'Sin Clan (Iwa)', icon: '⛰️', description: 'Sin clan de Iwa', hp: 130, chakra: 90, taijutsu: 19, ninjutsu: 12, genjutsu: 7, element: 'earth', village: 'iwa' },
+
+            yotsuki: { name: 'Yotsuki', icon: '⚡', description: 'Clan de Kumo', hp: 120, chakra: 125, taijutsu: 18, ninjutsu: 16, genjutsu: 8, element: 'lightning', village: 'kumo' },
+            killer_c: { name: 'Killer B', icon: '🎤', description: 'Clan de Kumo', hp: 130, chakra: 120, taijutsu: 20, ninjutsu: 15, genjutsu: 7, element: 'lightning', village: 'kumo' },
+            darui_c: { name: 'Darui', icon: '🌩️', description: 'Clan de Kumo', hp: 115, chakra: 130, taijutsu: 15, ninjutsu: 18, genjutsu: 10, element: 'lightning', village: 'kumo' },
+            yugito_c: { name: 'Yugito', icon: '🐱', description: 'Clan de Kumo', hp: 110, chakra: 140, taijutsu: 14, ninjutsu: 18, genjutsu: 11, element: 'fire', village: 'kumo' },
+            omoi_c: { name: 'Omoi', icon: '⚔️', description: 'Clan de Kumo', hp: 120, chakra: 110, taijutsu: 19, ninjutsu: 14, genjutsu: 9, element: 'lightning', village: 'kumo' },
+            karui_c: { name: 'Karui', icon: '🗡️', description: 'Clan de Kumo', hp: 115, chakra: 105, taijutsu: 20, ninjutsu: 13, genjutsu: 9, element: 'lightning', village: 'kumo' },
+            samui_c: { name: 'Samui', icon: '🧊', description: 'Clan de Kumo', hp: 105, chakra: 120, taijutsu: 16, ninjutsu: 16, genjutsu: 11, element: 'water', village: 'kumo' },
+            dodai_c: { name: 'Dodai', icon: '🌿', description: 'Clan de Kumo', hp: 110, chakra: 125, taijutsu: 13, ninjutsu: 17, genjutsu: 13, element: 'earth', village: 'kumo' },
+            atsui_c: { name: 'Atsui', icon: '🔥', description: 'Clan de Kumo', hp: 125, chakra: 100, taijutsu: 20, ninjutsu: 13, genjutsu: 8, element: 'fire', village: 'kumo' },
+            toroi_c: { name: 'Toroi', icon: '🧲', description: 'Clan de Kumo', hp: 100, chakra: 135, taijutsu: 12, ninjutsu: 18, genjutsu: 13, element: 'lightning', village: 'kumo' },
+            raikage_c: { name: 'Raikage', icon: '💪', description: 'Clan de Kumo', hp: 145, chakra: 105, taijutsu: 23, ninjutsu: 12, genjutsu: 6, element: 'lightning', village: 'kumo' },
+            kinkaku_c: { name: 'Kinkaku', icon: '🌟', description: 'Clan de Kumo', hp: 125, chakra: 120, taijutsu: 17, ninjutsu: 16, genjutsu: 9, element: 'lightning', village: 'kumo' },
+            ginkaku_c: { name: 'Ginkaku', icon: '🌙', description: 'Clan de Kumo', hp: 120, chakra: 125, taijutsu: 16, ninjutsu: 17, genjutsu: 9, element: 'wind', village: 'kumo' },
+            mabui_c: { name: 'Mabui', icon: '💫', description: 'Clan de Kumo', hp: 90, chakra: 145, taijutsu: 10, ninjutsu: 19, genjutsu: 14, element: 'lightning', village: 'kumo' },
+            ringo_c: { name: 'Ringo', icon: '⚡', description: 'Clan de Kumo', hp: 110, chakra: 120, taijutsu: 17, ninjutsu: 15, genjutsu: 10, element: 'lightning', village: 'kumo' },
+            no_clan_kumo: { name: 'Sin Clan (Kumo)', icon: '☁️', description: 'Sin clan de Kumo', hp: 125, chakra: 100, taijutsu: 19, ninjutsu: 13, genjutsu: 7, element: 'lightning', village: 'kumo' },
+
+            pein_c: { name: 'Pein', icon: '👁️', description: 'Clan de Ame', hp: 95, chakra: 160, taijutsu: 10, ninjutsu: 22, genjutsu: 15, element: 'water', village: 'ame' },
+            konan_c: { name: 'Konan', icon: '📄', description: 'Clan de Ame', hp: 90, chakra: 155, taijutsu: 9, ninjutsu: 20, genjutsu: 16, element: 'water', village: 'ame' },
+            yahiko_c: { name: 'Yahiko', icon: '🌧️', description: 'Clan de Ame', hp: 110, chakra: 130, taijutsu: 14, ninjutsu: 17, genjutsu: 12, element: 'water', village: 'ame' },
+            hanzo_c: { name: 'Hanzō', icon: '☠️', description: 'Clan de Ame', hp: 125, chakra: 110, taijutsu: 18, ninjutsu: 15, genjutsu: 10, element: 'wind', village: 'ame' },
+            ame_shinobi: { name: 'Ame Shinobi', icon: '💦', description: 'Clan de Ame', hp: 100, chakra: 120, taijutsu: 14, ninjutsu: 16, genjutsu: 13, element: 'water', village: 'ame' },
+            kuriarare: { name: 'Kuriarare', icon: '🔩', description: 'Clan de Ame', hp: 115, chakra: 105, taijutsu: 17, ninjutsu: 14, genjutsu: 11, element: 'earth', village: 'ame' },
+            nagato_c: { name: 'Nagato', icon: '🌑', description: 'Clan de Ame', hp: 90, chakra: 170, taijutsu: 8, ninjutsu: 23, genjutsu: 16, element: 'water', village: 'ame' },
+            fuma_ame: { name: 'Fūma (Ame)', icon: '🪃', description: 'Clan de Ame', hp: 110, chakra: 110, taijutsu: 16, ninjutsu: 15, genjutsu: 12, element: 'wind', village: 'ame' },
+            ame_mist: { name: 'Kiri no Ko', icon: '🌫️', description: 'Clan de Ame', hp: 95, chakra: 130, taijutsu: 12, ninjutsu: 17, genjutsu: 14, element: 'water', village: 'ame' },
+            kaiza_c: { name: 'Kaiza', icon: '⚓', description: 'Clan de Ame', hp: 120, chakra: 100, taijutsu: 18, ninjutsu: 13, genjutsu: 11, element: 'water', village: 'ame' },
+            kagari_c: { name: 'Kagari', icon: '🕸️', description: 'Clan de Ame', hp: 100, chakra: 120, taijutsu: 13, ninjutsu: 17, genjutsu: 13, element: 'wind', village: 'ame' },
+            mukade_c: { name: 'Mukade', icon: '🦂', description: 'Clan de Ame', hp: 105, chakra: 125, taijutsu: 12, ninjutsu: 17, genjutsu: 14, element: 'earth', village: 'ame' },
+            yura_c: { name: 'Yura', icon: '🌊', description: 'Clan de Ame', hp: 90, chakra: 140, taijutsu: 10, ninjutsu: 19, genjutsu: 14, element: 'water', village: 'ame' },
+            ame_silent: { name: 'Clan Silencioso', icon: '🤫', description: 'Clan de Ame', hp: 85, chakra: 145, taijutsu: 9, ninjutsu: 18, genjutsu: 18, element: 'wind', village: 'ame' },
+            ame_dark: { name: 'Clan Oscuro', icon: '🖤', description: 'Clan de Ame', hp: 100, chakra: 135, taijutsu: 11, ninjutsu: 19, genjutsu: 13, element: 'water', village: 'ame' },
+            no_clan_ame: { name: 'Sin Clan (Ame)', icon: '💧', description: 'Sin clan de Ame', hp: 105, chakra: 125, taijutsu: 13, ninjutsu: 16, genjutsu: 14, element: 'water', village: 'ame' }
         },
 
         // Reglas de Kekkei Genkai por clan
