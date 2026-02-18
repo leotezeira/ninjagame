@@ -9,8 +9,24 @@ export function createGame() {
         },
 
         showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
+            console.log('📺 showScreen called with:', screenId);
+            
+            // Remover clase active de todas las pantallas
+            const allScreens = document.querySelectorAll('.screen');
+            console.log('🔍 Found', allScreens.length, 'screens total');
+            allScreens.forEach(s => s.classList.remove('active'));
+            
+            // Obtener pantalla target
+            const targetScreen = document.getElementById(screenId);
+            if (!targetScreen) {
+                console.error('❌ Screen not found:', screenId);
+                alert(`Error: Pantalla "${screenId}" no encontrada`);
+                return;
+            }
+            
+            console.log('✅ Target screen found:', screenId);
+            targetScreen.classList.add('active');
+            console.log('✅ Active class added to:', screenId);
             
             // Controlar visibilidad del header (solo en village-screen)
             const header = document.getElementById('game-header');
@@ -4899,6 +4915,8 @@ export function createGame() {
                 return;
             }
             
+            console.log('✅ Mission data valid');
+            
             // Calcular recompensas estimadas
             const team = this.getTeamBonuses();
             const nightRyoMult = this.getTimeOfDay() === 2 ? 1.2 : 1;
@@ -4911,11 +4929,14 @@ export function createGame() {
             console.log('💬 Showing confirmation dialog');
             
             // Usar confirm nativo del navegador (siempre funciona)
-            if (confirm(message)) {
-                console.log('✅ Mission accepted');
+            const accepted = confirm(message);
+            console.log('🗳️ User choice:', accepted ? 'ACCEPTED' : 'REJECTED');
+            
+            if (accepted) {
+                console.log('✅ Mission accepted, calling _executeMission');
                 this._executeMission(mission);
             } else {
-                console.log('❌ Mission rejected');
+                console.log('❌ Mission rejected by user');
             }
         },
 
@@ -4963,7 +4984,14 @@ export function createGame() {
         },
 
         _executeMission(mission) {
-            if (!this.player) return;
+            console.log('🚀 _executeMission called with:', mission);
+            
+            if (!this.player) {
+                console.error('❌ No player found!');
+                return;
+            }
+            
+            console.log('✅ Player found:', this.player.name);
 
             // Fatiga por misión
             this.addFatigue(15);
@@ -4973,6 +5001,9 @@ export function createGame() {
                 ...mission,
                 enemies: Array.isArray(mission.enemies) ? mission.enemies.map(g => ({ ...g })) : []
             };
+            
+            console.log('📋 Cloned mission:', clonedMission);
+            console.log('👹 Mission enemies:', clonedMission.enemies);
 
             // Costo de tiempo (turnos) por complejidad - solo para cálculo de dificultad
             const rank = (clonedMission.rank || '').toUpperCase();
@@ -4996,34 +5027,84 @@ export function createGame() {
             this.currentMission = clonedMission;
             this.enemyQueue = [];
             
+            console.log('🏪 Available enemies catalog:', this.enemies ? 'Available' : 'NOT FOUND');
+            
             // Crear cola de enemigos basado en la misión
+            if (!clonedMission.enemies || clonedMission.enemies.length === 0) {
+                console.error('❌ Mission has no enemies defined!');
+                alert('Error: Esta misión no tiene enemigos configurados.');
+                return;
+            }
+            
             clonedMission.enemies.forEach(enemyGroup => {
+                console.log('Processing enemy group:', enemyGroup);
                 for (let i = 0; i < enemyGroup.count; i++) {
+                    if (!this.enemies || !this.enemies[enemyGroup.type] || !this.enemies[enemyGroup.type][enemyGroup.index]) {
+                        console.error(`❌ Enemy not found: ${enemyGroup.type}[${enemyGroup.index}]`);
+                        continue;
+                    }
                     const enemyTemplate = this.enemies[enemyGroup.type][enemyGroup.index];
                     this.enemyQueue.push({ ...enemyTemplate, maxHp: enemyTemplate.hp, maxChakra: enemyTemplate.chakra });
                 }
             });
+            
+            console.log('👥 Enemy queue created:', this.enemyQueue.length, 'enemies');
+            
+            if (this.enemyQueue.length === 0) {
+                console.error('❌ Enemy queue is empty!');
+                alert('Error: No se pudieron cargar los enemigos.');
+                return;
+            }
             
             this.totalWaves = this.enemyQueue.length;
             this.currentWave = 1;
             
             // Iniciar con el primer enemigo
             this.currentEnemy = this.enemyQueue.shift();
+            console.log('⚔️ Starting combat with:', this.currentEnemy.name);
             this.startCombat();
         },
 
         startCombat() {
+            console.log('⚔️ startCombat called');
+            console.log('🎮 Current enemy:', this.currentEnemy);
+            console.log('📺 Calling showScreen(combat-screen)');
+            
             this.showScreen('combat-screen');
+            
+            console.log('🔍 Combat screen should be visible now');
+            
             this.combatLog = [];
-            document.getElementById('combat-log').innerHTML = '';
+            const combatLogEl = document.getElementById('combat-log');
+            if (combatLogEl) {
+                combatLogEl.innerHTML = '';
+            } else {
+                console.error('❌ combat-log element not found!');
+            }
+            
             this.kawairimiUsed = false;
             this.defendActive = false;
             
-            document.getElementById('combat-player-name').textContent = this.getPlayerDisplayName();
-            document.getElementById('enemy-name').textContent = this.currentEnemy.name + 
-                (this.totalWaves > 1 ? ` (${this.currentWave}/${this.totalWaves})` : '');
-            document.getElementById('enemy-stats').textContent = 
-                `⚔️ Ataque: ${this.currentEnemy.attack} | 🛡️ Defensa: ${this.currentEnemy.defense} | 🎯 Precisión: +${this.currentEnemy.accuracy}`;
+            const playerNameEl = document.getElementById('combat-player-name');
+            const enemyNameEl = document.getElementById('enemy-name');
+            const enemyStatsEl = document.getElementById('enemy-stats');
+            
+            if (!playerNameEl || !enemyNameEl || !enemyStatsEl) {
+                console.error('❌ Combat UI elements not found!', {
+                    playerName: !!playerNameEl,
+                    enemyName: !!enemyNameEl,
+                    enemyStats: !!enemyStatsEl
+                });
+            }
+            
+            if (playerNameEl) playerNameEl.textContent = this.getPlayerDisplayName();
+            if (enemyNameEl) {
+                enemyNameEl.textContent = this.currentEnemy.name + 
+                    (this.totalWaves > 1 ? ` (${this.currentWave}/${this.totalWaves})` : '');
+            }
+            if (enemyStatsEl) {
+                enemyStatsEl.textContent = `⚔️ Ataque: ${this.currentEnemy.attack} | 🛡️ Defensa: ${this.currentEnemy.defense} | 🎯 Precisión: +${this.currentEnemy.accuracy}`;
+            }
             
             this.updateBar('combat-player-health-bar', this.player.hp, this.player.maxHp, 'HP');
             this.updateBar('combat-player-chakra-bar', this.player.chakra, this.player.maxChakra, 'Chakra');
@@ -5040,6 +5121,8 @@ export function createGame() {
             
             this.combatTurn = 'player';
             this.enableCombatButtons();
+            
+            console.log('✅ startCombat completed');
         },
 
         addCombatLog(message, className = '') {
