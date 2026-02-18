@@ -28,14 +28,27 @@ export function createGame() {
             targetScreen.classList.add('active');
             console.log('✅ Active class added to:', screenId);
             
-            // Controlar visibilidad del header (solo en village-screen)
+            // Controlar visibilidad del header
             const header = document.getElementById('game-header');
-            if (header) {
-                if (screenId === 'village-screen') {
-                    header.classList.add('visible');
-                } else {
-                    header.classList.remove('visible');
+            const bottomNav = document.getElementById('bottom-nav');
+            
+            if (screenId === 'combat-screen') {
+                // OCULTAR TODO durante combate
+                if (header) header.style.display = 'none';
+                if (bottomNav) bottomNav.style.display = 'none';
+                console.log('🥷 Combat mode: UI hidden');
+            } else {
+                // Restaurar UI normal
+                if (header) {
+                    if (screenId === 'village-screen') {
+                        header.classList.add('visible');
+                        header.style.display = '';
+                    } else {
+                        header.classList.remove('visible');
+                    }
                 }
+                if (bottomNav) bottomNav.style.display = '';
+                console.log('🏠 Normal mode: UI visible');
             }
             
             // Cerrar sidebar si está abierto

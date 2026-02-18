@@ -94,6 +94,7 @@ body {
 
 .screen.active {
     display: block;
+    z-index: 100;
 }
 
 /* ============================================
@@ -974,6 +975,12 @@ body {
 #combat-screen {
     background: linear-gradient(180deg, #1a0a0a 0%, var(--bg-dark) 100%);
     padding-top: 20px;
+}
+
+#combat-screen.active {
+    z-index: 5000 !important;
+    position: fixed !important;
+    inset: 0 !important;
 }
 
 #combat-screen .player-info {
