@@ -201,3 +201,16 @@ window.addEventListener('beforeunload', () => {
             .eq('id', game.authUser.id);
     }
 });
+
+// Ajuste dinámico para barras de navegador móvil
+function adjustNavBar() {
+    const nav = document.getElementById('bottom-nav');
+    if (nav) {
+        nav.style.bottom = '0px';
+    }
+}
+window.addEventListener('resize', adjustNavBar);
+window.addEventListener('scroll', adjustNavBar);
+if (typeof visualViewport !== 'undefined' && visualViewport) {
+    visualViewport.addEventListener('resize', adjustNavBar);
+}

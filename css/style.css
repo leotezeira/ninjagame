@@ -1731,9 +1731,15 @@
         display: none; /* Controlado por JS — visible solo en village-screen */
         background: #111;
         border-top: 2px solid #ff8c00;
-        z-index: 1000;
+        z-index: 9999;
         max-width: 600px;
         margin: 0 auto;
+        /* Clave: respeta la zona segura del navegador móvil */
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        /* Altura mínima garantizada */
+        min-height: 60px;
+        /* Usa el viewport real, no el visual */
+        bottom: env(safe-area-inset-bottom, 0px);
     }
 
     .nav-btn {
@@ -1768,7 +1774,7 @@
     /* Secciones de contenido */
     .section-content {
         display: none;
-        padding-bottom: 70px;
+        padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
     }
 
     .section-content.active {
@@ -1810,12 +1816,8 @@
             font-size: 18px;
         }
 
-        #bottom-nav {
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
         .section-content {
-            padding-bottom: 65px;
+            padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
         }
     }
 
