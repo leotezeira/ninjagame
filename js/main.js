@@ -1,5 +1,3 @@
-
-
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 import { createGame } from './systems/game.js';
 
@@ -117,4 +115,53 @@ import { showModal, showConfirm } from './ui/modal.js';
 window.showModal = showModal;
 window.showConfirm = showConfirm;
 window.showScreen = showScreen;
+
+// --- Navegación segura y listeners ---
+function safeShowSection(name) {
+    if (typeof window.game !== 'undefined' && window.game.showSection) {
+        window.game.showSection(name);
+    } else {
+        console.warn('Game not ready yet, retrying...');
+        setTimeout(() => safeShowSection(name), 100);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Bottom nav buttons
+    document.querySelectorAll('#bottom-nav .nav-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tab = this.getAttribute('data-tab');
+            safeShowSection(tab);
+        });
+    });
+    // Sidebar nav buttons
+    document.querySelectorAll('#sidebar .sidebar-nav-item').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const section = this.getAttribute('data-section');
+            if (typeof window.game !== 'undefined') {
+                window.game.navigateFromSidebar(section);
+            } else {
+                safeShowSection(section);
+            }
+        });
+    });
+    // Sidebar close button
+    const closeBtn = document.getElementById('sidebar-close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            if (typeof window.game !== 'undefined' && window.game.closeSidebar) {
+                window.game.closeSidebar();
+            } else {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        });
+    }
+    // Menu toggle button
+    const menuToggle = document.getElementById('menu-toggle');
+    if (menuToggle) {
+        menuToggle.addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+    }
+});
 

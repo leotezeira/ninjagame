@@ -550,54 +550,7 @@
 </div>
 
 <!-- Script de navegación (NO módulo, carga antes que main.js) -->
-<script>
-    // Funciones globales de navegación que esperan a que game esté listo
-    function safeShowSection(name) {
-        if (typeof game !== 'undefined' && game.showSection) {
-            game.showSection(name);
-        } else {
-            console.warn('Game not ready yet, retrying...');
-            setTimeout(() => safeShowSection(name), 100);
-        }
-    }
-    
-    // Configurar event listeners cuando el DOM esté listo
-    document.addEventListener('DOMContentLoaded', function() {
-        // Bottom nav buttons
-        document.querySelectorAll('#bottom-nav .nav-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const tab = this.getAttribute('data-tab');
-                safeShowSection(tab);
-            });
-        });
-        
-        // Sidebar nav buttons
-        document.querySelectorAll('#sidebar .sidebar-nav-item').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const section = this.getAttribute('data-section');
-                if (typeof game !== 'undefined') {
-                    game.navigateFromSidebar(section);
-                } else {
-                    safeShowSection(section);
-                }
-            });
-        });
-        
-        // Sidebar close button
-        const closeBtn = document.getElementById('sidebar-close-btn');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', function() {
-                if (typeof game !== 'undefined' && game.closeSidebar) {
-                    game.closeSidebar();
-                } else {
-                    document.getElementById('sidebar').classList.remove('open');
-                }
-            });
-        }
-        
-        // Menu toggle button
-        const menuToggle = document.getElementById('menu-toggle');
-        if (menuToggle) {
+<!-- Script de navegación movido a main.js para asegurar que game esté listo -->
             menuToggle.addEventListener('click', function() {
                 if (typeof game !== 'undefined' && game.toggleSidebar) {
                     game.toggleSidebar();
