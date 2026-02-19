@@ -4973,7 +4973,6 @@ gamePrompt(message, icon = '✏️') {
         async loadGame() {
             try {
                 const save = localStorage.getItem('ninjaRPGSave');
-                if (!modal)
                 if (!save) {
                     await this.gameAlert('No hay partida guardada', '❌');
                     return;
