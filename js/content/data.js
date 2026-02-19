@@ -1234,50 +1234,53 @@ export const BASE_GAME = {
 
         meetsJutsuRequirements(player, req) {
             if (!req) return false;
-            
+
             // Verificar stats
             if (req.stats) {
                 for (const [stat, value] of Object.entries(req.stats)) {
                     if (!player[stat] || player[stat] < value) return false;
                 }
             }
-            
+
             // Verificar EXP total acumulada
             if (req.exp && (player.totalExp || 0) < req.exp) return false;
-            
+
             // Verificar nivel
             if (req.level && player.level < req.level) return false;
-            
-            // Verificar rango
+
+            // Verificar rango (insensible a mayúsculas)
             if (req.rank) {
-                const rankOrder = { Genin: 0, Chunin: 1, Jonin: 2, Kage: 3, Master: 4 };
-                if (!rankOrder[player.rank] || rankOrder[player.rank] < rankOrder[req.rank]) return false;
+                const rankOrder = { genin: 0, chunin: 1, jonin: 2, kage: 3, master: 4 };
+                const playerRank = (player.rank || '').toLowerCase();
+                const reqRank = (req.rank || '').toLowerCase();
+                if (!(playerRank in rankOrder) || rankOrder[playerRank] < rankOrder[reqRank]) return false;
             }
-            
-            // Verificar elemento
-            if (req.element && player.element !== req.element) return false;
-            
-            // Verificar Kekkei Genkai
+
+            // Verificar elemento (insensible a mayúsculas)
+            if (req.element && (player.element || '').toLowerCase() !== (req.element || '').toLowerCase()) return false;
+
+            // Verificar Kekkei Genkai (acepta player.kekkeiGenkai o player.kekkei_genkai)
             if (req.kekkei_genkai) {
-                if (!player.kekkei_genkai || player.kekkei_genkai !== req.kekkei_genkai) return false;
+                const playerKG = player.kekkeiGenkai || player.kekkei_genkai || null;
+                if (!playerKG || playerKG !== req.kekkei_genkai) return false;
             }
-            
+
             // Verificar nivel de Kekkei Genkai (ej: nivel de Sharingan)
             if (req.KG_level) {
                 if (!player.KG_level || player.KG_level < req.KG_level) return false;
             }
-            
+
             // Verificar relación con Bijuu (solo para Jinchurikis)
             if (req.bijuu_relation !== undefined) {
                 if (player.bijuu_relation === undefined || player.bijuu_relation < req.bijuu_relation) return false;
             }
-            
+
             // Verificar jutsu prerequisito
             if (req.prerequisiteJutsu) {
                 const hasPrereq = player.learnedJutsus.some(j => j.name === req.prerequisiteJutsu);
                 if (!hasPrereq) return false;
             }
-            
+
             return true;
         },
 
