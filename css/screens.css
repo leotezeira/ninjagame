@@ -168,6 +168,14 @@
 }
 
 /* === VICTORY/DEFEAT SCREENS === */
+#mission-victory-screen,
+#defeat-screen,
+#exam-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: none;
+}
 #mission-victory-screen.active,
 #defeat-screen.active,
 #exam-screen.active {
