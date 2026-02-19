@@ -149,7 +149,7 @@ export const bijuuJutsus = {
             chakra: 150,
             damage: 130,
             type: 'kekkei',
-            description: '🔥 TRANSFORMACIÓN COMPLETA: Te transformas en el Bijuu completo. Poder absoluto de la Bestia con Cola.',
+            description: '<img src="img/fuego.png" alt="Katon" class="icon-elemento" style="height:1em;vertical-align:middle;"> TRANSFORMACIÓN COMPLETA: Te transformas en el Bijuu completo. Poder absoluto de la Bestia con Cola.',
             effect: 'full_transformation',
             learnMethod: 'auto',
             requirements: {

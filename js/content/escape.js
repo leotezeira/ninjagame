@@ -21,7 +21,7 @@ export const escapeJutsus = {
                 rank: 'Genin',
                 element: null
             },
-            onEscapeSuccess: '💨 Desapareces dejando un tronco en tu lugar.',
+            onEscapeSuccess: '<img src="img/aire.png" alt="Futon" class="icon-elemento" style="height:1em;vertical-align:middle;"> Desapareces dejando un tronco en tu lugar.',
             onEscapeFail: '❌ El enemigo detecta el sustituto. Pierdes el turno.'
         },
 
@@ -45,7 +45,7 @@ export const escapeJutsus = {
                 rank: 'Genin',
                 element: null
             },
-            onEscapeSuccess: '⚡ Te mueves tan rápido que desapareces del campo de batalla.',
+            onEscapeSuccess: '<img src="img/rayo.png" alt="Raiton" class="icon-elemento" style="height:1em;vertical-align:middle;"> Te mueves tan rápido que desapareces del campo de batalla.',
             onEscapeFail: '❌ El enemigo nota tu movimiento. Paralizas por un turno.'
         },
 
@@ -114,7 +114,7 @@ export const escapeJutsus = {
                 rank: 'Genin',
                 element: 'fire'
             },
-            onEscapeSuccess: '🔥 La cortina de fuego te rodea permitiéndote escapar.',
+            onEscapeSuccess: '<img src="img/fuego.png" alt="Katon" class="icon-elemento" style="height:1em;vertical-align:middle;"> La cortina de fuego te rodea permitiéndote escapar.',
             onEscapeFail: '❌ El humo no es suficiente. El enemigo te ve a través.'
         },
 
@@ -137,7 +137,7 @@ export const escapeJutsus = {
                 rank: 'Chunin',
                 element: 'lightning'
             },
-            onEscapeSuccess: '⚡ La explosión eléctrica ciega al enemigo. ¡Escapas!',
+            onEscapeSuccess: '<img src="img/rayo.png" alt="Raiton" class="icon-elemento" style="height:1em;vertical-align:middle;"> La explosión eléctrica ciega al enemigo. ¡Escapas!',
             onEscapeFail: '❌ El enemigo resiste la descarga y te bloquea.'
         },
 

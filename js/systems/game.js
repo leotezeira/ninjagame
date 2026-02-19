@@ -4,6 +4,7 @@ export function createGame() {
     const game = {
         ...BASE_GAME,
 
+
         rollDice(sides = 20) {
             return Math.floor(Math.random() * sides) + 1;
         },
@@ -132,6 +133,7 @@ export function createGame() {
             return this.player.name ? this.player.name : `${this.player.clan} Ninja`;
         },
 
+      
         showClanSelect() {
             const container = document.getElementById('clan-select');
             container.innerHTML = '';
@@ -562,7 +564,7 @@ export function createGame() {
                 let html = `<div class="kekkei-level">
                     <div style="text-align: center;">
                         <span style="background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; padding: 5px 15px; border-radius: 8px; font-weight: bold;">
-                            ⚡ ${this.player.kekkeiGenkai.name} - ${currentLevel.name}
+                            <img src="img/rayo.png" alt="Raiton" class="icon-elemento" style="height:1em;vertical-align:middle;"> ${this.player.kekkeiGenkai.name} - ${currentLevel.name}
                         </span>
                     </div>`;
                 
@@ -1183,7 +1185,7 @@ export function createGame() {
                 
                 // Mostrar notificación al jugador (opcional)
                 if (this.isVillageScreenActive()) {
-                    alert(`💰 Gastos semanales: -${weeklyRent} ryos (alquiler) -${weeklyFood} ryos (comida) = -${weeklyExpense} ryos total`);
+                    this.gameAlert(`💰 Gastos semanales: -${weeklyRent} ryos (alquiler) -${weeklyFood} ryos (comida) = -${weeklyExpense} ryos total`);
                 }
             } else {
                 // No hay dinero suficiente
@@ -1490,7 +1492,7 @@ export function createGame() {
             if (!item) return;
             const price = Math.ceil((item.price || 0) * this.getBlackMarketPriceMultiplier());
             if (this.player.ryo < price) {
-                alert('No tienes suficiente Ryo.');
+                this.gameAlert('No tienes suficiente Ryo.', '❌');
                 return;
             }
 
@@ -1517,7 +1519,7 @@ export function createGame() {
             this.saveGame();
             const panel = document.getElementById('blackmarket-panel');
             if (panel && panel.style.display === 'block') this.renderBlackMarketPanel(panel);
-            alert(`Compra realizada: ${item.name}`);
+            this.gameAlert(`Compra realizada: ${item.name}`, '✅');
         },
 
         buyBlackMarketService(serviceId) {
@@ -1526,7 +1528,7 @@ export function createGame() {
             if (!svc) return;
             const price = Math.ceil((svc.price || 0) * this.getBlackMarketPriceMultiplier());
             if (this.player.ryo < price) {
-                alert('No tienes suficiente Ryo.');
+                this.gameAlert('No tienes suficiente Ryo.', '❌');
                 return;
             }
             if (!confirm(`${svc.name} por ${price.toLocaleString('es-ES')} Ryo. ¿Confirmar?`)) return;
@@ -1562,7 +1564,7 @@ export function createGame() {
             this.saveGame();
             const panel = document.getElementById('blackmarket-panel');
             if (panel && panel.style.display === 'block') this.renderBlackMarketPanel(panel);
-            alert('Servicio completado.');
+            this.gameAlert('Servicio completado.', '✅');
         },
 
         unlockRandomKinjutsu() {
@@ -1588,7 +1590,7 @@ export function createGame() {
             if ((this.player.kinjutsuLearned || []).includes(kin.id)) return;
             const price = Math.ceil((kin.price || 0) * this.getBlackMarketPriceMultiplier());
             if (this.player.ryo < price) {
-                alert('No tienes suficiente Ryo.');
+                this.gameAlert('No tienes suficiente Ryo.', '❌');
                 return;
             }
             if (!confirm(`Aprender ${kin.name} por ${price.toLocaleString('es-ES')} Ryo. ¿Confirmar?`)) return;
@@ -1609,7 +1611,7 @@ export function createGame() {
             this.saveGame();
             const panel = document.getElementById('blackmarket-panel');
             if (panel && panel.style.display === 'block') this.renderBlackMarketPanel(panel);
-            alert(`Has aprendido: ${kin.name}`);
+            this.gameAlert(`Has aprendido: ${kin.name}`, '✅');
         },
 
         toggleOrganizationPanel() {
@@ -1660,7 +1662,7 @@ export function createGame() {
 
         joinOrganization(orgId) {
             if (!this.player?.isRenegade) {
-                alert('Solo renegados pueden unirse desde aquí.');
+                this.gameAlert('Solo renegados pueden unirse desde aquí.', '❌');
                 return;
             }
             if (this.player.organization) return;
@@ -1673,11 +1675,11 @@ export function createGame() {
             const req = requirements[orgId];
             if (!req) return;
             if (this.player.level < req.level) {
-                alert(`Requiere nivel ${req.level}+.`);
+                this.gameAlert(`Requiere nivel ${req.level}+.`, '❌');
                 return;
             }
             if (this.player.ryo < req.fee) {
-                alert('No tienes suficiente Ryo para el tributo.');
+                this.gameAlert('No tienes suficiente Ryo para el tributo.', '❌');
                 return;
             }
             if (!confirm(`Unirte a ${orgId} cuesta ${req.fee.toLocaleString('es-ES')} Ryo. ¿Confirmar?`)) return;
@@ -1702,7 +1704,7 @@ export function createGame() {
             this.saveGame();
             const panel = document.getElementById('organization-panel');
             if (panel && panel.style.display === 'block') this.renderOrganizationPanel(panel);
-            alert(`Te has unido a ${orgId}.`);
+            this.gameAlert(`Te has unido a ${orgId}.`, '✅');
         },
 
         leaveOrganization() {
@@ -1743,11 +1745,11 @@ export function createGame() {
         attemptRedemption() {
             if (!this.player?.isRenegade) return;
             if ((this.player.karma || 0) < 30) {
-                alert('Aún no has hecho suficientes acciones de redención.');
+                this.gameAlert('Aún no has hecho suficientes acciones de redención.', '❌');
                 return;
             }
             if ((this.player.renegadeLevel || 0) > 1) {
-                alert('Primero reduce tu nivel de búsqueda a 1★ o menos.');
+                this.gameAlert('Primero reduce tu nivel de búsqueda a 1★ o menos.', '❌');
                 return;
             }
             if (!confirm('¿Dejar la vida renegada y volver a Konoha?')) return;
@@ -1766,7 +1768,7 @@ export function createGame() {
             this.hideRenegadePanels();
             this.updateVillageUI();
             this.saveGame();
-            alert('Has sido readmitido.');
+            this.gameAlert('Has sido readmitido.', '✅');
         },
 
         anbuHunterAttack() {
@@ -1812,7 +1814,7 @@ export function createGame() {
             this.currentWave = 1;
             this.currentEnemy = this.enemyQueue.shift();
 
-            alert(`⚠️ ANBU te ha encontrado (${stars}★). ¡Prepárate!`);
+            this.gameAlert(`⚠️ ANBU te ha encontrado (${stars}★). ¡Prepárate!`, '❌');
             this.startCombat();
         },
 
@@ -1844,15 +1846,15 @@ export function createGame() {
 
         buyBlackMarketJutsu() {
             if (!this.player.blackMarketToday) {
-                alert('El Mercado Negro no está disponible ahora.');
+                this.gameAlert('El Mercado Negro no está disponible ahora.', '❌');
                 return;
             }
             if (this.player.location !== 'konoha') {
-                alert('Este contacto del Mercado Negro solo está en Konoha.');
+                this.gameAlert('Este contacto del Mercado Negro solo está en Konoha.', '❌');
                 return;
             }
             if (this.getTimeOfDay() === 3) {
-                alert('Es madrugada. No es seguro comerciar ahora.');
+                this.gameAlert('Es madrugada. No es seguro comerciar ahora.', '❌');
                 return;
             }
 
@@ -1861,11 +1863,11 @@ export function createGame() {
 
             const already = this.player.learnedJutsus?.some(l => l.name === offer.jutsu.name);
             if (already) {
-                alert('Ya aprendiste ese jutsu.');
+                this.gameAlert('Ya aprendiste ese jutsu.', '❌');
                 return;
             }
             if (this.player.ryo < offer.price) {
-                alert('No tienes suficiente Ryo para el Mercado Negro.');
+                this.gameAlert('No tienes suficiente Ryo para el Mercado Negro.', '❌');
                 return;
             }
 
@@ -1873,7 +1875,7 @@ export function createGame() {
             this.player.learnedJutsus.push(offer.jutsu);
             this.player.blackMarketToday = false;
             this.player.blackMarketOffer = null;
-            alert(`🕶️ Compraste y aprendiste: ${offer.jutsu.name}`);
+            this.gameAlert(`🕶️ Compraste y aprendiste: ${offer.jutsu.name}`, '✅');
             this.updateVillageUI();
             this.showAcademy('master');
             this.saveGame();
@@ -1888,7 +1890,7 @@ export function createGame() {
                 ryoMultiplier: 2,
                 expMultiplier: 1.2
             };
-            alert(`🚨 MISIÓN URGENTE: ${title}\nTiempo límite: ${daysLimit} días`);
+            this.gameAlert(`🚨 MISIÓN URGENTE: ${title}\nTiempo límite: ${daysLimit} días`, '❌');
         },
 
         buildUrgentMissionTemplate() {
@@ -1930,7 +1932,7 @@ export function createGame() {
             },
         startUrgentMission() {
             if (!this.player?.urgentMission) {
-                alert('No tienes misiones urgentes activas.');
+                 alert('No tienes misiones urgentes activas.');
                 return;
             }
             const urgent = this.player.urgentMission;
@@ -1944,7 +1946,7 @@ export function createGame() {
             if (!this.player.urgentMission) return;
             this.player.urgentMission.turnsLeft -= turnsPassed;
             if (this.player.urgentMission.turnsLeft <= 0) {
-                alert('⏳ Fallaste una misión urgente. Pierdes reputación.');
+                this.gameAlert('⏳ Fallaste una misión urgente. Pierdes reputación.', '❌');
                 this.applyReputationDelta(this.player.location, -10);
                 this.player.urgentMission = null;
             }
@@ -2148,7 +2150,7 @@ export function createGame() {
             this.renderRecruitPanel();
         },
 
-        getUpcomingEvents(daysAhead) {
+        async getUpcomingEvents(daysAhead) {
             const events = [];
 
             // Copia ligera del calendario
@@ -2219,20 +2221,20 @@ export function createGame() {
         // -----------------------------
         // Exámenes (Chunin / Jonin)
         // -----------------------------
-        getAbsoluteDay(p = this.player) {
+        async getAbsoluteDay(p = this.player) {
             // 30 días por mes, 12 meses por año
             return (p.year * this.monthsPerYear * this.daysPerMonth)
                 + ((p.month - 1) * this.daysPerMonth)
                 + (p.day - 1);
         },
 
-        getAbsoluteDayForDate(year, month, day) {
+        async getAbsoluteDayForDate(year, month, day) {
             return (year * this.monthsPerYear * this.daysPerMonth)
                 + ((month - 1) * this.daysPerMonth)
                 + (day - 1);
         },
 
-        getNextExamAbsoluteDay(currentAbs) {
+        async getNextExamAbsoluteDay(currentAbs) {
             const y = this.player.year;
             const a = this.getAbsoluteDayForDate(y, 1, 1);
             const b = this.getAbsoluteDayForDate(y, 7, 1);
@@ -2242,21 +2244,21 @@ export function createGame() {
             return this.getAbsoluteDayForDate(y + 1, 1, 1);
         },
 
-        getExamTypeForRank(rank) {
+        async getExamTypeForRank(rank) {
             if (rank === 'Genin') return 'chunin';
             if (rank === 'Chunin') return 'jonin';
             return null;
         },
 
-        isExamDay() {
+        async isExamDay() {
             return this.player.location === 'konoha' && this.player.day === 1 && (this.player.month === 1 || this.player.month === 7);
         },
 
-        getExamTitle(type) {
+        async getExamTitle(type) {
             return type === 'jonin' ? 'Examen Jonin' : 'Examen Chunin';
         },
 
-        showExamCountdown() {
+        async showExamCountdown() {
             const el = document.getElementById('exam-widget');
             if (!el || !this.player) return;
 
@@ -2296,11 +2298,11 @@ export function createGame() {
             `;
         },
 
-        showExamRequirements() {
+        async showExamRequirements() {
             if (!this.player) return;
             const type = this.getExamTypeForRank(this.player.rank);
             if (!type) {
-                alert('No tienes exámenes pendientes.');
+                this.gameAlert('No tienes exámenes pendientes.', '❌');
                 return;
             }
 
@@ -2324,7 +2326,7 @@ export function createGame() {
             }
         },
 
-        checkExamDay() {
+        async checkExamDay() {
             if (!this.player) return;
             const type = this.getExamTypeForRank(this.player.rank);
             if (!type) return;
@@ -2344,7 +2346,7 @@ export function createGame() {
             }
         },
 
-        enrollInExam() {
+        async enrollInExam() {
             if (!this.player) return;
             const type = this.getExamTypeForRank(this.player.rank);
             if (!type) {
@@ -4773,6 +4775,72 @@ export function createGame() {
             `;
         },
 
+            gameAlert(message, icon = 'ℹ️') {
+            return new Promise(resolve => {
+                const modal = document.getElementById('modal-alert');
+                const msg = document.getElementById('modal-alert-message');
+                const ico = document.getElementById('modal-alert-icon');
+                const btn = document.getElementById('modal-alert-ok');
+                if (!modal) { alert(message); resolve(); return; }
+                ico.textContent = icon;
+                msg.textContent = message;
+                modal.style.display = 'flex';
+                const close = () => {
+                    modal.style.display = 'none';
+                    btn.removeEventListener('click', close);
+                    resolve();
+                };
+                btn.addEventListener('click', close);
+            });
+        },
+
+        gameConfirm(message, icon = '❓') {
+            return new Promise(resolve => {
+                const modal = document.getElementById('modal-confirm');
+                const msg = document.getElementById('modal-confirm-message');
+                const ico = document.getElementById('modal-confirm-icon');
+                const yes = document.getElementById('modal-confirm-yes');
+                const no = document.getElementById('modal-confirm-no');
+                if (!modal) { resolve(confirm(message)); return; }
+                ico.textContent = icon;
+                msg.textContent = message;
+                modal.style.display = 'flex';
+                const accept = () => { modal.style.display = 'none'; cleanup(); resolve(true); };
+                const reject = () => { modal.style.display = 'none'; cleanup(); resolve(false); };
+                const cleanup = () => {
+                    yes.removeEventListener('click', accept);
+                    no.removeEventListener('click', reject);
+                };
+                yes.addEventListener('click', accept);
+                no.addEventListener('click', reject);
+            });
+        },
+
+        gamePrompt(message, icon = '✏️') {
+            return new Promise(resolve => {
+                const modal = document.getElementById('modal-prompt');
+                const msg = document.getElementById('modal-prompt-message');
+                const ico = document.getElementById('modal-prompt-icon');
+                const input = document.getElementById('modal-prompt-input');
+                const ok = document.getElementById('modal-prompt-ok');
+                const cancel = document.getElementById('modal-prompt-cancel');
+                if (!modal) { resolve(prompt(message)); return; }
+                ico.textContent = icon;
+                msg.textContent = message;
+                input.value = '';
+                modal.style.display = 'flex';
+                setTimeout(() => input.focus(), 100);
+                const accept = () => { modal.style.display = 'none'; cleanup(); resolve(input.value || null); };
+                const reject = () => { modal.style.display = 'none'; cleanup(); resolve(null); };
+                const cleanup = () => {
+                    ok.removeEventListener('click', accept);
+                    cancel.removeEventListener('click', reject);
+                };
+                ok.addEventListener('click', accept);
+                cancel.addEventListener('click', reject);
+            });
+        },
+
         saveGame() {
             try {
                 localStorage.setItem('ninjaRPGSave', JSON.stringify(this.player));
@@ -4796,11 +4864,118 @@ export function createGame() {
             }
         },
 
-        loadGame() {
+        // ============================================
+// SISTEMA DE MODALES - Reemplaza alert/confirm/prompt del navegador
+// ============================================
+
+gameAlert(message, icon = 'ℹ️') {
+    return new Promise(resolve => {
+        const modal = document.getElementById('modal-alert');
+        const msg = document.getElementById('modal-alert-message');
+        const ico = document.getElementById('modal-alert-icon');
+        const btn = document.getElementById('modal-alert-ok');
+        if (!modal) { alert(message); resolve(); return; }
+
+        ico.textContent = icon;
+        msg.textContent = message;
+        modal.style.display = 'flex';
+
+        const close = () => {
+            modal.style.display = 'none';
+            btn.removeEventListener('click', close);
+            resolve();
+        };
+        btn.addEventListener('click', close);
+    });
+},
+
+
+
+
+  // ============================================
+// SISTEMA DE MODALES - Reemplaza alert/confirm/prompt del navegador
+// ============================================
+
+gameAlert(message, icon = 'ℹ️') {
+    return new Promise(resolve => {
+        const modal = document.getElementById('modal-alert');
+        const msg = document.getElementById('modal-alert-message');
+        const ico = document.getElementById('modal-alert-icon');
+        const btn = document.getElementById('modal-alert-ok');
+        if (!modal) { alert(message); resolve(); return; }
+
+        ico.textContent = icon;
+        msg.textContent = message;
+        modal.style.display = 'flex';
+
+        const close = () => {
+            modal.style.display = 'none';
+            btn.removeEventListener('click', close);
+            resolve();
+        };
+        btn.addEventListener('click', close);
+    });
+},
+
+gameConfirm(message, icon = '❓') {
+    return new Promise(resolve => {
+        const modal = document.getElementById('modal-confirm');
+        const msg = document.getElementById('modal-confirm-message');
+        const ico = document.getElementById('modal-confirm-icon');
+        const yes = document.getElementById('modal-confirm-yes');
+        const no = document.getElementById('modal-confirm-no');
+        if (!modal) { resolve(confirm(message)); return; }
+
+        ico.textContent = icon;
+        msg.textContent = message;
+        modal.style.display = 'flex';
+
+        const accept = () => { modal.style.display = 'none'; cleanup(); resolve(true); };
+        const reject = () => { modal.style.display = 'none'; cleanup(); resolve(false); };
+        const cleanup = () => {
+            yes.removeEventListener('click', accept);
+            no.removeEventListener('click', reject);
+        };
+        yes.addEventListener('click', accept);
+        no.addEventListener('click', reject);
+    });
+},
+
+gamePrompt(message, icon = '✏️') {
+    return new Promise(resolve => {
+        const modal = document.getElementById('modal-prompt');
+        const msg = document.getElementById('modal-prompt-message');
+        const ico = document.getElementById('modal-prompt-icon');
+        const input = document.getElementById('modal-prompt-input');
+        const ok = document.getElementById('modal-prompt-ok');
+        const cancel = document.getElementById('modal-prompt-cancel');
+        if (!modal) { resolve(prompt(message)); return; }
+
+        ico.textContent = icon;
+        msg.textContent = message;
+        input.value = '';
+        modal.style.display = 'flex';
+        setTimeout(() => input.focus(), 100);
+
+        const accept = () => { modal.style.display = 'none'; cleanup(); resolve(input.value || null); };
+        const reject = () => { modal.style.display = 'none'; cleanup(); resolve(null); };
+        const cleanup = () => {
+            ok.removeEventListener('click', accept);
+            cancel.removeEventListener('click', reject);
+        };
+        ok.addEventListener('click', accept);
+        cancel.addEventListener('click', reject);
+    });
+},
+  
+
+
+        async loadGame() {
             try {
                 const save = localStorage.getItem('ninjaRPGSave');
+                if (!modal)
                 if (!save) {
-                    alert('No hay partida guardada');
+                    await this.gameAlert('No hay partida guardada', '❌');
                     return;
                 }
                 
@@ -4821,19 +4996,21 @@ export function createGame() {
                     this.showSleepOverlay();
                 }
                 
-                alert('¡Partida cargada!');
+                // ...mensaje de partida cargada eliminado por duplicidad...
             } catch(e) {
                 console.error('Error cargando:', e);
-                alert('Error al cargar la partida');
+                await this.gameAlert('Error al cargar la partida', '❌');
             }
         },
+
+            
 
         deleteCharacterAndRestart() {
             localStorage.removeItem('ninjaRPGSave');
             location.reload();
         },
 
-        startMission(mission) {
+        async startMission(mission) {
             console.log('🔔 startMission called with:', mission);
             
             if (!mission) {
@@ -4856,14 +5033,9 @@ export function createGame() {
             console.log('💬 Showing confirmation dialog');
             
             // Usar confirm nativo del navegador (siempre funciona)
-            const accepted = confirm(message);
-            console.log('🗳️ User choice:', accepted ? 'ACCEPTED' : 'REJECTED');
-            
+            const accepted = await this.gameConfirm(message, '📜');
             if (accepted) {
-                console.log('✅ Mission accepted, calling _executeMission');
-                this._executeMission(mission);
-            } else {
-                console.log('❌ Mission rejected by user');
+            this._executeMission(mission);
             }
         },
 
@@ -5844,7 +6016,7 @@ export function createGame() {
                 
                 if (kekkeiExpDiv) {
                     if (hasKekkei && kekkeiExpGain > 0) {
-                        kekkeiExpDiv.innerHTML = `<p style="color: #ffd700;">⚡ +${kekkeiExpGain} EXP de Kekkei Genkai</p>`;
+                        kekkeiExpDiv.innerHTML = `<p style=\"color: #ffd700;\"><img src=\"img/rayo.png\" alt=\"Raiton\" class=\"icon-elemento\" style=\"height:1em;vertical-align:middle;\"> +${kekkeiExpGain} EXP de Kekkei Genkai</p>`;
                     } else {
                         kekkeiExpDiv.innerHTML = '';
                     }
@@ -6048,6 +6220,115 @@ export function createGame() {
 
     // Transformar jutsus al cargar el juego
     game.normalizeAcademyJutsus();
+
+ // ============================================
+    // CREAR MODALES EN EL DOM
+    // ============================================
+    (function crearModales() {
+        if (document.getElementById('modal-alert')) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = `
+            <div id="modal-alert" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+                <div style="background:#1a1a2e; border:2px solid #00d4ff; border-radius:16px; padding:28px 24px; max-width:420px; width:90%; text-align:center;">
+                    <div id="modal-alert-icon" style="font-size:2em; margin-bottom:12px;">ℹ️</div>
+                    <p id="modal-alert-message" style="color:#f1f5f9; font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
+                    <button id="modal-alert-ok" style="padding:10px 28px; background:#ff8c00; border:none; border-radius:8px; color:white; font-weight:bold; font-size:1em; cursor:pointer;">Aceptar</button>
+                </div>
+            </div>
+
+            <div id="modal-confirm" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+                <div style="background:#1a1a2e; border:2px solid #00d4ff; border-radius:16px; padding:28px 24px; max-width:460px; width:90%; text-align:center;">
+                    <div id="modal-confirm-icon" style="font-size:2em; margin-bottom:12px;">❓</div>
+                    <p id="modal-confirm-message" style="color:#f1f5f9; font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
+                    <div style="display:flex; gap:12px; justify-content:center;">
+                        <button id="modal-confirm-yes" style="padding:10px 28px; background:#ff8c00; border:none; border-radius:8px; color:white; font-weight:bold; font-size:1em; cursor:pointer;">Confirmar</button>
+                        <button id="modal-confirm-no" style="padding:10px 28px; background:#7c3aed; border:none; border-radius:8px; color:white; font-weight:bold; font-size:1em; cursor:pointer;">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modal-prompt" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+                <div style="background:#1a1a2e; border:2px solid #00d4ff; border-radius:16px; padding:28px 24px; max-width:460px; width:90%; text-align:center;">
+                    <div id="modal-prompt-icon" style="font-size:2em; margin-bottom:12px;">✏️</div>
+                    <p id="modal-prompt-message" style="color:#f1f5f9; font-size:1em; line-height:1.6; margin-bottom:16px; white-space:pre-line;"></p>
+                    <input id="modal-prompt-input" type="text" style="width:100%; padding:10px; margin-bottom:16px; background:#16213e; border:1px solid #00d4ff; border-radius:8px; color:#f1f5f9; font-size:1em;" />
+                    <div style="display:flex; gap:12px; justify-content:center;">
+                        <button id="modal-prompt-ok" style="padding:10px 28px; background:#ff8c00; border:none; border-radius:8px; color:white; font-weight:bold; font-size:1em; cursor:pointer;">Aceptar</button>
+                        <button id="modal-prompt-cancel" style="padding:10px 28px; background:#7c3aed; border:none; border-radius:8px; color:white; font-weight:bold; font-size:1em; cursor:pointer;">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(wrapper);
+    })();
+
+    // Agregar funciones de modal al objeto game
+    game.gameAlert = function(message, icon = 'ℹ️') {
+        return new Promise(resolve => {
+            const modal = document.getElementById('modal-alert');
+            const msg = document.getElementById('modal-alert-message');
+            const ico = document.getElementById('modal-alert-icon');
+            const btn = document.getElementById('modal-alert-ok');
+            if (!modal) { alert(message); resolve(); return; }
+            ico.textContent = icon;
+            msg.textContent = message;
+            modal.style.display = 'flex';
+            const close = () => {
+                modal.style.display = 'none';
+                btn.removeEventListener('click', close);
+                resolve();
+            };
+            btn.addEventListener('click', close);
+        });
+    };
+
+    game.gameConfirm = function(message, icon = '❓') {
+        return new Promise(resolve => {
+            const modal = document.getElementById('modal-confirm');
+            const msg = document.getElementById('modal-confirm-message');
+            const ico = document.getElementById('modal-confirm-icon');
+            const yes = document.getElementById('modal-confirm-yes');
+            const no = document.getElementById('modal-confirm-no');
+            if (!modal) { resolve(confirm(message)); return; }
+            ico.textContent = icon;
+            msg.textContent = message;
+            modal.style.display = 'flex';
+            const accept = () => { modal.style.display = 'none'; cleanup(); resolve(true); };
+            const reject = () => { modal.style.display = 'none'; cleanup(); resolve(false); };
+            const cleanup = () => {
+                yes.removeEventListener('click', accept);
+                no.removeEventListener('click', reject);
+            };
+            yes.addEventListener('click', accept);
+            no.addEventListener('click', reject);
+        });
+    };
+
+    game.gamePrompt = function(message, icon = '✏️') {
+        return new Promise(resolve => {
+            const modal = document.getElementById('modal-prompt');
+            const msg = document.getElementById('modal-prompt-message');
+            const ico = document.getElementById('modal-prompt-icon');
+            const input = document.getElementById('modal-prompt-input');
+            const ok = document.getElementById('modal-prompt-ok');
+            const cancel = document.getElementById('modal-prompt-cancel');
+            if (!modal) { resolve(prompt(message)); return; }
+            ico.textContent = icon;
+            msg.textContent = message;
+            input.value = '';
+            modal.style.display = 'flex';
+            setTimeout(() => input.focus(), 100);
+            const accept = () => { modal.style.display = 'none'; cleanup(); resolve(input.value || null); };
+            const reject = () => { modal.style.display = 'none'; cleanup(); resolve(null); };
+            const cleanup = () => {
+                ok.removeEventListener('click', accept);
+                cancel.removeEventListener('click', reject);
+            };
+            ok.addEventListener('click', accept);
+            cancel.addEventListener('click', reject);
+        });
+    };
 
     return game;
 }
