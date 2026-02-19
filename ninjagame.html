@@ -488,6 +488,44 @@
             <button id="combat-defeat-return-btn" class="btn">Regresar a la Aldea</button>
         </div>
     </div>
+    <!-- ============================================
+         SISTEMA DE MODALES PERSONALIZADOS
+         Reemplaza alert(), confirm() y prompt()
+         ============================================ -->
+
+    <!-- Modal: alert() personalizado -->
+    <div id="modal-alert" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9000; display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+        <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:420px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
+            <div id="modal-alert-icon" style="font-size:2em; margin-bottom:12px;">ℹ️</div>
+            <p id="modal-alert-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
+            <button id="modal-alert-ok" class="btn" style="min-width:120px;">Aceptar</button>
+        </div>
+    </div>
+
+    <!-- Modal: confirm() personalizado -->
+    <div id="modal-confirm" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+        <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:460px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
+            <div id="modal-confirm-icon" style="font-size:2em; margin-bottom:12px;">❓</div>
+            <p id="modal-confirm-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
+            <div style="display:flex; gap:12px; justify-content:center;">
+                <button id="modal-confirm-yes" class="btn" style="min-width:120px;">Confirmar</button>
+                <button id="modal-confirm-no" class="btn btn-secondary" style="min-width:120px;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: prompt() personalizado -->
+    <div id="modal-prompt" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+        <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:460px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
+            <div id="modal-prompt-icon" style="font-size:2em; margin-bottom:12px;">✏️</div>
+            <p id="modal-prompt-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:16px; white-space:pre-line;"></p>
+            <input id="modal-prompt-input" class="text-input" type="text" style="width:100%; margin-bottom:16px;" />
+            <div style="display:flex; gap:12px; justify-content:center;">
+                <button id="modal-prompt-ok" class="btn" style="min-width:120px;">Aceptar</button>
+                <button id="modal-prompt-cancel" class="btn btn-secondary" style="min-width:120px;">Cancelar</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Script de navegación (NO módulo, carga antes que main.js) -->
