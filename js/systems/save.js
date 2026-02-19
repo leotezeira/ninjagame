@@ -25,11 +25,15 @@ const SaveSystem = {
         }
     },
 
-    loadGame() {
+    async loadGame() {
         try {
             const save = localStorage.getItem('ninjaRPGSave');
             if (!save) {
-                alert('No hay partida guardada');
+                await this.gameAlert('No hay partida guardada', '❌');
+                // Redirigir a pantalla de inicio o login
+                if (typeof this.showScreen === 'function') {
+                    this.showScreen('start-screen'); // Ajusta el ID si tu pantalla de inicio tiene otro nombre
+                }
                 return;
             }
             this.player = JSON.parse(save);
@@ -46,10 +50,10 @@ const SaveSystem = {
             if (this.player?.sleepState) {
                 this.showSleepOverlay();
             }
-            alert('¡Partida cargada!');
+           await this.gameAlert('¡Partida cargada!', '✅');
         } catch(e) {
             console.error('Error cargando:', e);
-            alert('Error al cargar la partida');
+            await this.gameAlert('Error al cargar la partida', '❌');
         }
     },
 
