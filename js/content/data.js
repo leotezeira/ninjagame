@@ -1210,7 +1210,7 @@ export const BASE_GAME = {
         },
 
         checkJutsuUnlocks(player) {
-            allJutsus = [...(this.academyJutsus.genin || []), ...(this.academyJutsus.chunin || []), 
+            let allJutsus = [...(this.academyJutsus.genin || []), ...(this.academyJutsus.chunin || []), 
                         ...(this.academyJutsus.jonin || []), ...(this.academyJutsus.master || []),
                         ...(this.taijutsuAcademy || []), ...(this.genjutsuAcademy || []),
                         ...(this.escapeAcademy || []), ...(this.katonAcademy || []),
