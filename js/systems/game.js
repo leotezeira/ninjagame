@@ -34,9 +34,9 @@ export function createGame() {
                 this.player.inventory.splice(index, 1);
                 this.saveGame();
                 this.updateVillageUI();
-                alert('Item consumido.');
+                this.gameAlert('Item consumido.', '✅');
             } else {
-                alert('Este item no es consumible.');
+                this.gameAlert('Este item no es consumible.', '❌');
             }
         },
 
@@ -52,7 +52,7 @@ export function createGame() {
             const targetScreen = document.getElementById(screenId);
             if (!targetScreen) {
                 console.error('❌ Screen not found:', screenId);
-                alert(`Error: Pantalla "${screenId}" no encontrada`);
+                this.gameAlert(`Error: Pantalla "${screenId}" no encontrada`, '❌');
                 return;
             }
             
@@ -671,11 +671,11 @@ export function createGame() {
             this._lastChallengeAt = this._lastChallengeAt || {};
             const lastSent = this._lastChallengeAt[playerId] || 0;
             if (Date.now() - lastSent < 10000) {
-                alert('Ya enviaste un desafio hace poco.');
+                this.gameAlert('Ya enviaste un desafio hace poco.', '❌');
                 return;
             }
 
-            const confirmed = confirm(`¿Desafiar a ${playerName || 'este ninja'}?`);
+            const confirmed = await this.gameConfirm(`¿Desafiar a ${playerName || 'este ninja'}?`, '❓');
             if (!confirmed) return;
 
             const { error } = await this.supabase
@@ -688,13 +688,13 @@ export function createGame() {
                 });
 
             if (error) {
-                alert('No se pudo enviar el desafio.');
+                this.gameAlert('No se pudo enviar el desafio.', '❌');
                 return;
             }
 
             this._lastChallengeAt[playerId] = Date.now();
 
-            alert(`Desafio enviado a ${playerName || 'jugador'}.`);
+            this.gameAlert(`Desafio enviado a ${playerName || 'jugador'}.`, '✅');
         },
 
         updateBar(elementId, current, max, label) {
@@ -1371,7 +1371,7 @@ export function createGame() {
             this.hideRenegadePanels();
             this.updateVillageUI();
             this.saveGame();
-            alert('Has desertado. Ahora eres un Ninja Renegado.');
+            this.gameAlert('Has desertado. Ahora eres un Ninja Renegado.', '⚠️');
         },
 
         hideRenegadePanels() {
@@ -1393,28 +1393,29 @@ export function createGame() {
             if (!this.player?.isRenegade) return;
             const current = this.player.renegadeLevel || 0;
             if (current <= 0) {
-                alert('No tienes búsqueda activa.');
+                this.gameAlert('No tienes búsqueda activa.', '❌');
                 return;
             }
             const cost = 8000 + current * 5000;
-            const ok = confirm(`Reducir búsqueda cuesta ${cost.toLocaleString('es-ES')} Ryo y consume 1 día (4 turnos). ¿Proceder?`);
-            if (!ok) return;
-            if (this.player.ryo < cost) {
-                alert('No tienes suficiente Ryo.');
-                return;
-            }
-            this.player.ryo -= cost;
-            this.increaseWantedLevel(-1);
-            this.player.karma = this.clamp((this.player.karma || 0) + 5, -100, 100);
-            // El tiempo avanza naturalmente en el sistema basado en tiempo real
-            this.updateVillageUI();
-            this.saveGame();
+            (async () => {
+                const ok = await this.gameConfirm(`Reducir búsqueda cuesta ${cost.toLocaleString('es-ES')} Ryo y consume 1 día (4 turnos). ¿Proceder?`, '❓');
+                if (!ok) return;
+                if (this.player.ryo < cost) {
+                    this.gameAlert('No tienes suficiente Ryo.', '❌');
+                    return;
+                }
+                this.player.ryo -= cost;
+                this.increaseWantedLevel(-1);
+                this.player.karma = this.clamp((this.player.karma || 0) + 5, -100, 100);
+                this.updateVillageUI();
+                this.saveGame();
+            })();
         },
 
         toggleBlackMarketPanel() {
             if (!this.player?.isRenegade) return;
             if (!this.player.blackMarketToday) {
-                alert('🕶️ El Mercado Negro no está disponible aquí/hoy. Busca un escondite.');
+                this.gameAlert('🕶️ El Mercado Negro no está disponible aquí/hoy. Busca un escondite.', '❌');
                 return;
             }
             this.hideRenegadePanels();
@@ -2119,13 +2120,14 @@ export function createGame() {
             const rep = (this.player.reputation && this.player.reputation[this.player.location]) || 0;
             document.getElementById('hud-rep').textContent = `${rep} (${this.getReputationTier(this.player.location)})`;
 
-            const events = this.getUpcomingEvents(7);
             const eventsDiv = document.getElementById('hud-events');
-            if (events.length === 0) {
-                eventsDiv.textContent = '• Ninguno';
-            } else {
-                eventsDiv.innerHTML = events.map(e => `• ${e}`).join('<br>');
-            }
+            Promise.resolve(this.getUpcomingEvents(7)).then(events => {
+                if (!Array.isArray(events) || events.length === 0) {
+                    eventsDiv.textContent = '• Ninguno';
+                } else {
+                    eventsDiv.innerHTML = events.map(e => `• ${e}`).join('<br>');
+                }
+            });
 
             const desertBtn = document.getElementById('desert-btn');
             if (desertBtn) {
