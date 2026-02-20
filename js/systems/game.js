@@ -9,7 +9,7 @@ export function createGame() {
             return Math.floor(Math.random() * sides) + 1;
         },
 
-        useInventoryItem(index) {
+        async useInventoryItem(index) {
             if (!Array.isArray(this.player.inventory) || index < 0 || index >= this.player.inventory.length) return;
             const item = this.player.inventory[index];
             let used = false;
@@ -34,13 +34,13 @@ export function createGame() {
                 this.player.inventory.splice(index, 1);
                 this.saveGame();
                 this.updateVillageUI();
-                this.gameAlert('Item consumido.', '✅');
+                await this.gameAlert('Item consumido.', '✅');
             } else {
-                this.gameAlert('Este item no es consumible.', '❌');
+                await this.gameAlert('Este item no es consumible.', '❌');
             }
         },
 
-        showScreen(screenId) {
+        async showScreen(screenId) {
             console.log('📺 showScreen called with:', screenId);
             
             // Remover clase active de todas las pantallas
@@ -52,7 +52,7 @@ export function createGame() {
             const targetScreen = document.getElementById(screenId);
             if (!targetScreen) {
                 console.error('❌ Screen not found:', screenId);
-                this.gameAlert(`Error: Pantalla "${screenId}" no encontrada`, '❌');
+                await this.gameAlert(`Error: Pantalla "${screenId}" no encontrada`, '❌');
                 return;
             }
             
@@ -1882,7 +1882,7 @@ export function createGame() {
             this.saveGame();
         },
 
-        spawnUrgentMission(title, daysLimit) {
+        async spawnUrgentMission(title, daysLimit) {
             const turnsLimit = daysLimit * this.turnsPerDay;
             this.player.urgentMission = {
                 name: title,
@@ -1891,7 +1891,7 @@ export function createGame() {
                 ryoMultiplier: 2,
                 expMultiplier: 1.2
             };
-            this.gameAlert(`🚨 MISIÓN URGENTE: ${title}\nTiempo límite: ${daysLimit} días`, '❌');
+            await this.gameAlert(`🚨 MISIÓN URGENTE: ${title}\nTiempo límite: ${daysLimit} días`, '❌');
         },
 
         buildUrgentMissionTemplate() {
