@@ -1,4 +1,4 @@
-import { createGame } from './systems/game.js';
+import { createGame } from './systems/game/createGame.js';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = 'https://bydufkvgicwiaybrfcpg.supabase.co';
