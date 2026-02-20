@@ -34,7 +34,7 @@
      ============================================ -->
 
 <!-- Modal: alert() personalizado -->
-<div id="modal-alert" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9000; display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+<div id="modal-alert" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
     <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:420px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
         <div id="modal-alert-icon" style="font-size:2em; margin-bottom:12px;">ℹ️</div>
         <p id="modal-alert-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
@@ -43,7 +43,7 @@
 </div>
 
 <!-- Modal: confirm() personalizado -->
-<div id="modal-confirm" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+<div id="modal-confirm" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
     <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:460px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
         <div id="modal-confirm-icon" style="font-size:2em; margin-bottom:12px;">❓</div>
         <p id="modal-confirm-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
@@ -55,7 +55,7 @@
 </div>
 
 <!-- Modal: prompt() personalizado -->
-<div id="modal-prompt" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+<div id="modal-prompt" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
     <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:460px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
         <div id="modal-prompt-icon" style="font-size:2em; margin-bottom:12px;">✏️</div>
         <p id="modal-prompt-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:16px; white-space:pre-line;"></p>
@@ -204,7 +204,7 @@
         <!-- MAIN: contenedor de secciones -->
         <main id="game-main">
             <!-- MODAL DE CONFIRMACIÓN DE MISIÓN -->
-            <div id="mission-confirm-modal" class="modal-overlay" style="display: none;">
+            <div id="mission-confirm-modal" class="modal-overlay" style="display: none; z-index:99999;">
                 <div class="modal-content">
                     <h3 id="mission-confirm-title">📜 Misión</h3>
                     <p id="mission-confirm-description"></p>
@@ -510,7 +510,7 @@
     </div>
 
     <!-- Modal de Victoria (por encima de todo) -->
-    <div id="combat-victory-modal" class="modal-overlay" style="display: none; z-index: 6000;">
+    <div id="combat-victory-modal" class="modal-overlay" style="display: none; z-index: 99999;">
         <div class="modal-content" style="text-align: center;">
             <h2 style="color: #00ff88;">🎉 ¡VICTORIA! 🎉</h2>
             <p id="combat-victory-text" style="margin: 20px 0; font-size: 1.1em;"></p>
@@ -521,7 +521,7 @@
     </div>
 
     <!-- Modal de Derrota (por encima de todo) -->
-    <div id="combat-defeat-modal" class="modal-overlay" style="display: none; z-index: 6000;">
+    <div id="combat-defeat-modal" class="modal-overlay" style="display: none; z-index: 99999;">
         <div class="modal-content" style="text-align: center;">
             <h2 style="color: #ff4444;">💀 DERROTA 💀</h2>
             <p id="combat-defeat-text" style="margin: 20px 0; font-size: 1.1em;">Has caído en batalla...</p>

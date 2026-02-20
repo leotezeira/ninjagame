@@ -1940,7 +1940,7 @@ export function createGame() {
             const mission = this.buildUrgentMissionTemplate();
             mission.ryo = Math.floor(mission.ryo * (urgent.ryoMultiplier || 2));
             mission.exp = Math.floor(mission.exp * (urgent.expMultiplier || 1.2));
-            this.startMission(mission);
+            game.startMission(mission);
         },
 
         tickUrgentMission(turnsPassed) {
@@ -3386,7 +3386,7 @@ export function createGame() {
         startNpcMission(mission) {
             if (!mission) return;
             const cloned = { ...mission, npcMission: true };
-            this.startMission(cloned);
+            game.startMission(cloned);
         },
 
         showNpcTrainings(npcId) {
