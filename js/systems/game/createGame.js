@@ -9,14 +9,14 @@
 
 import { utilsMethods    } from './utils.js';
 import { saveLoadMethods } from './saveLoad.js';
-import { calendarMethods } from '../world/calendar.js';
-import { travelMethods   } from '../world/travel.js';
-import { creationMethods } from '../character/creation.js';
-import { kekkeiMethods   } from '../character/kekkei.js';
-import { statsMethods    } from '../character/stats.js';
-import { combatMethods   } from '../combat/combat.js';
-import { actionsMethods  } from '../combat/actions.js';
-import { examsMethods    } from '../combat/exams.js';
+import { calendarMethods } from './calendar.js';
+import { travelMethods   } from './travel.js';
+import { creationMethods } from './creation.js';
+import { kekkeiMethods   } from './kekkei.js';
+import { statsMethods    } from './stats.js';
+import { combatMethods   } from './combat.js';
+import { actionsMethods  } from './actions.js';
+import { examsMethods    } from './exams.js';
 import { missionsMethods } from '../village/missions.js';
 import { uiMethods       } from '../village/ui.js';
 import { shopMethods     } from '../village/shop.js';
