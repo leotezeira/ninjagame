@@ -17,11 +17,11 @@ import { statsMethods    } from './stats.js';
 import { combatMethods   } from './combat.js';
 import { actionsMethods  } from './actions.js';
 import { examsMethods    } from './exams.js';
-import { missionsMethods } from '../village/missions.js';
-import { uiMethods       } from '../village/ui.js';
-import { shopMethods     } from '../village/shop.js';
-import { npcsMethods     } from '../village/npcs.js';
-import { renegadeMethods } from '../renegade/renegade.js';
+import { missionsMethods } from './missions.js';
+import { uiMethods       } from './ui.js';
+import { shopMethods     } from './shop.js';
+import { npcsMethods     } from './npcs.js';
+import { renegadeMethods } from './renegade.js';
 
 // ── Constantes del mundo ─────────────────────────────────────
 const WORLD_CONSTANTS = {
