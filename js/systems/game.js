@@ -1,6 +1,18 @@
 import { BASE_GAME } from '../content/data.js';
 
 export function createGame() {
+            // Limpia el overlay de sueño y sleepState
+            wakeUp() {
+                // Eliminar overlay si existe
+                const overlay = document.getElementById('sleep-overlay');
+                if (overlay) overlay.remove();
+                // Limpiar estado de sueño
+                if (this.player) {
+                    this.player.sleepState = null;
+                    this.saveGame();
+                    this.updateVillageUI();
+                }
+            },
     const game = {
         ...BASE_GAME,
 
@@ -719,6 +731,7 @@ export function createGame() {
             if (!this.player) return;
 
             const defaults = {
+                sleepState: null,
                 name: '',
                 location: 'konoha',
                 village: 'konoha',

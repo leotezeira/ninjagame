@@ -65,6 +65,7 @@ const SaveSystem = {
     migratePlayerSave() {
         if (!this.player) return;
         const defaults = {
+            sleepState: null,
             name: '',
             location: 'konoha',
             village: 'konoha',
