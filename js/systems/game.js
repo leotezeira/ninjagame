@@ -521,7 +521,8 @@ export function createGame() {
         },
 
         updateVillageUI() {
-            document.getElementById('player-name-village').textContent = `${this.getPlayerDisplayName()}`;
+            const nameEl = document.getElementById('player-name-village');
+            if (nameEl) nameEl.textContent = `${this.getPlayerDisplayName()}`;
             
             const clanDisplay = document.getElementById('player-clan-village');
             if (clanDisplay && this.player.clanKey) {
@@ -545,13 +546,18 @@ export function createGame() {
                 }
             }
             
-            document.getElementById('player-rank').textContent = this.player.rank;
-            document.getElementById('player-level-village').textContent = this.player.level;
-            document.getElementById('player-ryo').textContent = this.player.ryo;
-            document.getElementById('player-exp-village').textContent = `${this.player.exp}/${this.player.expToNext}`;
-            
-            document.getElementById('village-health-text').textContent = `${Math.max(0, Math.floor(this.player.hp))}/${this.player.maxHp}`;
-            document.getElementById('village-chakra-text').textContent = `${Math.max(0, Math.floor(this.player.chakra))}/${this.player.maxChakra}`;
+            const rankEl = document.getElementById('player-rank');
+            if (rankEl) rankEl.textContent = this.player.rank;
+            const levelEl = document.getElementById('player-level-village');
+            if (levelEl) levelEl.textContent = this.player.level;
+            const ryoEl = document.getElementById('player-ryo');
+            if (ryoEl) ryoEl.textContent = this.player.ryo;
+            const expEl = document.getElementById('player-exp-village');
+            if (expEl) expEl.textContent = `${this.player.exp}/${this.player.expToNext}`;
+            const hpTextEl = document.getElementById('village-health-text');
+            if (hpTextEl) hpTextEl.textContent = `${Math.max(0, Math.floor(this.player.hp))}/${this.player.maxHp}`;
+            const chakraTextEl = document.getElementById('village-chakra-text');
+            if (chakraTextEl) chakraTextEl.textContent = `${Math.max(0, Math.floor(this.player.chakra))}/${this.player.maxChakra}`;
             
             this.updateBar('village-health-bar', this.player.hp, this.player.maxHp);
             this.updateBar('village-chakra-bar', this.player.chakra, this.player.maxChakra);

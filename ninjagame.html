@@ -216,58 +216,45 @@
                 <div class="player-info">
                     <h2 id="player-name-village">Ninja</h2>
                     <div class="player-info-clan" id="player-clan-village"></div>
-                    <div class="game-container">
-                        <h1>🍥 NINJA RPG 🍥</h1>
-                        <!-- ...existing code... -->
+                    <div class="stats-grid" style="margin-top:12px;">
+                        <div class="stat-item"><span>🎖️ Rango:</span> <span id="player-rank">Genin</span></div>
+                        <div class="stat-item"><span>⭐ Nivel:</span> <span id="player-level-village">1</span></div>
+                        <div class="stat-item"><span>💰 Ryo:</span> <span id="player-ryo">0</span></div>
+                        <div class="stat-item"><span>✨ EXP:</span> <span id="player-exp-village">0/100</span></div>
                     </div>
-                    <button class="btn btn-secondary" onclick="game.wakeUp()">⏰ Despertar</button>
+                    <div class="player-bars" style="margin-top:12px;">
+                        <div>
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                <span>❤️ HP</span>
+                                <span id="village-health-text">100/100</span>
+                            </div>
+                            <div class="bar-container">
+                                <div class="health-fill" id="village-health-bar" style="width:100%"></div>
+                            </div>
+                        </div>
+                        <div style="margin-top:8px;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                <span>💙 Chakra</span>
+                                <span id="village-chakra-text">100/100</span>
+                            </div>
+                            <div class="bar-container">
+                                <div class="chakra-fill" id="village-chakra-bar" style="width:100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="kekkei-display" style="margin-top:12px;"></div>
+                    <div id="element-display" style="margin-top:8px;"></div>
+                    <div id="village-info" style="margin-top:8px;"></div>
+                    <div style="margin-top:12px;">
+                        <div style="display:flex;justify-content:space-between;">
+                            <span>🧑‍🤝‍🧑 Jugadores online: <span id="village-online-count">0</span></span>
+                        </div>
+                        <div id="village-online-list" style="margin-top:8px;"></div>
+                    </div>
                 </div>
                 <!-- ...existing code... -->
             </div>
 
-            <!-- 🏠 SECCIÓN INICIO -->
-        <div id="section-home" class="section-content active">
-            <div class="player-info">
-                <h2 id="player-name-village">Ninja</h2>
-                <div class="player-info-clan" id="player-clan-village"></div>
-                <div class="game-container">
-                    <h1>🍥 NINJA RPG 🍥</h1>
-                    <!-- ...existing code... -->
-                </div>
-
-                <!-- ============================================
-                 SISTEMA DE MODALES PERSONALIZADOS
-                 Reemplaza alert(), confirm() y prompt()
-                 ============================================ -->
-
-                <!-- Modal: alert() personalizado -->
-                <div id="modal-alert" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-                    <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:420px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
-                        <div id="modal-alert-icon" style="font-size:2em; margin-bottom:12px;">ℹ️</div>
-                        <p id="modal-alert-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
-                        <button id="modal-alert-ok" class="btn" style="min-width:120px;">Aceptar</button>
-                    </div>
-                </div>
-
-                <!-- Modal: confirm() personalizado -->
-                <div id="modal-confirm" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-                    <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:460px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
-                        <div id="modal-confirm-icon" style="font-size:2em; margin-bottom:12px;">❓</div>
-                        <p id="modal-confirm-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
-                        <div style="display:flex; gap:12px; justify-content:center;">
-                            <button id="modal-confirm-yes" class="btn" style="min-width:120px;">Confirmar</button>
-                            <button id="modal-confirm-no" class="btn btn-secondary" style="min-width:120px;">Cancelar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal: prompt() personalizado -->
-                <div id="modal-prompt" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-                    <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:460px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
-                        <div id="modal-prompt-icon" style="font-size:2em; margin-bottom:12px;">✏️</div>
-                        <p id="modal-prompt-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:16px; white-space:pre-line;"></p>
-                        <input id="modal-prompt-input" class="text-input" type="text" style="width:100%; margin-bottom:16px;" />
-                        <div style="display:flex; gap:12px; justify-content:center;">
                             <button id="modal-prompt-ok" class="btn" style="min-width:120px;">Aceptar</button>
                             <button id="modal-prompt-cancel" class="btn btn-secondary" style="min-width:120px;">Cancelar</button>
                         </div>
@@ -281,6 +268,22 @@
                 <p style="margin: 10px 0;">Conoce personajes, mejora relaciones, recibe misiones y entrenamientos únicos.</p>
                 <div id="npc-list" class="npc-list"></div>
 
+                <div id="npc-modal" class="npc-modal" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- 🗺️ SECCIÓN MUNDO (Misiones y NPCs) -->
+        <div id="section-world" class="section-content">
+            <div id="world-hud-display"></div>
+            <div class="tabs" style="display:flex; gap:8px; margin-bottom:16px; border-bottom:1px solid var(--border-color); padding-bottom:8px;">
+                <button class="tab-btn active" onclick="game.activateVillageTab('missions')">📜 Misiones</button>
+                <button class="tab-btn" onclick="game.activateVillageTab('npcs')">👥 NPCs</button>
+            </div>
+            <div id="missions-content">
+                <div class="mission-list" id="mission-list"></div>
+            </div>
+            <div id="npcs-content" style="display:none;">
+                <div id="npc-list" class="npc-list"></div>
                 <div id="npc-modal" class="npc-modal" style="display:none;"></div>
             </div>
         </div>
@@ -330,7 +333,6 @@
                 </div>
                 <div class="tabs tabs-inline">
                     <button class="tab-btn" onclick="game.showJutsuRank('katon')"><img src="img/fuego.png" alt="Katon" class="icon-elemento" style="height:1.2em;vertical-align:middle;"> Katon</button>
-                    <button class="tab-btn" onclick="game.showJutsuRank('suiton')"><img src="img/agua.png" alt="Suiton" class="icon-elemento" style="height:1.2em;vertical-align:middle;"> Suiton</button>
                     <button class="tab-btn" onclick="game.showJutsuRank('futon')"><img src="img/aire.png" alt="Futon" class="icon-elemento" style="height:1.2em;vertical-align:middle;"> Futon</button>
                     <button class="tab-btn" onclick="game.showJutsuRank('doton')"><img src="img/tierra.png" alt="Doton" class="icon-elemento" style="height:1.2em;vertical-align:middle;"> Doton</button>
                     <button class="tab-btn" onclick="game.showJutsuRank('raiton')"><img src="img/rayo.png" alt="Raiton" class="icon-elemento" style="height:1.2em;vertical-align:middle;"> Raiton</button>

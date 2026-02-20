@@ -78,6 +78,24 @@ const initAuthSession = async () => {
     if (hasSave) {
         game.loadGame();
     } else {
+        // Intentar cargar desde Supabase antes de crear personaje nuevo
+        try {
+            const userId = supabase.auth.user()?.id;
+            if (userId) {
+                const { data: cloudData } = await supabase
+                    .from('players')
+                    .select('game_state')
+                    .eq('id', userId)
+                    .maybeSingle();
+                if (cloudData?.game_state) {
+                    localStorage.setItem('ninjaRPGSave', JSON.stringify(cloudData.game_state));
+                    game.loadGame();
+                    return;
+                }
+            }
+        } catch (e) {
+            console.error('Error al intentar cargar desde Supabase:', e);
+        }
         game.showNameScreen();
     }
 };
@@ -179,6 +197,24 @@ const handleLogin = async () => {
     if (hasSave) {
         game.loadGame();
     } else {
+        // Intentar cargar desde Supabase antes de crear personaje nuevo
+        try {
+            const userId = supabase.auth.user()?.id;
+            if (userId) {
+                const { data: cloudData } = await supabase
+                    .from('players')
+                    .select('game_state')
+                    .eq('id', userId)
+                    .maybeSingle();
+                if (cloudData?.game_state) {
+                    localStorage.setItem('ninjaRPGSave', JSON.stringify(cloudData.game_state));
+                    game.loadGame();
+                    return;
+                }
+            }
+        } catch (e) {
+            console.error('Error al intentar cargar desde Supabase:', e);
+        }
         game.showNameScreen();
     }
 };
