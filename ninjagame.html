@@ -10,64 +10,45 @@
 <body>
     <div class="game-container">
         <h1>🍥 NINJA RPG 🍥</h1>
-
-    <!-- Autenticacion -->
-    <div id="auth-screen" class="screen active">
-        <div class="story-text">
-            <h2>🔐 Acceso Ninja</h2>
-            <p>Registra tu personaje unico o inicia sesion para continuar.</p>
-        </div>
-        <div class="player-info auth-box" style="max-width: 560px; margin: 0 auto; border-top: none;">
-            <label for="auth-username" style="display:block; margin-bottom: 10px; color:#ff8c00; font-weight: bold; text-transform: uppercase; font-size: 0.85em; letter-spacing: 0.5px;">Nombre de personaje</label>
-            <input id="auth-username" class="text-input" type="text" maxlength="20" placeholder="Ej: Kenji Uzumaki" autocomplete="off" />
-            <label for="auth-password" style="display:block; margin: 14px 0 10px; color:#ff8c00; font-weight: bold; text-transform: uppercase; font-size: 0.85em; letter-spacing: 0.5px;">Contrasena</label>
-            <input id="auth-password" class="text-input" type="password" maxlength="32" placeholder="Minimo 6 caracteres" autocomplete="off" />
-            <div id="auth-error" style="margin-top: 12px; color:#ff7f66; display: none;"></div>
-            <div class="auth-actions">
-                <button class="btn" id="auth-register-btn">Registrar</button>
-                <button class="btn btn-secondary" id="auth-login-btn">Iniciar Sesion</button>
-            </div>
-        </div>
-        <!-- ============================================
+        <!-- ...existing code... -->
+    </div>
+    <!-- ============================================
      SISTEMA DE MODALES PERSONALIZADOS
      Reemplaza alert(), confirm() y prompt()
      ============================================ -->
 
-<!-- Modal: alert() personalizado -->
-<div id="modal-alert" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-    <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:420px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
-        <div id="modal-alert-icon" style="font-size:2em; margin-bottom:12px;">ℹ️</div>
-        <p id="modal-alert-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
-        <button id="modal-alert-ok" class="btn" style="min-width:120px;">Aceptar</button>
-    </div>
-</div>
-
-<!-- Modal: confirm() personalizado -->
-<div id="modal-confirm" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-    <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:460px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
-        <div id="modal-confirm-icon" style="font-size:2em; margin-bottom:12px;">❓</div>
-        <p id="modal-confirm-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
-        <div style="display:flex; gap:12px; justify-content:center;">
-            <button id="modal-confirm-yes" class="btn" style="min-width:120px;">Confirmar</button>
-            <button id="modal-confirm-no" class="btn btn-secondary" style="min-width:120px;">Cancelar</button>
+    <!-- Modal: alert() personalizado -->
+    <div id="modal-alert" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+        <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:420px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
+            <div id="modal-alert-icon" style="font-size:2em; margin-bottom:12px;">ℹ️</div>
+            <p id="modal-alert-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
+            <button id="modal-alert-ok" class="btn" style="min-width:120px;">Aceptar</button>
         </div>
     </div>
-</div>
 
-<!-- Modal: prompt() personalizado -->
-<div id="modal-prompt" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-    <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:460px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
-        <div id="modal-prompt-icon" style="font-size:2em; margin-bottom:12px;">✏️</div>
-        <p id="modal-prompt-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:16px; white-space:pre-line;"></p>
-        <input id="modal-prompt-input" class="text-input" type="text" style="width:100%; margin-bottom:16px;" />
-        <div style="display:flex; gap:12px; justify-content:center;">
-            <button id="modal-prompt-ok" class="btn" style="min-width:120px;">Aceptar</button>
-            <button id="modal-prompt-cancel" class="btn btn-secondary" style="min-width:120px;">Cancelar</button>
+    <!-- Modal: confirm() personalizado -->
+    <div id="modal-confirm" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+        <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:460px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
+            <div id="modal-confirm-icon" style="font-size:2em; margin-bottom:12px;">❓</div>
+            <p id="modal-confirm-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
+            <div style="display:flex; gap:12px; justify-content:center;">
+                <button id="modal-confirm-yes" class="btn" style="min-width:120px;">Confirmar</button>
+                <button id="modal-confirm-no" class="btn btn-secondary" style="min-width:120px;">Cancelar</button>
+            </div>
         </div>
     </div>
-</div>
 
-        
+    <!-- Modal: prompt() personalizado -->
+    <div id="modal-prompt" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+        <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:460px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
+            <div id="modal-prompt-icon" style="font-size:2em; margin-bottom:12px;">✏️</div>
+            <p id="modal-prompt-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:16px; white-space:pre-line;"></p>
+            <input id="modal-prompt-input" class="text-input" type="text" style="width:100%; margin-bottom:16px;" />
+            <div style="display:flex; gap:12px; justify-content:center;">
+                <button id="modal-prompt-ok" class="btn" style="min-width:120px;">Aceptar</button>
+                <button id="modal-prompt-cancel" class="btn btn-secondary" style="min-width:120px;">Cancelar</button>
+            </div>
+        </div>
     </div>
 
     <!-- Nombre del Ninja -->
@@ -238,67 +219,49 @@
             <div class="player-info">
                 <h2 id="player-name-village">Ninja</h2>
                 <div class="player-info-clan" id="player-clan-village"></div>
-                <div id="village-info"></div>
-                
-                <div class="player-bars">
-                    <div class="bar-container">
-                        <div class="bar-label">
-                            <span>❤️ Salud</span>
-                            <span id="village-health-text">100/100</span>
-                        </div>
-                        <div class="health-bar">
-                            <div class="health-fill" id="village-health-bar" style="width: 100%;"></div>
-                        </div>
-                    </div>
-                    <div class="bar-container">
-                        <div class="bar-label">
-                            <span>💙 Chakra</span>
-                            <span id="village-chakra-text">100/100</span>
-                        </div>
-                        <div class="chakra-bar">
-                            <div class="chakra-fill" id="village-chakra-bar" style="width: 100%;"></div>
-                        </div>
+                <div class="game-container">
+                    <h1>🍥 NINJA RPG 🍥</h1>
+                    <!-- ...existing code... -->
+                </div>
+
+                <!-- ============================================
+                 SISTEMA DE MODALES PERSONALIZADOS
+                 Reemplaza alert(), confirm() y prompt()
+                 ============================================ -->
+
+                <!-- Modal: alert() personalizado -->
+                <div id="modal-alert" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+                    <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:420px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
+                        <div id="modal-alert-icon" style="font-size:2em; margin-bottom:12px;">ℹ️</div>
+                        <p id="modal-alert-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
+                        <button id="modal-alert-ok" class="btn" style="min-width:120px;">Aceptar</button>
                     </div>
                 </div>
 
-                <div class="info-grid">
-                    <div class="info-item"><span>🥷</span><span>Rango: <span id="player-rank">Genin</span></span></div>
-                    <div class="info-item"><span>⭐</span><span>Nivel: <span id="player-level-village">1</span></span></div>
-                    <div class="info-item"><span>💰</span><span>Ryo: <span id="player-ryo">100</span></span></div>
-                    <div class="info-item"><span>✨</span><span>EXP: <span id="player-exp-village">0/100</span></span></div>
+                <!-- Modal: confirm() personalizado -->
+                <div id="modal-confirm" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+                    <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:460px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
+                        <div id="modal-confirm-icon" style="font-size:2em; margin-bottom:12px;">❓</div>
+                        <p id="modal-confirm-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
+                        <div style="display:flex; gap:12px; justify-content:center;">
+                            <button id="modal-confirm-yes" class="btn" style="min-width:120px;">Confirmar</button>
+                            <button id="modal-confirm-no" class="btn btn-secondary" style="min-width:120px;">Cancelar</button>
+                        </div>
+                    </div>
                 </div>
 
-                <div id="kekkei-display" style="margin-top: 14px;"></div>
-                <div id="element-display" style="margin-top: 8px; text-align: center;"></div>
-            </div>
-
-            <div id="exam-widget"></div>
-
-            <div id="village-online" class="online-panel">
-                <div class="online-header">
-                    <span>🟢 En linea en tu aldea</span>
-                    <span id="village-online-count">0</span>
+                <!-- Modal: prompt() personalizado -->
+                <div id="modal-prompt" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+                    <div style="background:var(--bg-panel); border:2px solid var(--accent-primary); border-radius:var(--radius-lg); padding:28px 24px; max-width:460px; width:90%; text-align:center; animation:modalSlideIn 0.25s ease-out;">
+                        <div id="modal-prompt-icon" style="font-size:2em; margin-bottom:12px;">✏️</div>
+                        <p id="modal-prompt-message" style="color:var(--text-primary); font-size:1em; line-height:1.6; margin-bottom:16px; white-space:pre-line;"></p>
+                        <input id="modal-prompt-input" class="text-input" type="text" style="width:100%; margin-bottom:16px;" />
+                        <div style="display:flex; gap:12px; justify-content:center;">
+                            <button id="modal-prompt-ok" class="btn" style="min-width:120px;">Aceptar</button>
+                            <button id="modal-prompt-cancel" class="btn btn-secondary" style="min-width:120px;">Cancelar</button>
+                        </div>
+                    </div>
                 </div>
-                <div id="village-online-list" class="online-list"></div>
-            </div>
-
-            <div style="display: flex; gap: 10px; margin-top: 16px;">
-                <button class="btn-small btn-secondary" onclick="game.saveGame()" style="flex: 1;">💾 Guardar</button>
-            </div>
-        </div>
-
-        <!-- 🗺️ SECCIÓN MUNDO -->
-        <div id="section-world" class="section-content">
-            <h3>🗺️ Mundo Ninja</h3>
-            <div id="world-hud-display" style="margin-bottom: 20px;"></div>
-            
-            <div class="tabs">
-                <button class="tab-btn active" onclick="game.showTab('missions')">📜 Misiones</button>
-                <button class="tab-btn" onclick="game.showTab('npcs')">🧑‍🤝‍🧑 NPCs</button>
-            </div>
-
-            <div id="missions-tab" class="tab-content active">
-                <h3>Misiones Disponibles</h3>
                 <div class="mission-list" id="mission-list"></div>
             </div>
 

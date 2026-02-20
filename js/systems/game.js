@@ -4777,24 +4777,6 @@ export function createGame() {
             `;
         },
 
-            async gameAlert(message, icon = 'ℹ️') {
-            return new Promise(resolve => {
-                const modal = document.getElementById('modal-alert');
-                const msg = document.getElementById('modal-alert-message');
-                const ico = document.getElementById('modal-alert-icon');
-                const btn = document.getElementById('modal-alert-ok');
-                if (!modal) { alert(message); resolve(); return; }
-                ico.textContent = icon;
-                msg.textContent = message;
-                modal.style.display = 'flex';
-                const close = () => {
-                    modal.style.display = 'none';
-                    btn.removeEventListener('click', close);
-                    resolve();
-                };
-                btn.addEventListener('click', close);
-            });
-        },
 
         async gameConfirm(message, icon = '❓') {
             return new Promise(resolve => {
@@ -4867,9 +4849,6 @@ export function createGame() {
         },
 
         // ============================================
-// SISTEMA DE MODALES - Reemplaza alert/confirm/prompt del navegador
-// ============================================
-
 gameAlert(message, icon = 'ℹ️') {
     return new Promise(resolve => {
         const modal = document.getElementById('modal-alert');
@@ -4890,14 +4869,6 @@ gameAlert(message, icon = 'ℹ️') {
         btn.addEventListener('click', close);
     });
 },
-
-
-
-
-  // ============================================
-// SISTEMA DE MODALES - Reemplaza alert/confirm/prompt del navegador
-// ============================================
-
 gameAlert(message, icon = 'ℹ️') {
     return new Promise(resolve => {
         const modal = document.getElementById('modal-alert');

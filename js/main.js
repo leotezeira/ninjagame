@@ -7,56 +7,6 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const game = createGame();
 window.game = game;
 // ============================================
-// CREAR MODALES EN EL DOM
-// ============================================
-(function crearModales() {
-    if (!document.getElementById('modal-alert')) {
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = `
-            <div id="modal-alert" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-                <div style="background:#1a1a2e; border:2px solid #00d4ff; border-radius:16px; padding:28px 24px; max-width:420px; width:90%; text-align:center;">
-                    <div id="modal-alert-icon" style="font-size:2em; margin-bottom:12px;">ℹ️</div>
-                    <p id="modal-alert-message" style="color:#f1f5f9; font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
-                    <button id="modal-alert-ok" style="padding:10px 28px; background:#ff8c00; border:none; border-radius:8px; color:white; font-weight:bold; font-size:1em; cursor:pointer;">Aceptar</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(wrapper);
-    }
-    if (!document.getElementById('modal-confirm')) {
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = `
-            <div id="modal-confirm" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-                <div style="background:#1a1a2e; border:2px solid #00d4ff; border-radius:16px; padding:28px 24px; max-width:460px; width:90%; text-align:center;">
-                    <div id="modal-confirm-icon" style="font-size:2em; margin-bottom:12px;">❓</div>
-                    <p id="modal-confirm-message" style="color:#f1f5f9; font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
-                    <div style="display:flex; gap:12px; justify-content:center;">
-                        <button id="modal-confirm-yes" style="padding:10px 28px; background:#ff8c00; border:none; border-radius:8px; color:white; font-weight:bold; font-size:1em; cursor:pointer;">Confirmar</button>
-                        <button id="modal-confirm-no" style="padding:10px 28px; background:#7c3aed; border:none; border-radius:8px; color:white; font-weight:bold; font-size:1em; cursor:pointer;">Cancelar</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(wrapper);
-    }
-    if (!document.getElementById('modal-prompt')) {
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = `
-            <div id="modal-prompt" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-                <div style="background:#1a1a2e; border:2px solid #00d4ff; border-radius:16px; padding:28px 24px; max-width:460px; width:90%; text-align:center;">
-                    <div id="modal-prompt-icon" style="font-size:2em; margin-bottom:12px;">✏️</div>
-                    <p id="modal-prompt-message" style="color:#f1f5f9; font-size:1em; line-height:1.6; margin-bottom:16px; white-space:pre-line;"></p>
-                    <input id="modal-prompt-input" type="text" style="width:100%; padding:10px; margin-bottom:16px; background:#16213e; border:1px solid #00d4ff; border-radius:8px; color:#f1f5f9; font-size:1em;" />
-                    <div style="display:flex; gap:12px; justify-content:center;">
-                        <button id="modal-prompt-ok" style="padding:10px 28px; background:#ff8c00; border:none; border-radius:8px; color:white; font-weight:bold; font-size:1em; cursor:pointer;">Aceptar</button>
-                        <button id="modal-prompt-cancel" style="padding:10px 28px; background:#7c3aed; border:none; border-radius:8px; color:white; font-weight:bold; font-size:1em; cursor:pointer;">Cancelar</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(wrapper);
-    }
-})();
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 game.supabase = supabase;
