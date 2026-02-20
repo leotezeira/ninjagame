@@ -1,14 +1,3 @@
-        // Cierra todos los modales personalizados
-        closeAllModals() {
-            const modals = [
-                document.getElementById('modal-alert'),
-                document.getElementById('modal-confirm'),
-                document.getElementById('modal-prompt')
-            ];
-            modals.forEach(modal => {
-                if (modal) modal.style.display = 'none';
-            });
-        },
 import { BASE_GAME } from '../content/data.js';
 
 export function createGame() {
@@ -3051,9 +3040,6 @@ export function createGame() {
             document.querySelectorAll('.section-content').forEach(s => {
                 s.classList.remove('active');
             });
-
-            // Cerrar todos los modales para evitar overlays bloqueando la UI
-            this.closeAllModals();
             
             // Quitar clase active de botones de sidebar
             document.querySelectorAll('#sidebar .sidebar-nav-item').forEach(b => b.classList.remove('active'));
