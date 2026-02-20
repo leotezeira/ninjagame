@@ -4777,7 +4777,7 @@ export function createGame() {
             `;
         },
 
-            gameAlert(message, icon = 'ℹ️') {
+            async gameAlert(message, icon = 'ℹ️') {
             return new Promise(resolve => {
                 const modal = document.getElementById('modal-alert');
                 const msg = document.getElementById('modal-alert-message');
@@ -4796,7 +4796,7 @@ export function createGame() {
             });
         },
 
-        gameConfirm(message, icon = '❓') {
+        async gameConfirm(message, icon = '❓') {
             return new Promise(resolve => {
                 const modal = document.getElementById('modal-confirm');
                 const msg = document.getElementById('modal-confirm-message');
@@ -4818,7 +4818,7 @@ export function createGame() {
             });
         },
 
-        gamePrompt(message, icon = '✏️') {
+        async gamePrompt(message, icon = '✏️') {
             return new Promise(resolve => {
                 const modal = document.getElementById('modal-prompt');
                 const msg = document.getElementById('modal-prompt-message');
