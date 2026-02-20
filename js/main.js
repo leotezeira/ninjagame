@@ -1,10 +1,11 @@
 import { createGame } from './systems/game/createGame.js';
+import { BASE_GAME } from './content/data.js';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = 'https://bydufkvgicwiaybrfcpg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5ZHVma3ZnaWN3aWF5YnJmY3BnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzY5NDAsImV4cCI6MjA4Njk1Mjk0MH0.YNxeF2mOMy4xzXrL4uFy9fh5BSAkxZIGRRwijVlnQr8';
 
-const game = createGame();
+const game = createGame(BASE_GAME);
 window.game = game;
 // ============================================
 
