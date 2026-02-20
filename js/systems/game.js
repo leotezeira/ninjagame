@@ -1,18 +1,6 @@
 import { BASE_GAME } from '../content/data.js';
 
 export function createGame() {
-            // Limpia el overlay de sueño y sleepState
-            wakeUp() {
-                // Eliminar overlay si existe
-                const overlay = document.getElementById('sleep-overlay');
-                if (overlay) overlay.remove();
-                // Limpiar estado de sueño
-                if (this.player) {
-                    this.player.sleepState = null;
-                    this.saveGame();
-                    this.updateVillageUI();
-                }
-            },
     const game = {
         ...BASE_GAME,
 
@@ -4882,26 +4870,6 @@ gameAlert(message, icon = 'ℹ️') {
         btn.addEventListener('click', close);
     });
 },
-gameAlert(message, icon = 'ℹ️') {
-    return new Promise(resolve => {
-        const modal = document.getElementById('modal-alert');
-        const msg = document.getElementById('modal-alert-message');
-        const ico = document.getElementById('modal-alert-icon');
-        const btn = document.getElementById('modal-alert-ok');
-        if (!modal) { alert(message); resolve(); return; }
-
-        ico.textContent = icon;
-        msg.textContent = message;
-        modal.style.display = 'flex';
-
-        const close = () => {
-            modal.style.display = 'none';
-            btn.removeEventListener('click', close);
-            resolve();
-        };
-        btn.addEventListener('click', close);
-    });
-},
 
 gameConfirm(message, icon = '❓') {
     return new Promise(resolve => {
@@ -6196,12 +6164,6 @@ gamePrompt(message, icon = '✏️') {
     };
 
     // Check if there's a saved game on load
-    window.onload = function() {
-        const hasSave = localStorage.getItem('ninjaRPGSave');
-        if (!hasSave) {
-            document.getElementById('load-btn').style.display = 'none';
-        }
-    };
 
     // Transformar jutsus al cargar el juego
     game.normalizeAcademyJutsus();
@@ -6209,44 +6171,6 @@ gamePrompt(message, icon = '✏️') {
  // ============================================
     // CREAR MODALES EN EL DOM
     // ============================================
-    (function crearModales() {
-        if (document.getElementById('modal-alert')) return;
-
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = `
-            <div id="modal-alert" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-                <div style="background:#1a1a2e; border:2px solid #00d4ff; border-radius:16px; padding:28px 24px; max-width:420px; width:90%; text-align:center;">
-                    <div id="modal-alert-icon" style="font-size:2em; margin-bottom:12px;">ℹ️</div>
-                    <p id="modal-alert-message" style="color:#f1f5f9; font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
-                    <button id="modal-alert-ok" style="padding:10px 28px; background:#ff8c00; border:none; border-radius:8px; color:white; font-weight:bold; font-size:1em; cursor:pointer;">Aceptar</button>
-                </div>
-            </div>
-
-            <div id="modal-confirm" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-                <div style="background:#1a1a2e; border:2px solid #00d4ff; border-radius:16px; padding:28px 24px; max-width:460px; width:90%; text-align:center;">
-                    <div id="modal-confirm-icon" style="font-size:2em; margin-bottom:12px;">❓</div>
-                    <p id="modal-confirm-message" style="color:#f1f5f9; font-size:1em; line-height:1.6; margin-bottom:20px; white-space:pre-line;"></p>
-                    <div style="display:flex; gap:12px; justify-content:center;">
-                        <button id="modal-confirm-yes" style="padding:10px 28px; background:#ff8c00; border:none; border-radius:8px; color:white; font-weight:bold; font-size:1em; cursor:pointer;">Confirmar</button>
-                        <button id="modal-confirm-no" style="padding:10px 28px; background:#7c3aed; border:none; border-radius:8px; color:white; font-weight:bold; font-size:1em; cursor:pointer;">Cancelar</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="modal-prompt" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-                <div style="background:#1a1a2e; border:2px solid #00d4ff; border-radius:16px; padding:28px 24px; max-width:460px; width:90%; text-align:center;">
-                    <div id="modal-prompt-icon" style="font-size:2em; margin-bottom:12px;">✏️</div>
-                    <p id="modal-prompt-message" style="color:#f1f5f9; font-size:1em; line-height:1.6; margin-bottom:16px; white-space:pre-line;"></p>
-                    <input id="modal-prompt-input" type="text" style="width:100%; padding:10px; margin-bottom:16px; background:#16213e; border:1px solid #00d4ff; border-radius:8px; color:#f1f5f9; font-size:1em;" />
-                    <div style="display:flex; gap:12px; justify-content:center;">
-                        <button id="modal-prompt-ok" style="padding:10px 28px; background:#ff8c00; border:none; border-radius:8px; color:white; font-weight:bold; font-size:1em; cursor:pointer;">Aceptar</button>
-                        <button id="modal-prompt-cancel" style="padding:10px 28px; background:#7c3aed; border:none; border-radius:8px; color:white; font-weight:bold; font-size:1em; cursor:pointer;">Cancelar</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(wrapper);
-    })();
 
     // Agregar funciones de modal al objeto game
     game.gameAlert = function(message, icon = 'ℹ️') {
